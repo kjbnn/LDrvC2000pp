@@ -4,7 +4,7 @@
     <PathDelim Value="\"/>
     <Version Value="11"/>
     <BuildModes Active="Default"/>
-    <Units Count="45">
+    <Units Count="44">
       <Unit0>
         <Filename Value="DrvC2000pp.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -20,43 +20,35 @@
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
         <IsVisibleTab Value="True"/>
-        <TopLine Value="361"/>
-        <CursorPos X="30" Y="378"/>
-        <UsageCount Value="220"/>
-        <Bookmarks Count="7">
-          <Item0 Y="623" ID="7"/>
-          <Item1 Y="2224" ID="9"/>
-          <Item2 Y="900" ID="3"/>
-          <Item3 Y="1375" ID="4"/>
-          <Item4 X="15" Y="491"/>
-          <Item5 Y="2032" ID="1"/>
-          <Item6 Y="2461" ID="2"/>
+        <CursorPos X="10" Y="16"/>
+        <UsageCount Value="21"/>
+        <Bookmarks Count="1">
+          <Item0 X="16" Y="1244" ID="6"/>
         </Bookmarks>
         <Loaded Value="True"/>
-        <LoadedDesigner Value="True"/>
         <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit1>
       <Unit2>
         <Filename Value="commpp.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="commPP"/>
-        <EditorIndex Value="-1"/>
-        <TopLine Value="118"/>
+        <EditorIndex Value="1"/>
         <CursorPos X="17" Y="125"/>
         <UsageCount Value="220"/>
         <Bookmarks Count="1">
           <Item0 X="32" Y="108" ID="8"/>
         </Bookmarks>
+        <Loaded Value="True"/>
         <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit2>
       <Unit3>
-        <Filename Value="..\LKsb\common\cIniKey.pas"/>
+        <Filename Value="C:\LKsb\common\cIniKey.pas"/>
         <IsPartOfProject Value="True"/>
         <UsageCount Value="220"/>
         <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit3>
       <Unit4>
-        <Filename Value="..\LKsb\ksbmesapi\cKsbmes.pas"/>
+        <Filename Value="C:\LKsb\ksbmesapi\cKsbmes.pas"/>
         <IsPartOfProject Value="True"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="170"/>
@@ -65,7 +57,7 @@
         <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit4>
       <Unit5>
-        <Filename Value="..\LKsb\windows\cOsFeature.pas"/>
+        <Filename Value="C:\LKsb\windows\cOsFeature.pas"/>
         <IsPartOfProject Value="True"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="141"/>
@@ -74,7 +66,7 @@
         <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit5>
       <Unit6>
-        <Filename Value="..\LKsb\ksbmesapi\cmesdriver_api.pas"/>
+        <Filename Value="C:\LKsb\ksbmesapi\cmesdriver_api.pas"/>
         <IsPartOfProject Value="True"/>
         <EditorIndex Value="-1"/>
         <CursorPos X="20" Y="10"/>
@@ -82,7 +74,7 @@
         <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit6>
       <Unit7>
-        <Filename Value="..\LKsb\ksbmesapi\cAppApi.pas"/>
+        <Filename Value="C:\LKsb\ksbmesapi\cAppApi.pas"/>
         <IsPartOfProject Value="True"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="36"/>
@@ -94,7 +86,7 @@
         <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit7>
       <Unit8>
-        <Filename Value="..\LKsb\ksbmesapi\cBufKsb.pas"/>
+        <Filename Value="C:\LKsb\ksbmesapi\cBufKsb.pas"/>
         <IsPartOfProject Value="True"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="220"/>
@@ -106,7 +98,7 @@
         <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit8>
       <Unit9>
-        <Filename Value="..\LKsb\ksbmesapi\cForFormKsb.pas"/>
+        <Filename Value="C:\LKsb\ksbmesapi\cForFormKsb.pas"/>
         <IsPartOfProject Value="True"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="18"/>
@@ -119,7 +111,7 @@
         <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit9>
       <Unit10>
-        <Filename Value="..\LKsb\constants.pas"/>
+        <Filename Value="C:\LKsb\constants.pas"/>
         <IsPartOfProject Value="True"/>
         <EditorIndex Value="-1"/>
         <UsageCount Value="220"/>
@@ -141,7 +133,7 @@
         <UsageCount Value="16"/>
       </Unit12>
       <Unit13>
-        <Filename Value="..\KsbOld\cAppKsb.pas"/>
+        <Filename Value="C:\KsbOld\cAppKsb.pas"/>
         <EditorIndex Value="-1"/>
         <WindowIndex Value="-1"/>
         <TopLine Value="-1"/>
@@ -150,7 +142,7 @@
         <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit13>
       <Unit14>
-        <Filename Value="..\KsbOld\cBuilderAppKsb.pas"/>
+        <Filename Value="C:\KsbOld\cBuilderAppKsb.pas"/>
         <EditorIndex Value="-1"/>
         <WindowIndex Value="-1"/>
         <TopLine Value="-1"/>
@@ -159,7 +151,7 @@
         <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit14>
       <Unit15>
-        <Filename Value="..\KsbOld\CMAINKSB.pas"/>
+        <Filename Value="C:\KsbOld\CMAINKSB.pas"/>
         <HasResources Value="True"/>
         <UnitName Value="cMainKsb"/>
         <EditorIndex Value="-1"/>
@@ -168,7 +160,7 @@
         <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit15>
       <Unit16>
-        <Filename Value="..\KsbOld\connection.pas"/>
+        <Filename Value="C:\KsbOld\connection.pas"/>
         <EditorIndex Value="-1"/>
         <WindowIndex Value="-1"/>
         <TopLine Value="-1"/>
@@ -177,7 +169,7 @@
         <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit16>
       <Unit17>
-        <Filename Value="..\KsbOld\cRights.pas"/>
+        <Filename Value="C:\KsbOld\cRights.pas"/>
         <EditorIndex Value="-1"/>
         <WindowIndex Value="-1"/>
         <TopLine Value="-1"/>
@@ -186,7 +178,7 @@
         <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit17>
       <Unit18>
-        <Filename Value="..\KsbOld\NetService.pas"/>
+        <Filename Value="C:\KsbOld\NetService.pas"/>
         <EditorIndex Value="-1"/>
         <WindowIndex Value="-1"/>
         <TopLine Value="-1"/>
@@ -195,7 +187,7 @@
         <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit18>
       <Unit19>
-        <Filename Value="..\KsbOld\SharedBuffer.pas"/>
+        <Filename Value="C:\KsbOld\SharedBuffer.pas"/>
         <EditorIndex Value="-1"/>
         <WindowIndex Value="-1"/>
         <TopLine Value="-1"/>
@@ -204,7 +196,7 @@
         <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit19>
       <Unit20>
-        <Filename Value="..\LDrvR81\R8Unit.pas"/>
+        <Filename Value="C:\LDrvR81\R8Unit.pas"/>
         <EditorIndex Value="-1"/>
         <WindowIndex Value="-1"/>
         <TopLine Value="121"/>
@@ -335,7 +327,7 @@
         <UsageCount Value="6"/>
       </Unit37>
       <Unit38>
-        <Filename Value="..\LDrvCu1\mMain.pas"/>
+        <Filename Value="C:\LDrvCu1\mMain.pas"/>
         <EditorIndex Value="-1"/>
         <WindowIndex Value="-1"/>
         <TopLine Value="94"/>
@@ -344,174 +336,162 @@
         <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit38>
       <Unit39>
-        <Filename Value="..\LDrvCu1\commcu01.pas"/>
+        <Filename Value="C:\LDrvCu1\commcu01.pas"/>
         <UnitName Value="commCu01"/>
         <EditorIndex Value="-1"/>
         <UsageCount Value="8"/>
         <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit39>
       <Unit40>
-        <Filename Value="..\..\DrvC2000pp\mMain.pas"/>
-        <HasResources Value="True"/>
-        <EditorIndex Value="-1"/>
-        <TopLine Value="174"/>
-        <CursorPos X="13" Y="1235"/>
-        <UsageCount Value="12"/>
-        <Bookmarks Count="1">
-          <Item0 X="16" Y="1244" ID="6"/>
-        </Bookmarks>
-        <DefaultSyntaxHighlighter Value="Delphi"/>
-      </Unit40>
-      <Unit41>
-        <Filename Value="..\..\DrvC2000pp\Comm.pas"/>
+        <Filename Value="Comm.pas"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="56"/>
         <UsageCount Value="12"/>
         <DefaultSyntaxHighlighter Value="Delphi"/>
-      </Unit41>
-      <Unit42>
-        <Filename Value="..\Barinov\test_mesdriver_lazarus\ksbmesapi\cForFormKsb.pas"/>
+      </Unit40>
+      <Unit41>
+        <Filename Value="C:\Barinov\test_mesdriver_lazarus\ksbmesapi\cForFormKsb.pas"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="54"/>
         <CursorPos X="2" Y="75"/>
         <UsageCount Value="9"/>
         <DefaultSyntaxHighlighter Value="Delphi"/>
-      </Unit42>
-      <Unit43>
-        <Filename Value="..\LKsb\ksbmesapi\backup\cForFormKsb.pas"/>
+      </Unit41>
+      <Unit42>
+        <Filename Value="C:\LKsb\ksbmesapi\backup\cForFormKsb.pas"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="22"/>
         <CursorPos X="6" Y="43"/>
         <UsageCount Value="9"/>
         <DefaultSyntaxHighlighter Value="Delphi"/>
-      </Unit43>
-      <Unit44>
-        <Filename Value="..\synapse40.1\synaser.pas"/>
+      </Unit42>
+      <Unit43>
+        <Filename Value="C:\synapse40.1\synaser.pas"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="2118"/>
         <CursorPos X="3" Y="2122"/>
         <UsageCount Value="10"/>
-      </Unit44>
+      </Unit43>
     </Units>
     <JumpHistory Count="30" HistoryIndex="29">
       <Position1>
         <Filename Value="mMain.pas"/>
-        <Caret Line="2022" TopLine="2002"/>
+        <Caret Line="2021" Column="25" TopLine="2002"/>
       </Position1>
       <Position2>
         <Filename Value="mMain.pas"/>
-        <Caret Line="2021" Column="25" TopLine="2002"/>
+        <Caret Line="261" Column="10" TopLine="241"/>
       </Position2>
       <Position3>
         <Filename Value="mMain.pas"/>
-        <Caret Line="261" Column="10" TopLine="241"/>
+        <Caret Line="2431" TopLine="2423"/>
       </Position3>
       <Position4>
         <Filename Value="mMain.pas"/>
-        <Caret Line="2431" TopLine="2423"/>
+        <Caret Line="2433" TopLine="2423"/>
       </Position4>
       <Position5>
         <Filename Value="mMain.pas"/>
-        <Caret Line="2433" TopLine="2423"/>
+        <Caret Line="2434" TopLine="2423"/>
       </Position5>
       <Position6>
         <Filename Value="mMain.pas"/>
-        <Caret Line="2434" TopLine="2423"/>
+        <Caret Line="2431" TopLine="2423"/>
       </Position6>
       <Position7>
         <Filename Value="mMain.pas"/>
-        <Caret Line="2431" TopLine="2423"/>
+        <Caret Line="2433" TopLine="2423"/>
       </Position7>
       <Position8>
         <Filename Value="mMain.pas"/>
-        <Caret Line="2433" TopLine="2423"/>
+        <Caret Line="2434" TopLine="2423"/>
       </Position8>
       <Position9>
         <Filename Value="mMain.pas"/>
-        <Caret Line="2434" TopLine="2423"/>
+        <Caret Line="2431" TopLine="2423"/>
       </Position9>
       <Position10>
         <Filename Value="mMain.pas"/>
-        <Caret Line="2431" TopLine="2423"/>
+        <Caret Line="2443" TopLine="2423"/>
       </Position10>
       <Position11>
         <Filename Value="mMain.pas"/>
-        <Caret Line="2443" TopLine="2423"/>
+        <Caret Line="2022" TopLine="2003"/>
       </Position11>
       <Position12>
         <Filename Value="mMain.pas"/>
-        <Caret Line="2022" TopLine="2003"/>
+        <Caret Line="2119" TopLine="2100"/>
       </Position12>
       <Position13>
         <Filename Value="mMain.pas"/>
-        <Caret Line="2119" TopLine="2100"/>
+        <Caret Line="2021" TopLine="2002"/>
       </Position13>
       <Position14>
         <Filename Value="mMain.pas"/>
-        <Caret Line="2021" TopLine="2002"/>
+        <Caret Line="2431" TopLine="2411"/>
       </Position14>
       <Position15>
         <Filename Value="mMain.pas"/>
-        <Caret Line="2431" TopLine="2411"/>
+        <Caret Line="2433" TopLine="2411"/>
       </Position15>
       <Position16>
         <Filename Value="mMain.pas"/>
-        <Caret Line="2433" TopLine="2411"/>
+        <Caret Line="2434" TopLine="2411"/>
       </Position16>
       <Position17>
         <Filename Value="mMain.pas"/>
-        <Caret Line="2434" TopLine="2411"/>
+        <Caret Line="2435" TopLine="2411"/>
       </Position17>
       <Position18>
         <Filename Value="mMain.pas"/>
-        <Caret Line="2435" TopLine="2411"/>
+        <Caret Line="2437" TopLine="2411"/>
       </Position18>
       <Position19>
         <Filename Value="mMain.pas"/>
-        <Caret Line="2437" TopLine="2411"/>
+        <Caret Line="2416" Column="4" TopLine="2412"/>
       </Position19>
       <Position20>
         <Filename Value="mMain.pas"/>
-        <Caret Line="2416" Column="4" TopLine="2412"/>
+        <Caret Line="2021" TopLine="2002"/>
       </Position20>
       <Position21>
         <Filename Value="mMain.pas"/>
-        <Caret Line="2021" TopLine="2002"/>
+        <Caret Line="2022" TopLine="2002"/>
       </Position21>
       <Position22>
         <Filename Value="mMain.pas"/>
-        <Caret Line="2022" TopLine="2002"/>
+        <Caret Line="2119" TopLine="2100"/>
       </Position22>
       <Position23>
         <Filename Value="mMain.pas"/>
-        <Caret Line="2119" TopLine="2100"/>
+        <Caret Line="2121" TopLine="2100"/>
       </Position23>
       <Position24>
         <Filename Value="mMain.pas"/>
-        <Caret Line="2121" TopLine="2100"/>
+        <Caret Line="2035" Column="25" TopLine="2002"/>
       </Position24>
       <Position25>
         <Filename Value="mMain.pas"/>
-        <Caret Line="2035" Column="25" TopLine="2002"/>
+        <Caret Line="2228" Column="19" TopLine="2211"/>
       </Position25>
       <Position26>
         <Filename Value="mMain.pas"/>
-        <Caret Line="2037" Column="20" TopLine="2118"/>
+        <Caret Line="377" Column="27" TopLine="343"/>
       </Position26>
       <Position27>
         <Filename Value="mMain.pas"/>
-        <Caret Line="2228" Column="19" TopLine="2211"/>
       </Position27>
       <Position28>
         <Filename Value="mMain.pas"/>
-        <Caret Line="377" Column="27" TopLine="343"/>
+        <Caret Line="135" Column="10" TopLine="103"/>
       </Position28>
       <Position29>
         <Filename Value="mMain.pas"/>
+        <Caret Line="3" Column="17"/>
       </Position29>
       <Position30>
-        <Filename Value="mMain.pas"/>
-        <Caret Line="135" Column="10" TopLine="103"/>
+        <Filename Value="commpp.pas"/>
+        <Caret Line="125" Column="17"/>
       </Position30>
     </JumpHistory>
     <RunParams>
@@ -520,24 +500,6 @@
     </RunParams>
   </ProjectSession>
   <Debugging>
-    <BreakPoints Count="2">
-      <Item1>
-        <Kind Value="bpkSource"/>
-        <WatchScope Value="wpsLocal"/>
-        <WatchKind Value="wpkWrite"/>
-        <Source Value="mMain.pas"/>
-        <InitialEnabled Value="False"/>
-        <Line Value="770"/>
-      </Item1>
-      <Item2>
-        <Kind Value="bpkSource"/>
-        <WatchScope Value="wpsLocal"/>
-        <WatchKind Value="wpkWrite"/>
-        <Source Value="mMain.pas"/>
-        <InitialEnabled Value="False"/>
-        <Line Value="783"/>
-      </Item2>
-    </BreakPoints>
     <Watches Count="2">
       <Item1>
         <Expression Value="CurDev.r"/>

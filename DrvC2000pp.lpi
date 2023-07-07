@@ -65,35 +65,35 @@
         <UnitName Value="commPP"/>
       </Unit2>
       <Unit3>
-        <Filename Value="..\LKsb\common\cIniKey.pas"/>
+        <Filename Value="C:\LKsb\common\cIniKey.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit3>
       <Unit4>
-        <Filename Value="..\LKsb\ksbmesapi\cKsbmes.pas"/>
+        <Filename Value="C:\LKsb\ksbmesapi\cKsbmes.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit4>
       <Unit5>
-        <Filename Value="..\LKsb\windows\cOsFeature.pas"/>
+        <Filename Value="C:\LKsb\windows\cOsFeature.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit5>
       <Unit6>
-        <Filename Value="..\LKsb\ksbmesapi\cmesdriver_api.pas"/>
+        <Filename Value="C:\LKsb\ksbmesapi\cmesdriver_api.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit6>
       <Unit7>
-        <Filename Value="..\LKsb\ksbmesapi\cAppApi.pas"/>
+        <Filename Value="C:\LKsb\ksbmesapi\cAppApi.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit7>
       <Unit8>
-        <Filename Value="..\LKsb\ksbmesapi\cBufKsb.pas"/>
+        <Filename Value="C:\LKsb\ksbmesapi\cBufKsb.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit8>
       <Unit9>
-        <Filename Value="..\LKsb\ksbmesapi\cForFormKsb.pas"/>
+        <Filename Value="C:\LKsb\ksbmesapi\cForFormKsb.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit9>
       <Unit10>
-        <Filename Value="..\LKsb\constants.pas"/>
+        <Filename Value="C:\LKsb\constants.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit10>
     </Units>
