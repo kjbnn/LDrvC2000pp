@@ -108,16 +108,9 @@ begin
       while (not Terminated) do
       begin
         {отправка}
+        //FillChar(w, 255, 0);
         if not ProcessProc(True) then
-        begin
-          strLog := Format('ProcessProc: False, Serial: %s, ', [Serial]);
-          if CurDev<>Nil then
-            strLog := strLog + Format('CurDev.Op: %d, CurDev.ObjNum: %d', [ ord(CurDev.Op), CurDev.CmdObj ])
-          else
-            strLog := strLog + 'CurDev: Nil';
-          ThreadLog(strLog);
           break;
-        end;
         ser.SendBuffer(@CurDev.w, CurDev.wCount);
         Synchronize(@DrawWrite);
 
