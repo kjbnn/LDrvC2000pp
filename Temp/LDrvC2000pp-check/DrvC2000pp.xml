@@ -1,0 +1,34 @@
+<C2000ppConfig>
+  <Line Port="Com5" Parameters="baud=19200 parity=N data=8 stop=1">
+    <Pp Number="12" Pultid="101" Id="2">
+      <Zone Number="1" Type="1" Id="1"/>
+      <Zone Number="2" Type="1" Id="2"/>
+      <Zone Number="3" Type="1" Id="3"/>
+      <Zone Number="4" Type="1" Id="4"/>
+      <Zone Number="5" Type="1" Id="5"/>
+      <Zone Number="6" Type="1" Id="6"/>
+      <Zone Number="7" Type="1" Id="7"/>
+      <Zone Number="8" Type="1" Id="8"/>
+      <Zone Number="9" Type="3" Id="1"/>
+      <Zone Number="10" Type="3" Id="2"/>
+      <Zone Number="11" Type="3" Id="0"/>
+      <Output Number="1" Id="1"/>
+      <Output Number="2" Id="2"/>
+      <Output Number="3" Id="3"/>
+      <Output Number="4" Id="4"/>
+      <Output Number="5" Id="5"/>
+      <Part Number="1" Id="1"/>
+      <Part Number="2" Id="2"/>
+      <Part Number="3" Id="3"/>
+      <Part Number="63" Id="4"/>
+      <Part Number="64" Id="5"/>
+
+      <User Number="1" Id="1"/>	
+      <User Number="2" Id="2"/>
+      <User Number="3" Id="3"/>
+      <User Number="4" Id="4"/>
+      <User Number="5" Id="5"/>
+
+    </Pp>
+  </Line>  
+</C2000ppConfig>

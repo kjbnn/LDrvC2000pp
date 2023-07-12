@@ -63,6 +63,7 @@
 *.bak
 backup/
 lib/
+Temp/LDrvC2000pp-check/lib
 
 # Castalia statistics file (since XE7 Castalia is distributed with Delphi)
 *.stat
