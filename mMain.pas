@@ -1,8 +1,5 @@
 unit mMain;
 
-{$DEFINE _MASTER}
-{$DEFINE _EXTENDINFO}
-
 interface
 
 uses
@@ -11,9 +8,8 @@ uses
   Dialogs, StdCtrls, Buttons,
   ExtCtrls, ComCtrls, Menus, Spin, FileUtil,
   laz2_DOM,
-  laz2_XMLRead,
-  FileInfo,
-  cksbmes;
+  laz2_XMLRead, FileInfo, syncobjs,
+  cKsbmes;
 
 const
   MAX_LOG_SIZE = 3e10;
@@ -85,7 +81,7 @@ const
   PORT_BUF_SIZE = 256;
   BASE_MSG = 13000;
 
-  PP_DISCONNECTED = 20;
+  PP_DISCONNECTED = 10;
 
 type
 
@@ -129,11 +125,9 @@ type
   TAct = (ComPortList, DeviceList, ShleifList, RelayList, ReaderList);
 
   TOption = record
-    LogForm,
-    LogFile: boolean;
+    LogForm: boolean;
     FileMask: string;
     Debug: string;
-    MesTransport: boolean;
   end;
 
   TObjectType = (UNKNOWN, LINE, DEVPP, ZONE, OUTKEY, PART, USER);
@@ -165,6 +159,7 @@ type
     procedure Read;
     function NextDev: TDev;
     function Process(IsWrite: boolean): boolean;
+  private
   public
     CurDev: TDev;
     constructor Create;
@@ -188,7 +183,6 @@ type
     procedure AddCrc;
     procedure AddCmd(Op: TDevOp; ObjNum: word);
     procedure GetCmd(var Op: TDevOp; var ObjNum: word);
-
 
 
   public
@@ -215,6 +209,7 @@ type
     MenuItem9: TMenuItem;
     N3: TMenuItem;
     N4: TMenuItem;
+    N5: TMenuItem;
     SpinEdit1: TSpinEdit;
     SpinEdit2: TSpinEdit;
     SpinEdit3: TSpinEdit;
@@ -225,7 +220,9 @@ type
     Indicator: TShape;
     FormTimer: TTimer;
     TimerVisible: TTimer;
+
     procedure FormCreate(Sender: TObject);
+    procedure FormClose(Sender: TObject; var CloseAction: TCloseAction);
     procedure FormTimerTimer(Sender: TObject);
     procedure MenuItem1Click(Sender: TObject);
     procedure MenuItem3Click(Sender: TObject);
@@ -236,14 +233,12 @@ type
     procedure MenuItem8Click(Sender: TObject);
     procedure MenuItem9Click(Sender: TObject);
     procedure ReadParam;
-    procedure FormClose(Sender: TObject; var CloseAction: TCloseAction);
     procedure FormConstrainedResize(Sender: TObject;
       var MinWidth, MinHeight, MaxWidth, MaxHeight: TConstraintSize);
     procedure N3Click(Sender: TObject);
     procedure N1Click(Sender: TObject);
     procedure IndicatorMouseMove(Sender: TObject);
     procedure TimerVisibleTimer(Sender: TObject);
-
   private
     XML: TXMLDocument;
     procedure ReadConfiguration;
@@ -252,10 +247,12 @@ type
   public
   end;
 
+
 function ExistDebugKey(sub: string): boolean;
 function ArrayToStr(Ar: array of byte; Count: byte): string;
 procedure WriteLog(str: string);
 procedure Log(str: string);
+procedure OutputLog;
 function GetVersion(FileName: string): string;
 function FindDev(Number: word): TDev;
 function FindDevWithPultid(DevId: word; KindObj: TObjectType; ObjId: word): TDev;
@@ -266,36 +263,31 @@ procedure Send(mes: KSBMES; str: PChar); overload;
 var
   aMain: TaMain;
   Option: TOption;
-  GraphicScannerHandle: THandle;
-  InitGraphicScanner: procedure(Left, Top, Col, Row: word); stdcall;
-  ViewGraphicScanner: procedure(Value: boolean); stdcall;
-  DrawGraphicScanner: procedure(m: array of byte; Num: word; Color: dword); stdcall;
   Lines: TList;
   Devs: TList;
   Event: array [0..511] of string;
   RelayState: array [0..1] of string;
   OrionState: array [0..1] of string;
+  ls_log: TStringList;
+  cs_log: TCriticalSection;
 
 
 implementation
 
 uses
-  DateUtils, dynlibs,
+  DateUtils,
   commPP,
   cForFormKsb,
   cIniKey,
   constants,
   cmesdriver_api,
-  typinfo;
+  typinfo,
+  mCheckDrv;
 
 {$R *.lfm}
 
-{kostiv }
 var
   ModuleNetDevice, ModuleBigDevice: word;
-
-{kostiv }
-
 
 procedure TaMain.FormCreate(Sender: TObject);
 const
@@ -304,24 +296,6 @@ const
 var
   i: byte;
 begin
-
-  {$ifdef MSWINDOWS}
-  try
-    GraphicScannerHandle := LoadLibrary('GraphicScanner.dll');
-    InitGraphicScanner := GetProcAddress(GraphicScannerHandle, 'InitGraphicScanner');
-    ViewGraphicScanner := GetProcAddress(GraphicScannerHandle, 'ViewGraphicScanner');
-    DrawGraphicScanner := GetProcAddress(GraphicScannerHandle, 'DrawGraphicScanner');
-    if GraphicScannerHandle > 0 then
-    begin
-      InitGraphicScanner(0, 0, 30, 25);
-      ViewGraphicScanner(True);
-    end;
-  except
-    FreeLibrary(GraphicScannerHandle);
-    GraphicScannerHandle := 0;
-  end;
-  {$endif}
-
   AppKsbInit(self);
   TimerVisible.Enabled := True;
 
@@ -342,13 +316,13 @@ begin
 
     if not ExistDebugKey('noport') then
     begin
-      Log('Старт опроса');
+      Log('Инициализация опроса');
       for i := 1 to Lines.Count do
-        (TLine(Lines.Items[i - 1]).Serial as TComPort).Start;
+        (TLine(Lines.Items[i - 1]).Serial as TPort).Start;
     end
     else
       MessageDlg('Внимание',
-        'Модуль загружен в режиме без связи с ПП!',
+        'Модуль загружен в режиме без связи с C2000-ПП !!!',
         mtWarning, [mbOK], 0, mbOK);
 
     FormTimer.Enabled := True;
@@ -356,7 +330,8 @@ begin
   except
     On E: Exception do
     begin
-      Log(Format('Процесс завершен с ошибкой #%s', [E.Message]));
+      Log(Format('Завершение работы с ошибкой #%s',
+        [E.Message]));
       Close;
     end;
   end;
@@ -375,15 +350,16 @@ begin
   Indicator.Brush.Color := clRed;
   Indicator.ShowHint := True;
 
-  if not ExistDebugKey('SendMes') then
+  if not ExistDebugKey('send_check') then
   begin
-    SpinEdit1.Visible:= False;
-    SpinEdit2.Visible:= False;
-    SpinEdit3.Visible:= False;
-    MenuItem2.Visible:= False;
+    SpinEdit1.Visible := False;
+    SpinEdit2.Visible := False;
+    SpinEdit3.Visible := False;
+    MenuItem2.Visible := False;
   end;
-end;
 
+  CheckDrv := TCheckDrv.Create(False);
+end;
 
 procedure TaMain.ReadParam;
 var
@@ -394,7 +370,6 @@ begin
   begin
     ModuleNetDevice := getkey('ModuleNetDevice', 1);
     ModuleBigDevice := getkey('ModuleBigDevice', 1);
-    //NetDevice:= getkey('NetDevice', 1);
     FileMask := GetKey('FileMask', '');
     if FileMask = '' then
     begin
@@ -404,9 +379,7 @@ begin
         SetLength(FileMask, Length(FileMask) - 4);
     end;
     LogForm := StrToInt(getkey('LogForm', '1')) = 1;
-    LogFile := StrToInt(getkey('LogFile', '1')) = 1;
-    Debug := getkey('Debug', '');
-    MesTransport := StrToInt(getkey('MesTransport', '1')) = 1;
+    Debug := getkey('Debug', '_debug_log _send_check _noport');
   end;
   Left := StrToInt(getkey('POS_LEFT', '0'));
   Top := StrToInt(getkey('POS_TOP', '0'));
@@ -460,20 +433,24 @@ begin
 
     if XmlDocNode.NodeName = 'Line' then
     begin
-      s := Format('%s Serial=%s Baud=%s', [XmlDocNode.NodeName,
-        TDOMElement(XmlDocNode).GetAttribute('Serial'),
-        TDOMElement(XmlDocNode).GetAttribute('Baud')]);
+      s := Format('%s Port=%s Baud=%s Bits=%s Stop=%s',
+        [XmlDocNode.NodeName, TDOMElement(XmlDocNode).GetAttribute('Port'),
+        TDOMElement(XmlDocNode).GetAttribute('Baud'),
+        TDOMElement(XmlDocNode).GetAttribute('Bits'),
+        TDOMElement(XmlDocNode).GetAttribute('Stop')]);
       Log(s);
 
       pObj := TLine.Create;
       with TLine(pObj) do
       begin
         ParentObj := pParent;
-        Serial := TComPort.Create(True);
-        with (Serial as TComPort) do
+        Serial := TPort.Create(True);
+        with (Serial as TPort) do
         begin
-          Serial := TDOMElement(XmlDocNode).GetAttribute('Serial');
+          Port := TDOMElement(XmlDocNode).GetAttribute('Port');
           Baud := TDOMElement(XmlDocNode).GetAttribute('Baud');
+          Bits := TDOMElement(XmlDocNode).GetAttribute('Bits');
+          Stop := TDOMElement(XmlDocNode).GetAttribute('Stop');
           Owner := pObj;
           ProcessProc := Process;
         end;
@@ -484,7 +461,7 @@ begin
 
     if XmlDocNode.NodeName = 'Pp' then
     begin
-      s := Format('%s Number=%s Pultid=%s Id=%s',
+      s := Format('  %s Number=%s Pultid=%s Id=%s',
         [XmlDocNode.NodeName, TDOMElement(XmlDocNode).GetAttribute('Number'),
         TDOMElement(XmlDocNode).GetAttribute('Pultid'),
         TDOMElement(XmlDocNode).GetAttribute('Id')]);
@@ -502,7 +479,9 @@ begin
         Devs.Add(pObj);
 
         TempIndex := $FFFF;
-        Op := DOP_OUTKEYS_STATE;
+        //set start PP operation
+        //Op := DOP_OUTKEYS_STATE;
+        Op := DOP_HW_INFO;
         {$IFDEF EXTENDINFO}
         Op := DOP_MAX_RELAYS;
         {$ENDIF}
@@ -514,7 +493,7 @@ begin
 
     if XmlDocNode.NodeName = 'Zone' then
     begin
-      s := Format('%s Number=%s Type=%s Id=%s',
+      s := Format('    %s Number=%s Type=%s Id=%s',
         [XmlDocNode.NodeName, TDOMElement(XmlDocNode).GetAttribute('Number'),
         TDOMElement(XmlDocNode).GetAttribute('Type'),
         TDOMElement(XmlDocNode).GetAttribute('Id')]);
@@ -536,7 +515,7 @@ begin
 
     if XmlDocNode.NodeName = 'Output' then
     begin
-      s := Format('%s Number=%s Id=%s', [XmlDocNode.NodeName,
+      s := Format('    %s Number=%s Id=%s', [XmlDocNode.NodeName,
         TDOMElement(XmlDocNode).GetAttribute('Number'),
         TDOMElement(XmlDocNode).GetAttribute('Id')]);
       Log(s);
@@ -556,7 +535,7 @@ begin
 
     if XmlDocNode.NodeName = 'Part' then
     begin
-      s := Format('%s Number=%s Id=%s', [XmlDocNode.NodeName,
+      s := Format('    %s Number=%s Id=%s', [XmlDocNode.NodeName,
         TDOMElement(XmlDocNode).GetAttribute('Number'),
         TDOMElement(XmlDocNode).GetAttribute('Id')]);
       Log(s);
@@ -576,7 +555,7 @@ begin
 
     if XmlDocNode.NodeName = 'User' then
     begin
-      s := Format('%s Number=%s Id=%s', [XmlDocNode.NodeName,
+      s := Format('    %s Number=%s Id=%s', [XmlDocNode.NodeName,
         TDOMElement(XmlDocNode).GetAttribute('Number'),
         TDOMElement(XmlDocNode).GetAttribute('Id')]);
       Log(s);
@@ -703,10 +682,10 @@ begin
       mes.BigDevice := Bigdevice;
       mes.Code := ORION_ENABLE_MSG;
       Send(mes);
-      s := Format('PP #%d СОБЫТИЕ >> %s', [Number, OrionState[1]]);
+      s := Format('%s PP#%d %s', [(TLine(ParentObj).Serial as TPort).Port,
+        Number, OrionState[1]]);
       Log(s);
     end;
-
     FNoAnswer := 0;
   end
 
@@ -723,7 +702,8 @@ begin
       mes.BigDevice := Bigdevice;
       mes.Code := ORION_DISABLE_MSG;
       Send(mes);
-      s := Format('PP #%d СОБЫТИЕ >> %s', [Number, OrionState[0]]);
+      s := Format('%s PP#%d %s', [(TLine(ParentObj).Serial as TPort).Port,
+        Number, OrionState[0]]);
       Log(s);
     end;
 
@@ -811,33 +791,37 @@ function TLine.Process(IsWrite: boolean): boolean;
 var
   cObj: TOrionObj;
   s: string;
+  ch: char;
   Address: word;
   Sended: boolean;
 begin
   Result := False;
 
-  if ExistDebugKey('Tic') then
-    if CurDev <> nil then
-    begin
-      if IsWrite then
-        s := Format('tic >> %s PP #%d %s %s (%d)',
-          [TComPort(Serial).Serial, CurDev.Number, 'W',
-          GetEnumName(TypeInfo(TDevOp), Ord(CurDev.Op)), Ord(CurDev.Op)])
-      else
-        s := Format('tic >> %s PP #%d %s %s (%d)',
-          [TComPort(Serial).Serial, CurDev.Number, 'R',
-          GetEnumName(TypeInfo(TDevOp), Ord(CurDev.Op)), Ord(CurDev.Op)]);
-      log(s);
-    end;
 
+  if CurDev <> nil then
+    s := Format('%s PP#%d ', [TPort(Serial).Port, CurDev.Number])
+  else
+    s := Format('%s PP(unknown) ', [TPort(Serial).Port]);
+
+  ch := 'W';
+  if not IsWrite then
+    ch := 'R';
+
+  if ExistDebugKey('debug_log') then
+    if CurDev <> nil then
+      log(Format('%s%s %s (%d)', [s, ch, GetEnumName(TypeInfo(TDevOp), Ord(CurDev.Op)),
+        Ord(CurDev.Op)]));
+
+
+  { IsWrite }
   if IsWrite then
   begin
     CurDev := NextDev;
     if CurDev = nil then
     begin
       Log(Format('Отсутсвуют в конфигурации С2000-ПП для %s',
-        [TComPort(self.Serial).Serial]));
-      exit;
+        [TPort(self.Serial).Port]));
+      exit;  {???}
     end;
 
     with CurDev do
@@ -870,22 +854,24 @@ begin
     end;
   end
 
+  { not IsWrite }
   else
     with CurDev do
     begin
+
       if (CurDev.Number <> r[0]) then
-        Log(Format(
-          'ОШИБКА ПРИЕМА. PP #%d в запросе, PP #%d в ответе',
+        Log(s + Format(
+          'Ошибка приема PP#%d в запросе, PP#%d в ответе',
           [CurDev.Number, r[0]]));
 
       if (r[1] = (w[1] + $80)) then
       begin
         case r[2] of
-          1: s :=
+          1: s := s +
               'Принятый код функции не может быть обработан на ведомом';
           2:
           begin
-            s :=
+            s := s +
               'Адрес данных в запросе не доступен данному ведомому'
               + Format(
               ', ошибка в файле %s.xml для С2000-ПП #%d [%d]',
@@ -895,7 +881,7 @@ begin
 
           3:
           begin
-            s :=
+            s := s +
               'Величина в поле данных запроса является недопустимой для ведомого'
               + Format(
               ', ошибка в файле %s.xml для С2000-ПП #%d [%d]',
@@ -922,17 +908,18 @@ begin
           end;
 
           6:
-            s :=
+            s := s +
               'Ведомый занят обработкой команды. Повторите запрос позже';
 
-          15: s :=
+          15: s := s +
               'Запрошенные данные пока не получены. Повторите запрос позже';
 
           else
-            s := 'Причина неизвестна';
+            s := s + 'Причина неизвестна';
         end;
 
-        Log(Format('Ошибка приема #%d. %s ', [r[2], s]));
+        Log(s + Format('(Ошибка #%d)', [r[2]]));
+
 
         case Op of
           DOP_CMD_ZONE_DISARM,
@@ -953,431 +940,429 @@ begin
     end;
 
 
-  try
+  { Write or Read }
+  with CurDev do
+    case Op of
 
-    with CurDev do
-      case Op of
+      DOP_SET_TIME:
+        if IsWrite then
+        begin
+          w[0] := Number;
+          w[1] := $10;
+          w[2] := hi(MB_DATATIME);
+          w[3] := lo(MB_DATATIME);
+          w[4] := hi(3);
+          w[5] := lo(3);
+          w[6] := 6;
+          w[7] := HourOf(now);
+          w[8] := MinuteOf(now);
+          w[9] := SecondOf(now);
+          w[10] := DayOf(now);
+          w[11] := MonthOf(now);
+          w[12] := YearOf(now) mod 100;
+          wCount := 13;
+          AddCrc;
+        end
+        else
+        begin
+          TempIndex := $FFFF;
+          Op := DOP_ZONE_ESTATE_NUM;
+          Log(s + Format(
+            'Установлено время: %.2d:%.2d:%.2d %.2d.%.2d.20%d',
+            [w[7], w[8], w[9], w[10], w[11], w[12]]));
+        end;
 
-        DOP_SET_TIME:
-          if IsWrite then
-          begin
-            w[0] := Number;
-            w[1] := $10;
-            w[2] := hi(MB_DATATIME);
-            w[3] := lo(MB_DATATIME);
-            w[4] := hi(3);
-            w[5] := lo(3);
-            w[6] := 6;
-            w[7] := HourOf(now);
-            w[8] := MinuteOf(now);
-            w[9] := SecondOf(now);
-            w[10] := DayOf(now);
-            w[11] := MonthOf(now);
-            w[12] := YearOf(now) mod 100;
-            wCount := 13;
-            AddCrc;
-          end
-          else
-          begin
-            TempIndex := $FFFF;
+      DOP_MAX_RELAYS:
+        if IsWrite then
+        begin
+          w[0] := Number;
+          w[1] := $03;
+          w[2] := hi(MB_MAX_RELAYS);
+          w[3] := lo(MB_MAX_RELAYS);
+          w[4] := hi(1);
+          w[5] := lo(1);
+          wCount := 6;
+          AddCrc;
+        end
+        else
+        begin
+          Op := DOP_MAX_ZONES;
+          Log(s + Format(
+            'Максимальное количество реле: %d',
+            [256 * r[3] + r[4]]));
+        end;
+
+      DOP_MAX_ZONES:
+        if IsWrite then
+        begin
+          w[0] := Number;
+          w[1] := $03;
+          w[2] := hi(MB_MAX_ZONES);
+          w[3] := lo(MB_MAX_ZONES);
+          w[4] := hi(1);
+          w[5] := lo(1);
+          wCount := 6;
+          AddCrc;
+        end
+        else
+        begin
+          Op := DOP_MAX_PARTS;
+          Log(s + Format('Максимальное количество зон: %d',
+            [256 * r[3] + r[4]]));
+        end;
+
+      DOP_MAX_PARTS:
+        if IsWrite then
+        begin
+          w[0] := Number;
+          w[1] := $03;
+          w[2] := hi(MB_MAX_PARTS);
+          w[3] := lo(MB_MAX_PARTS);
+          w[4] := hi(1);
+          w[5] := lo(1);
+          wCount := 6;
+          AddCrc;
+        end
+        else
+        begin
+          Op := DOP_MAX_ZONESTATES;
+          Log(s + Format(
+            'Максимальное количество разделов: %d',
+            [256 * r[3] + r[4]]));
+        end;
+
+      DOP_MAX_ZONESTATES:
+        if IsWrite then
+        begin
+          w[0] := Number;
+          w[1] := $03;
+          w[2] := hi(MB_MAX_ZONESTATES);
+          w[3] := lo(MB_MAX_ZONESTATES);
+          w[4] := hi(1);
+          w[5] := lo(1);
+          wCount := 6;
+          AddCrc;
+        end
+        else
+        begin
+          Op := DOP_MAX_PARTSTATES;
+          Log(s + Format(
+            'Максимальное количество состояний зоны: %d',
+            [
+            256 * r[3] + r[4]]));
+        end;
+
+      DOP_MAX_PARTSTATES:
+        if IsWrite then
+        begin
+          w[0] := Number;
+          w[1] := $03;
+          w[2] := hi(MB_MAX_PARTSTATES);
+          w[3] := lo(MB_MAX_PARTSTATES);
+          w[4] := hi(1);
+          w[5] := lo(1);
+          wCount := 6;
+          AddCrc;
+        end
+        else
+        begin
+          Op := DOP_MAX_EVENTS;
+          Log(s + Format(
+            'Максимальное количество состояний раздела: %d',
+            [256 * r[3] + r[4]]));
+        end;
+
+      DOP_MAX_EVENTS:
+        if IsWrite then
+        begin
+          Op := DOP_MAX_EVENTLEN;
+          Log(s + Format(
+            'Максимальное количество событий: %d',
+            [256 * r[3] + r[4]]));
+        end
+        else
+        begin
+          w[0] := Number;
+          w[1] := $03;
+          w[2] := hi(MB_MAX_EVENTS);
+          w[3] := lo(MB_MAX_EVENTS);
+          w[4] := hi(1);
+          w[5] := lo(1);
+          wCount := 6;
+          AddCrc;
+        end;
+
+      DOP_MAX_EVENTLEN:
+        if IsWrite then
+        begin
+          w[0] := Number;
+          w[1] := $03;
+          w[2] := hi(MB_MAX_EVENTLEN);
+          w[3] := lo(MB_MAX_EVENTLEN);
+          w[4] := hi(1);
+          w[5] := lo(1);
+          wCount := 6;
+          AddCrc;
+        end
+        else
+        begin
+          Op := DOP_HW_INFO;
+          Log(s + Format('Максимальная длина события: %d',
+            [256 * r[3] + r[4]]));
+        end;
+
+      DOP_HW_INFO:
+        if IsWrite then
+        begin
+          w[0] := Number;
+          w[1] := $03;
+          w[2] := hi(MB_HW_INFO);
+          w[3] := lo(MB_HW_INFO);
+          w[4] := hi(2);
+          w[5] := lo(2);
+          wCount := 6;
+          AddCrc;
+        end
+        else
+        begin
+          Op := DOP_OUTKEYS_STATE;
+          Log(s + Format('HW: %d %d',
+            [256 * r[3] + r[4], 256 * r[5] + r[6]]));
+        end;
+
+      DOP_STATE:
+        if IsWrite then
+        begin
+          cObj := ChildsObj.Items[TempIndex];
+          if cObj.Kind = ZONE then
+            Address := MB_BASE_ADR_ZONE + cObj.Number
+          else if cObj.Kind = OUTKEY then
+            Address := MB_BASE_ADR_OUTKEY + cObj.Number
+          else if cObj.Kind = PART then
+            Address := MB_BASE_ADR_PART + cObj.Number;
+          w[0] := Number;
+          w[1] := $03;
+          w[2] := hi(Address);
+          w[3] := lo(Address);
+          w[4] := hi(1);
+          w[5] := lo(1);
+          wCount := 6;
+          AddCrc;
+        end
+        else
+        begin
+          Read;
+          Inc(TempIndex);
+          if TempIndex >= CurDev.ChildsObj.Count then
+            Op := DOP_EVENT;
+        end;
+
+      {usable}
+      DOP_OUTKEYS_STATE:
+        if IsWrite then
+        begin
+          cObj := ChildsObj.Items[TempIndex];
+          Address := MB_BASE_ADR_OUTKEY + cObj.Number - 1;
+          w[0] := Number;
+          w[1] := $01;
+          w[2] := hi(Address);
+          w[3] := lo(Address);
+          w[4] := hi(1);
+          w[5] := lo(1);
+          wCount := 6;
+          AddCrc;
+        end
+        else
+        begin
+          Read;
+          TempIndex := NextObj(OUTKEY);
+          if TempIndex = $FFFF then
             Op := DOP_ZONE_ESTATE_NUM;
-            Log(Format(
-              'Установлено время: %.2d:%.2d:%.2d %.2d.%.2d.20%d',
-              [w[7], w[8], w[9], w[10], w[11], w[12]]));
-          end;
+        end;
 
-        DOP_MAX_RELAYS:
-          if IsWrite then
-          begin
-            w[0] := Number;
-            w[1] := $03;
-            w[2] := hi(MB_MAX_RELAYS);
-            w[3] := lo(MB_MAX_RELAYS);
-            w[4] := hi(1);
-            w[5] := lo(1);
-            wCount := 6;
-            AddCrc;
-          end
+      DOP_ZONE_ESTATE_NUM:
+        if IsWrite then
+        begin
+          cObj := ChildsObj.Items[TempIndex];
+          w[0] := Number;
+          w[1] := $06;
+          w[2] := hi(MB_SET_ZONE_NUM);
+          w[3] := lo(MB_SET_ZONE_NUM);
+          w[4] := hi(cObj.Number);
+          w[5] := lo(cObj.Number);
+          wCount := 6;
+          AddCrc;
+        end
+        else
+        begin
+          Op := DOP_ZONE_ESTATE;
+        end;
+
+      DOP_ZONE_ESTATE:
+        if IsWrite then
+        begin
+          w[0] := Number;
+          w[1] := $03;
+          w[2] := hi(MB_EXT_ZONE_STATE);
+          w[3] := lo(MB_EXT_ZONE_STATE);
+          w[4] := hi(5);
+          w[5] := lo(5);
+          wCount := 6;
+          AddCrc;
+        end
+        else
+        begin
+          Read;
+          TempIndex := NextObj(ZONE);
+          if TempIndex <> $FFFF then
+            Op := DOP_ZONE_ESTATE_NUM
+          else
+            Op := DOP_PART_ESTATE_NUM;
+        end;
+
+      DOP_PART_ESTATE_NUM:
+        if IsWrite then
+        begin
+          cObj := ChildsObj.Items[TempIndex];
+          w[0] := Number;
+          w[1] := $06;
+          w[2] := hi(MB_SET_PART_NUM);
+          w[3] := lo(MB_SET_PART_NUM);
+          w[4] := hi(cObj.Number);
+          w[5] := lo(cObj.Number);
+          wCount := 6;
+          AddCrc;
+        end
+        else
+        begin
+          Op := DOP_PART_ESTATE;
+        end;
+
+      DOP_PART_ESTATE:
+        if IsWrite then
+        begin
+          w[0] := Number;
+          w[1] := $03;
+          w[2] := hi(MB_EXT_PART_STATE);
+          w[3] := lo(MB_EXT_PART_STATE);
+          w[4] := hi(8);
+          w[5] := lo(8);
+          wCount := 6;
+          AddCrc;
+        end
+        else
+        begin
+          Read;
+          TempIndex := NextObj(PART);
+          if TempIndex <> $FFFF then
+            Op := DOP_PART_ESTATE_NUM
+          else
+            Op := DOP_EVENT;
+        end;
+
+      DOP_EVENT:
+        if IsWrite then
+        begin
+          w[0] := Number;
+          w[1] := $03;
+          w[2] := hi(MB_EVENT);
+          w[3] := lo(MB_EVENT);
+          w[4] := hi(14);
+          w[5] := lo(14);
+          wCount := 6;
+          AddCrc;
+        end
+        else
+        begin
+          Read;
+          if (r[3] <> 0) or (r[4] <> 0) or (r[5] <> 0) then
+            Op := DOP_EVENT_SET_READED
           else
           begin
-            Op := DOP_MAX_ZONES;
-            Log(Format(
-              'Максимальное количество реле: %d',
-              [256 * r[3] + r[4]]));
-          end;
-
-        DOP_MAX_ZONES:
-          if IsWrite then
-          begin
-            w[0] := Number;
-            w[1] := $03;
-            w[2] := hi(MB_MAX_ZONES);
-            w[3] := lo(MB_MAX_ZONES);
-            w[4] := hi(1);
-            w[5] := lo(1);
-            wCount := 6;
-            AddCrc;
-          end
-          else
-          begin
-            Op := DOP_MAX_PARTS;
-            Log(Format('Максимальное количество зон: %d',
-              [256 * r[3] + r[4]]));
-          end;
-
-        DOP_MAX_PARTS:
-          if IsWrite then
-          begin
-            w[0] := Number;
-            w[1] := $03;
-            w[2] := hi(MB_MAX_PARTS);
-            w[3] := lo(MB_MAX_PARTS);
-            w[4] := hi(1);
-            w[5] := lo(1);
-            wCount := 6;
-            AddCrc;
-          end
-          else
-          begin
-            Op := DOP_MAX_ZONESTATES;
-            Log(Format(
-              'Максимальное количество разделов: %d',
-              [256 * r[3] + r[4]]));
-          end;
-
-        DOP_MAX_ZONESTATES:
-          if IsWrite then
-          begin
-            w[0] := Number;
-            w[1] := $03;
-            w[2] := hi(MB_MAX_ZONESTATES);
-            w[3] := lo(MB_MAX_ZONESTATES);
-            w[4] := hi(1);
-            w[5] := lo(1);
-            wCount := 6;
-            AddCrc;
-          end
-          else
-          begin
-            Op := DOP_MAX_PARTSTATES;
-            Log(Format(
-              'Максимальное количество состояний зоны: %d',
-              [
-              256 * r[3] + r[4]]));
-          end;
-
-        DOP_MAX_PARTSTATES:
-          if IsWrite then
-          begin
-            w[0] := Number;
-            w[1] := $03;
-            w[2] := hi(MB_MAX_PARTSTATES);
-            w[3] := lo(MB_MAX_PARTSTATES);
-            w[4] := hi(1);
-            w[5] := lo(1);
-            wCount := 6;
-            AddCrc;
-          end
-          else
-          begin
-            Op := DOP_MAX_EVENTS;
-            Log(Format(
-              'Максимальное количество состояний раздела: %d',
-              [256 * r[3] + r[4]]));
-          end;
-
-        DOP_MAX_EVENTS:
-          if IsWrite then
-          begin
-            Op := DOP_MAX_EVENTLEN;
-            Log(Format(
-              'Максимальное количество событий: %d',
-              [256 * r[3] + r[4]]));
-          end
-          else
-          begin
-            w[0] := Number;
-            w[1] := $03;
-            w[2] := hi(MB_MAX_EVENTS);
-            w[3] := lo(MB_MAX_EVENTS);
-            w[4] := hi(1);
-            w[5] := lo(1);
-            wCount := 6;
-            AddCrc;
-          end;
-
-        DOP_MAX_EVENTLEN:
-          if IsWrite then
-          begin
-            w[0] := Number;
-            w[1] := $03;
-            w[2] := hi(MB_MAX_EVENTLEN);
-            w[3] := lo(MB_MAX_EVENTLEN);
-            w[4] := hi(1);
-            w[5] := lo(1);
-            wCount := 6;
-            AddCrc;
-          end
-          else
-          begin
-            Op := DOP_HW_INFO;
-            Log(Format('Максимальная длина события: %d',
-              [256 * r[3] + r[4]]));
-          end;
-
-        DOP_HW_INFO:
-          if IsWrite then
-          begin
-            w[0] := Number;
-            w[1] := $03;
-            w[2] := hi(MB_HW_INFO);
-            w[3] := lo(MB_HW_INFO);
-            w[4] := hi(2);
-            w[5] := lo(2);
-            wCount := 6;
-            AddCrc;
-          end
-          else
-          begin
-            Op := DOP_OUTKEYS_STATE;
-            Log(Format('HW инфо: (%d, %d)', [256 *
-              r[3] + r[4], 256 * r[5] + r[6]]));
-          end;
-
-        DOP_STATE:
-          if IsWrite then
-          begin
-            cObj := ChildsObj.Items[TempIndex];
-            if cObj.Kind = ZONE then
-              Address := MB_BASE_ADR_ZONE + cObj.Number
-            else if cObj.Kind = OUTKEY then
-              Address := MB_BASE_ADR_OUTKEY + cObj.Number
-            else if cObj.Kind = PART then
-              Address := MB_BASE_ADR_PART + cObj.Number;
-            w[0] := Number;
-            w[1] := $03;
-            w[2] := hi(Address);
-            w[3] := lo(Address);
-            w[4] := hi(1);
-            w[5] := lo(1);
-            wCount := 6;
-            AddCrc;
-          end
-          else
-          begin
-            Read;
-            Inc(TempIndex);
-            if TempIndex >= CurDev.ChildsObj.Count then
-              Op := DOP_EVENT;
-          end;
-
-        {usable}
-        DOP_OUTKEYS_STATE:
-          if IsWrite then
-          begin
-            cObj := ChildsObj.Items[TempIndex];
-            Address := MB_BASE_ADR_OUTKEY + cObj.Number - 1;
-            w[0] := Number;
-            w[1] := $01;
-            w[2] := hi(Address);
-            w[3] := lo(Address);
-            w[4] := hi(1);
-            w[5] := lo(1);
-            wCount := 6;
-            AddCrc;
-          end
-          else
-          begin
-            Read;
-            TempIndex := NextObj(OUTKEY);
-            if TempIndex = $FFFF then
-              Op := DOP_ZONE_ESTATE_NUM;
-          end;
-
-        DOP_ZONE_ESTATE_NUM:
-          if IsWrite then
-          begin
-            cObj := ChildsObj.Items[TempIndex];
-            w[0] := Number;
-            w[1] := $06;
-            w[2] := hi(MB_SET_ZONE_NUM);
-            w[3] := lo(MB_SET_ZONE_NUM);
-            w[4] := hi(cObj.Number);
-            w[5] := lo(cObj.Number);
-            wCount := 6;
-            AddCrc;
-          end
-          else
-          begin
-            Op := DOP_ZONE_ESTATE;
-          end;
-
-        DOP_ZONE_ESTATE:
-          if IsWrite then
-          begin
-            w[0] := Number;
-            w[1] := $03;
-            w[2] := hi(MB_EXT_ZONE_STATE);
-            w[3] := lo(MB_EXT_ZONE_STATE);
-            w[4] := hi(5);
-            w[5] := lo(5);
-            wCount := 6;
-            AddCrc;
-          end
-          else
-          begin
-            Read;
-            TempIndex := NextObj(ZONE);
-            if TempIndex <> $FFFF then
-              Op := DOP_ZONE_ESTATE_NUM
+            if StateRequest > 0 then
+              Dec(StateRequest);
+            if StateRequest = 1 then
+            begin
+              TempIndex := $FFFF;
+              Op := DOP_OUTKEYS_STATE;
+            end
             else
-              Op := DOP_PART_ESTATE_NUM;
-          end;
-
-        DOP_PART_ESTATE_NUM:
-          if IsWrite then
-          begin
-            cObj := ChildsObj.Items[TempIndex];
-            w[0] := Number;
-            w[1] := $06;
-            w[2] := hi(MB_SET_PART_NUM);
-            w[3] := lo(MB_SET_PART_NUM);
-            w[4] := hi(cObj.Number);
-            w[5] := lo(cObj.Number);
-            wCount := 6;
-            AddCrc;
-          end
-          else
-          begin
-            Op := DOP_PART_ESTATE;
-          end;
-
-
-        DOP_PART_ESTATE:
-          if IsWrite then
-          begin
-            w[0] := Number;
-            w[1] := $03;
-            w[2] := hi(MB_EXT_PART_STATE);
-            w[3] := lo(MB_EXT_PART_STATE);
-            w[4] := hi(8);
-            w[5] := lo(8);
-            wCount := 6;
-            AddCrc;
-          end
-          else
-          begin
-            Read;
-            TempIndex := NextObj(PART);
-            if TempIndex <> $FFFF then
-              Op := DOP_PART_ESTATE_NUM
-            else
-              Op := DOP_EVENT;
-          end;
-
-        DOP_EVENT:
-          if IsWrite then
-          begin
-            w[0] := Number;
-            w[1] := $03;
-            w[2] := hi(MB_EVENT);
-            w[3] := lo(MB_EVENT);
-            w[4] := hi(14);
-            w[5] := lo(14);
-            wCount := 6;
-            AddCrc;
-          end
-          else
-          begin
-            Read;
-            if (r[3] <> 0) or (r[4] <> 0) or (r[5] <> 0) then
-              Op := DOP_EVENT_SET_READED
+            if (NextOp <> DOP_NOP) then
+            begin
+              TempIndex := $FFFF;
+              Op := NextOp;
+              NextOp := DOP_NOP;
+            end
             else
             begin
-              if StateRequest > 0 then
-                Dec(StateRequest);
-              if StateRequest = 1 then
+              GetCmd(CmdOp, CmdObj);
+              if CmdOp <> DOP_NOP then
               begin
                 TempIndex := $FFFF;
-                Op := DOP_OUTKEYS_STATE;
-              end
-              else
-              if (NextOp <> DOP_NOP) then
-              begin
-                TempIndex := $FFFF;
-                Op := NextOp;
-                NextOp := DOP_NOP;
-              end
-              else
-              begin
-                GetCmd(CmdOp, CmdObj);
-                if CmdOp <> DOP_NOP then
-                begin
-                  TempIndex := $FFFF;
-                  Op := CmdOp;
-                  CmdOp := DOP_NOP;
-                  CmdTry := 5;
-                end;
+                Op := CmdOp;
+                CmdOp := DOP_NOP;
+                CmdTry := 5;
               end;
             end;
           end;
+        end;
 
-        DOP_EVENT_SET_READED:
-          if IsWrite then
-          begin
-            w[0] := Number;
-            w[1] := $06;
-            w[2] := hi(MB_EVENT_IS_READED);
-            w[3] := lo(MB_EVENT_IS_READED);
-            w[4] := r[3];
-            w[5] := r[4];
-            wCount := 6;
-            AddCrc;
-          end
-          else
-          begin
+      DOP_EVENT_SET_READED:
+        if IsWrite then
+        begin
+          w[0] := Number;
+          w[1] := $06;
+          w[2] := hi(MB_EVENT_IS_READED);
+          w[3] := lo(MB_EVENT_IS_READED);
+          w[4] := r[3];
+          w[5] := r[4];
+          wCount := 6;
+          AddCrc;
+        end
+        else
+        begin
             {
             if (w[4] = r[4]) and (w[5] = r[5]) then
               Log( 'Подтверждение. Прочитано >> #' + IntToStr(256 * r[4] + r[5]) );
             }
+          Op := DOP_EVENT;
+        end;
+
+      DOP_CMD_ZONE_DISARM:
+        if IsWrite then
+        begin
+          w[0] := Number;
+          w[1] := $06;
+          w[2] := hi(word(MB_BASE_ADR_ZONE + CmdObj - 1));
+          w[3] := lo(word(MB_BASE_ADR_ZONE + CmdObj - 1));
+          w[4] := hi(109);
+          w[5] := lo(109);
+          wCount := 6;
+          AddCrc;
+        end
+        else
+        begin
+          Sended := False;
+          if (w[0] = r[0]) and (w[1] = r[1]) and (w[2] = r[2]) and
+            (w[3] = r[3]) and (w[4] = r[4]) and (w[5] = r[5]) then
+          begin
+            Log(s + Format(
+              'Отправлен запрос. PP#%d Снять шлейф #%d',
+              [Number, CmdObj]));
+            Sended := True;
+          end;
+          if (Sended) or (CmdTry = 0) then
+          begin
+            CmdObj := 0;
+            CmdOp := DOP_NOP;
             Op := DOP_EVENT;
           end;
+        end;
 
-        DOP_CMD_ZONE_DISARM:
-          if IsWrite then
-          begin
-            w[0] := Number;
-            w[1] := $06;
-            w[2] := hi(word(MB_BASE_ADR_ZONE + CmdObj - 1));
-            w[3] := lo(word(MB_BASE_ADR_ZONE + CmdObj - 1));
-            w[4] := hi(109);
-            w[5] := lo(109);
-            wCount := 6;
-            AddCrc;
-          end
-          else
-          begin
-            Sended := False;
-            if (w[0] = r[0]) and (w[1] = r[1]) and (w[2] = r[2]) and
-              (w[3] = r[3]) and (w[4] = r[4]) and (w[5] = r[5]) then
-            begin
-              Log(Format(
-                'Отправлен запрос. PP #%d Снять шлейф #%d',
-                [Number, CmdObj]));
-              Sended := True;
-            end;
-            if (Sended) or (CmdTry = 0) then
-            begin
-              CmdObj := 0;
-              CmdOp := DOP_NOP;
-              Op := DOP_EVENT;
-            end;
-          end;
-
-        DOP_CMD_ZONE_ARM:
-          if IsWrite then
-          begin
-            w[0] := Number; //kostiv
+      DOP_CMD_ZONE_ARM:
+        if IsWrite then
+        begin
+          w[0] := Number;
             {
             Когда в очредном NextDev придет очередь данного PP,
             в разделах DOP_CMD_ZONE_ARM...
@@ -1386,172 +1371,164 @@ begin
             от Конкретного PP. В GetCmd н. убрать параметр номер PP,
             ведь он и так известен.
             }
-            w[1] := $06;
-            w[2] := hi(word(MB_BASE_ADR_ZONE + CmdObj - 1));
-            w[3] := lo(word(MB_BASE_ADR_ZONE + CmdObj - 1));
-            w[4] := hi(24);
-            w[5] := lo(24);
-            wCount := 6;
-            AddCrc;
-          end
-          else
+          w[1] := $06;
+          w[2] := hi(word(MB_BASE_ADR_ZONE + CmdObj - 1));
+          w[3] := lo(word(MB_BASE_ADR_ZONE + CmdObj - 1));
+          w[4] := hi(24);
+          w[5] := lo(24);
+          wCount := 6;
+          AddCrc;
+        end
+        else
+        begin
+          Sended := False;
+          if (w[0] = r[0]) and (w[1] = r[1]) and (w[2] = r[2]) and
+            (w[3] = r[3]) and (w[4] = r[4]) and (w[5] = r[5]) then
           begin
-            Sended := False;
-            if (w[0] = r[0]) and (w[1] = r[1]) and (w[2] = r[2]) and
-              (w[3] = r[3]) and (w[4] = r[4]) and (w[5] = r[5]) then
-            begin
-              Log(Format(
-                'Отправлен запрос. PP #%d Взять шлейф #%d',
-                [Number, CmdObj]));
-              Sended := True;
-            end;
-            if (Sended) or (CmdTry = 0) then
-            begin
-              CmdObj := 0;
-              CmdOp := DOP_NOP;
-              Op := DOP_EVENT;
-            end;
+            Log(s + Format(
+              'Отправлен запрос. PP#%d Взять шлейф #%d',
+              [Number, CmdObj]));
+            Sended := True;
           end;
-
-        DOP_CMD_PART_DISARM:
-          if IsWrite then
+          if (Sended) or (CmdTry = 0) then
           begin
-            w[0] := Number;
-            w[1] := $06;
-            w[2] := hi(word(MB_BASE_ADR_PART + CmdObj - 1));
-            w[3] := lo(word(MB_BASE_ADR_PART + CmdObj - 1));
-            w[4] := hi(109);
-            w[5] := lo(109);
-            wCount := 6;
-            AddCrc;
-          end
-          else
-          begin
-            Sended := False;
-            if (w[0] = r[0]) and (w[1] = r[1]) and (w[2] = r[2]) and
-              (w[3] = r[3]) and (w[4] = r[4]) and (w[5] = r[5]) then
-            begin
-              Log(Format(
-                'Отправлен запрос. PP #%d Снять раздел #%d',
-                [Number, CmdObj]));
-              Sended := True;
-            end;
-            if (Sended) or (CmdTry = 0) then
-            begin
-              CmdObj := 0;
-              CmdOp := DOP_NOP;
-              Op := DOP_EVENT;
-            end;
+            CmdObj := 0;
+            CmdOp := DOP_NOP;
+            Op := DOP_EVENT;
           end;
+        end;
 
-        DOP_CMD_PART_ARM:
-          if IsWrite then
+      DOP_CMD_PART_DISARM:
+        if IsWrite then
+        begin
+          w[0] := Number;
+          w[1] := $06;
+          w[2] := hi(word(MB_BASE_ADR_PART + CmdObj - 1));
+          w[3] := lo(word(MB_BASE_ADR_PART + CmdObj - 1));
+          w[4] := hi(109);
+          w[5] := lo(109);
+          wCount := 6;
+          AddCrc;
+        end
+        else
+        begin
+          Sended := False;
+          if (w[0] = r[0]) and (w[1] = r[1]) and (w[2] = r[2]) and
+            (w[3] = r[3]) and (w[4] = r[4]) and (w[5] = r[5]) then
           begin
-            w[0] := Number;
-            w[1] := $06;
-            w[2] := hi(word(MB_BASE_ADR_PART + CmdObj - 1));
-            w[3] := lo(word(MB_BASE_ADR_PART + CmdObj - 1));
-            w[4] := hi(24);
-            w[5] := lo(24);
-            wCount := 6;
-            AddCrc;
-          end
-          else
-          begin
-            Sended := False;
-            if (w[0] = r[0]) and (w[1] = r[1]) and (w[2] = r[2]) and
-              (w[3] = r[3]) and (w[4] = r[4]) and (w[5] = r[5]) then
-            begin
-              Log(Format(
-                'Отправлен запрос. PP #%d Взять раздел #%d',
-                [Number, CmdObj]));
-              Sended := True;
-            end;
-            if (Sended) or (CmdTry = 0) then
-            begin
-              CmdObj := 0;
-              CmdOp := DOP_NOP;
-              Op := DOP_EVENT;
-            end;
+            Log(s + Format(
+              'Отправлен запрос. PP#%d Снять раздел #%d',
+              [Number, CmdObj]));
+            Sended := True;
           end;
-
-        DOP_CMD_RELAY_OFF:
-          if IsWrite then
+          if (Sended) or (CmdTry = 0) then
           begin
-            w[0] := Number;
-            w[1] := $0F;
-            w[2] := hi(word(MB_BASE_ADR_OUTKEY + CmdObj - 1));
-            w[3] := lo(word(MB_BASE_ADR_OUTKEY + CmdObj - 1));
-            w[4] := hi(1);
-            w[5] := lo(1);
-            w[6] := 1;
-            w[7] := 0;
-            wCount := 8;
-            AddCrc;
-          end
-          else
-          begin
-            Sended := False;
-            if (w[0] = r[0]) and (w[1] = r[1]) and (w[2] = r[2]) and
-              (w[3] = r[3]) and (w[4] = r[4]) and (w[5] = r[5]) then
-            begin
-              Log(Format(
-                'Отправлен запрос. PP #%d Выключить реле #%d',
-                [
-                Number, CmdObj]));
-              Sended := True;
-            end;
-            if (Sended) or (CmdTry = 0) then
-            begin
-              CmdObj := 0;
-              CmdOp := DOP_NOP;
-              Op := DOP_EVENT;
-            end;
+            CmdObj := 0;
+            CmdOp := DOP_NOP;
+            Op := DOP_EVENT;
           end;
+        end;
 
-        DOP_CMD_RELAY_ON:
-          if IsWrite then
+      DOP_CMD_PART_ARM:
+        if IsWrite then
+        begin
+          w[0] := Number;
+          w[1] := $06;
+          w[2] := hi(word(MB_BASE_ADR_PART + CmdObj - 1));
+          w[3] := lo(word(MB_BASE_ADR_PART + CmdObj - 1));
+          w[4] := hi(24);
+          w[5] := lo(24);
+          wCount := 6;
+          AddCrc;
+        end
+        else
+        begin
+          Sended := False;
+          if (w[0] = r[0]) and (w[1] = r[1]) and (w[2] = r[2]) and
+            (w[3] = r[3]) and (w[4] = r[4]) and (w[5] = r[5]) then
           begin
-            w[0] := Number;
-            w[1] := $0F;
-            w[2] := hi(word(MB_BASE_ADR_OUTKEY + CmdObj - 1));
-            w[3] := lo(word(MB_BASE_ADR_OUTKEY + CmdObj - 1));
-            w[4] := hi(1);
-            w[5] := lo(1);
-            w[6] := 1;
-            w[7] := 1;
-            wCount := 8;
-            AddCrc;
-          end
-          else
-          begin
-            Sended := False;
-            if (w[0] = r[0]) and (w[1] = r[1]) and (w[2] = r[2]) and
-              (w[3] = r[3]) and (w[4] = r[4]) and (w[5] = r[5]) then
-            begin
-              Log(Format(
-                'Отправлен запрос. PP #%d Включить реле #%d',
-                [Number, CmdObj]));
-              Sended := True;
-            end;
-            if (Sended) or (CmdTry = 0) then
-            begin
-              CmdObj := 0;
-              CmdOp := DOP_NOP;
-              Op := DOP_EVENT;
-            end;
+            Log(s + Format(
+              'Отправлен запрос. PP#%d Взять раздел #%d',
+              [Number, CmdObj]));
+            Sended := True;
           end;
+          if (Sended) or (CmdTry = 0) then
+          begin
+            CmdObj := 0;
+            CmdOp := DOP_NOP;
+            Op := DOP_EVENT;
+          end;
+        end;
 
-      end; //case Op
+      DOP_CMD_RELAY_OFF:
+        if IsWrite then
+        begin
+          w[0] := Number;
+          w[1] := $0F;
+          w[2] := hi(word(MB_BASE_ADR_OUTKEY + CmdObj - 1));
+          w[3] := lo(word(MB_BASE_ADR_OUTKEY + CmdObj - 1));
+          w[4] := hi(1);
+          w[5] := lo(1);
+          w[6] := 1;
+          w[7] := 0;
+          wCount := 8;
+          AddCrc;
+        end
+        else
+        begin
+          Sended := False;
+          if (w[0] = r[0]) and (w[1] = r[1]) and (w[2] = r[2]) and
+            (w[3] = r[3]) and (w[4] = r[4]) and (w[5] = r[5]) then
+          begin
+            Log(s + Format(
+              'Отправлен запрос. PP#%d Выключить реле #%d',
+              [Number, CmdObj]));
+            Sended := True;
+          end;
+          if (Sended) or (CmdTry = 0) then
+          begin
+            CmdObj := 0;
+            CmdOp := DOP_NOP;
+            Op := DOP_EVENT;
+          end;
+        end;
 
-    Result := True;
+      DOP_CMD_RELAY_ON:
+        if IsWrite then
+        begin
+          w[0] := Number;
+          w[1] := $0F;
+          w[2] := hi(word(MB_BASE_ADR_OUTKEY + CmdObj - 1));
+          w[3] := lo(word(MB_BASE_ADR_OUTKEY + CmdObj - 1));
+          w[4] := hi(1);
+          w[5] := lo(1);
+          w[6] := 1;
+          w[7] := 1;
+          wCount := 8;
+          AddCrc;
+        end
+        else
+        begin
+          Sended := False;
+          if (w[0] = r[0]) and (w[1] = r[1]) and (w[2] = r[2]) and
+            (w[3] = r[3]) and (w[4] = r[4]) and (w[5] = r[5]) then
+          begin
+            Log(s + Format(
+              'Отправлен запрос. PP#%d Включить реле #%d',
+              [Number, CmdObj]));
+            Sended := True;
+          end;
+          if (Sended) or (CmdTry = 0) then
+          begin
+            CmdObj := 0;
+            CmdOp := DOP_NOP;
+            Op := DOP_EVENT;
+          end;
+        end;
 
-  except
-    Log(Format('Порт %s - ошибка приема...',
-      [TComPort(Self.Serial).Serial]));
+    end; //case Op
 
-  end;
-
+  Result := True;
 end;
 
 procedure TLine.Read;
@@ -1566,13 +1543,15 @@ var
 begin
   with CurDev, aMain do
   begin
+    s := Format('%s PP#%d ', [(Serial as TPort).Port, Number]);
+
     case Op of
 
       DOP_OUTKEYS_STATE:
       begin
         Child := ChildsObj.Items[TempIndex];
-        s := Format('PP #%d Реле #%d Состояние >> %s (%d)',
-          [Number, Child.Number, RelayState[r[3]], r[3]]);
+        s := s + Format('Реле #%d Состояние >> %s (%d)',
+          [Child.Number, RelayState[r[3]], r[3]]);
 
         Init(mes);
         mes.NetDevice := ModuleNetDevice;
@@ -1595,14 +1574,12 @@ begin
           Child := ChildsObj.Items[Childindex]
         else
         begin
-          Log(Format(
-            'PP #%d Зона %d не найдена в файле %s.xml !!!',
-            [Number, 256 * r[3] + r[4], Option.FileMask]));
-          exit;
+          Log(s + Format('Зона %d не найдена в файле %s.xml !!!',
+            [256 * r[3] + r[4], Option.FileMask]));
+          exit; {???}
         end;
 
-        s := Format('PP #%d Зона #%d Состояние >>',
-          [Number, 256 * r[3] + r[4]]);
+        s := s + Format('Зона #%d Состояние >>', [256 * r[3] + r[4]]);
 
         SyntNorma := True; // new 1.1
         for i := 1 to r[5] do
@@ -1679,13 +1656,13 @@ begin
         else
         begin
           Log(Format(
-            'PP #%d Раздел #%d не найден в файле %s.xml !!!',
-            [Number, 256 * r[3] + r[4], Option.FileMask]));
+            'Раздел #%d не найден в файле %s.xml !!!',
+            [256 * r[3] + r[4], Option.FileMask]));
           exit;
         end;
 
-        s := Format('PP #%d Раздел #%d Состояние >>',
-          [Number, 256 * r[3] + r[4]]);
+        s := s + Format('Раздел #%d Состояние >>',
+          [256 * r[3] + r[4]]);
 
         for i := 1 to r[5] do
         begin
@@ -1713,8 +1690,8 @@ begin
         if (r[3] = 0) and (r[4] = 0) and (r[5] = 0) and (r[6] = 0) then
           exit;
 
-        s := Format('PP #%d СОБЫТИЕ #%d >> %s #%d ',
-          [Number, 256 * r[3] + r[4], Event[r[6]], r[6]]);
+        s := s + Format('СОБЫТИЕ #%d.%d >> %s ',
+          [256 * r[3] + r[4], r[6], Event[r[6]]]);
 
         Init(mes);
         mes.SysDevice := 0;
@@ -1738,10 +1715,9 @@ begin
               end
               else
               begin
-                Log(Format(
-                  'PP #%d Пользователь %d не найден в файле %s.xml !!!',
-                  [Number, 256 * r[i + 2] + r[i + 3],
-                  Option.FileMask]));
+                Log(s + Format(
+                  'Пользователь #%d не найден в файле %s.xml !!!',
+                  [256 * r[i + 2] + r[i + 3], Option.FileMask]));
               end;
               Inc(i, 4);
             end;
@@ -1764,10 +1740,9 @@ begin
               end
               else
               begin
-                Log(Format(
-                  'PP #%d Раздел %d не найден в файле %s.xml !!!',
-                  [Number, 256 * r[i + 2] + r[i + 3],
-                  Option.FileMask]));
+                Log(s + Format(
+                  'Раздел #%d не найден в файле %s.xml !!!',
+                  [256 * r[i + 2] + r[i + 3], Option.FileMask]));
               end;
 
               {
@@ -1792,19 +1767,18 @@ begin
                 mes.BigDevice := Child.Bigdevice;
                 mes.SmallDevice := Child.Smalldevice;
                 s := s + Format(' Зона #%d', [256 * r[i + 2] + r[i + 3]]);
-                if (mes.SmallDevice = 0) and (Child.ZnType in [3..5, 8]) then
+                if (mes.SmallDevice = 0) and (Child.ZnType in [3, 8]) then
                   mes.TypeDevice := TYPEDEVICE_PULT
-                else if (mes.SmallDevice <> 0) and (Child.ZnType in [3..5, 8]) then
+                else if (mes.SmallDevice <> 0) and (Child.ZnType in [3, 8]) then
                   mes.TypeDevice := TYPEDEVICE_DEVICE
                 else
                   mes.TypeDevice := TYPEDEVICE_ZONE;
               end
               else
               begin
-                Log(Format(
-                  'PP #%d Зона %d не найдена в файле %s.xml !!!',
-                  [Number, 256 * r[i + 2] + r[i + 3],
-                  Option.FileMask]));
+                Log(s + Format(
+                  'Зона #%d не найдена в файле %s.xml !!!',
+                  [256 * r[i + 2] + r[i + 3], Option.FileMask]));
               end;
               Inc(i, 4);
             end;
@@ -1822,10 +1796,9 @@ begin
               end
               else
               begin
-                Log(Format(
-                  'PP #%d Реле %d не найдено в файле %s.xml !!!',
-                  [Number, 256 * r[i + 2] + r[i + 3],
-                  Option.FileMask]));
+                Log(s + Format(
+                  'Реле #%d не найдено в файле %s.xml !!!',
+                  [256 * r[i + 2] + r[i + 3], Option.FileMask]));
               end;
               Inc(i, 4);
             end;
@@ -1845,10 +1818,9 @@ begin
               end
               else
               begin
-                Log(Format(
-                  'PP #%d Реле %d не найдено в файле %s.xml !!!',
-                  [Number, 256 * r[i + 2] + r[i + 3],
-                  Option.FileMask]));
+                Log(s + Format(
+                  'Реле %d не найдено в файле %s.xml !!!',
+                  [Number, 256 * r[i + 2] + r[i + 3], Option.FileMask]));
 
               end;
               Inc(i, 4);
@@ -1857,13 +1829,13 @@ begin
             11:
             begin
 
-              try
+              try  //???
                 if (r[i + 5] = 0) or (r[i + 6] = 0) then
                   mes.SendTime := 0
                 else
                   mes.SendTime :=
                     EncodeDateTime(2000 + (r[i + 7] mod 100),
-                    r[i + 6] mod 13, r[i + 5] mod 31, r[i + 2] mod
+                    r[i + 6] mod 13, r[i + 5] mod 32, r[i + 2] mod
                     24, r[i + 3] mod 60, r[i + 4] mod 60, 0);
                 s := s + Format(' Время: %s', [DateTimeToStr(mes.SendTime)]);
               except
@@ -1892,7 +1864,7 @@ begin
           Log(s);
         end
         else
-          Log(s + '. Не определен объект в ответе от С2000-ПП !!!');
+          Log(s + 'В ответе не определен объект !!!');
 
         if r[6] in [250, 251] then
           StateRequest := 500;
@@ -1940,6 +1912,9 @@ end;
 (*      KSBMES     *)
 (* --------------- *)
 procedure Send(mes: KSBMES; str: PChar);
+const
+  max_str_len = 100;
+
 var
   s: string;
 
@@ -1954,7 +1929,9 @@ begin
     mes.NetDevice, mes.BigDevice, mes.SmallDevice, mes.Mode, mes.Partion,
     mes.Level, mes.User, mes.Num, mes.NumCard, mes.Monitor, mes.Camera,
     mes.Proga, mes.NumDevice]);
-  if mes.Size > 0 then
+  if (mes.Size > max_str_len) then
+    s := s + 'Внимание!!! Длина строки более 1000'
+  else if (mes.Size > 0) then
     s := s + Format(' str(%d)=%s', [mes.Size, Bin2Simbol(str, mes.Size)]);
   Log(s);
 end;
@@ -1978,7 +1955,7 @@ begin
 
   if (mes.Proga <> KsbAppType) and (mes.NetDevice = ModuleNetDevice) then
     case mes.Code of
-      CHECK_LIVE_PROGRAM,
+      //CHECK_LIVE_PROGRAM,
       KILL_PROGRAM,
       EXIT_PROGRAM,
       BASE_ROSTEK_MSG..(BASE_ROSTEK_MSG + 999):
@@ -2016,7 +1993,7 @@ begin
         Send(mes);
 
         Log(
-          Format('PP #%d Состояние >> %s',
+          Format('PP#%d Состояние >> %s',
           [Dev.Number, OrionState[Ord(Dev.Connected)]])
           );
 
@@ -2026,7 +2003,7 @@ begin
 
     ZONE_DISARM_MSG:
     begin
-      s := Format('Снять шлейф #%d/%d',
+      s := Format('Снять шлейф Big=%d Small=%d.',
         [mes.BigDevice, mes.SmallDevice]);
 
       Dev := FindDevWithPultid(mes.BigDevice, ZONE, mes.SmallDevice);
@@ -2037,17 +2014,17 @@ begin
         begin
           Dev.AddCmd(DOP_CMD_ZONE_DISARM,
             TOrionObj(Dev.ChildsObj.Items[Param]).Number);
-          s := s + Format('-> PP #%d Снять шлейф #%d',
+          s := s + Format(' -> найдено оборудование: PP#%d шлейф #%d',
             [Dev.Number, TOrionObj(Dev.ChildsObj.Items[Param]).Number]);
         end;
       end
       else
-        s := s + '. Шлейф не найден!'
+        s := s + '. Шлейф не найден!';
     end;
 
     ZONE_ARM_MSG:
     begin
-      s := Format('Взять шлейф #%d/%d',
+      s := Format('Взять шлейф Big=%d Small=%d.',
         [mes.BigDevice, mes.SmallDevice]);
       Dev := FindDevWithPultid(mes.BigDevice, ZONE, mes.SmallDevice);
       if Dev <> nil then
@@ -2057,17 +2034,17 @@ begin
         begin
           Dev.AddCmd(DOP_CMD_ZONE_ARM,
             TOrionObj(Dev.ChildsObj.Items[Param]).Number);
-          s := s + Format('-> PP #%d Взять шлейф #%d',
+          s := s + Format(' -> найдено оборудование: PP#%d шлейф #%d',
             [Dev.Number, TOrionObj(Dev.ChildsObj.Items[Param]).Number]);
         end;
       end
       else
-        s := s + '. Шлейф не найден!'
+        s := s + '. Шлейф не найден!';
     end;
 
     PART_DISARM_MSG:
     begin
-      s := Format('Снять раздел #%d/%d',
+      s := Format('Снять раздел Big=%d Small=%d.',
         [mes.BigDevice, mes.SmallDevice]);
       Dev := FindDevWithPultid(mes.BigDevice, PART, mes.SmallDevice);
       if Dev <> nil then
@@ -2077,17 +2054,17 @@ begin
         begin
           Dev.AddCmd(DOP_CMD_PART_DISARM,
             TOrionObj(Dev.ChildsObj.Items[Param]).Number);
-          s := s + Format('-> PP #%d Снять раздел #%d',
+          s := s + Format(' -> найден элемент: PP#%d раздел #%d',
             [Dev.Number, TOrionObj(Dev.ChildsObj.Items[Param]).Number]);
         end;
       end
       else
-        s := s + '. Раздел не найден!'
+        s := s + '. Раздел не найден!';
     end;
 
     PART_ARM_MSG:
     begin
-      s := Format('Взять раздел #%d/%d',
+      s := Format('Взять раздел Big=%d Small=%d.',
         [mes.BigDevice, mes.SmallDevice]);
       Dev := FindDevWithPultid(mes.BigDevice, PART, mes.SmallDevice);
       if Dev <> nil then
@@ -2097,17 +2074,17 @@ begin
         begin
           Dev.AddCmd(DOP_CMD_PART_ARM,
             TOrionObj(Dev.ChildsObj.Items[Param]).Number);
-          s := s + Format('-> PP #%d Взять раздел #%d',
+          s := s + Format(' -> найден элемент: PP#%d раздел #%d',
             [Dev.Number, TOrionObj(Dev.ChildsObj.Items[Param]).Number]);
         end;
       end
       else
-        s := s + '. Раздел не найден!'
+        s := s + '. Раздел не найден!';
     end;
 
     RELAY_OFF_MSG:
     begin
-      s := Format('Выключить реле #%d/%d',
+      s := Format('Выключить реле Big=%d Small=%d.',
         [mes.BigDevice, mes.SmallDevice]);
       Dev := FindDevWithPultid(mes.BigDevice, OUTKEY, mes.SmallDevice);
       if Dev <> nil then
@@ -2117,17 +2094,17 @@ begin
         begin
           Dev.AddCmd(DOP_CMD_RELAY_OFF,
             TOrionObj(Dev.ChildsObj.Items[Param]).Number);
-          s := s + Format('-> PP #%d Выключить реле #%d',
+          s := s + Format(' -> найдено оборудование: PP#%d реле #%d',
             [Dev.Number, TOrionObj(Dev.ChildsObj.Items[Param]).Number]);
         end;
       end
       else
-        s := s + '. Реле не найдено!'
+        s := s + '. Реле не найдено!';
     end;
 
     RELAY_ON_MSG:
     begin
-      s := Format('Включить реле #%d/%d',
+      s := Format('Включить реле Big=%d Small=%d.',
         [mes.BigDevice, mes.SmallDevice]);
       Dev := FindDevWithPultid(mes.BigDevice, OUTKEY, mes.SmallDevice);
       if Dev <> nil then
@@ -2137,12 +2114,12 @@ begin
         begin
           Dev.AddCmd(DOP_CMD_RELAY_ON,
             TOrionObj(Dev.ChildsObj.Items[Param]).Number);
-          s := s + Format('PP #%d Включить реле #%d',
+          s := s + Format(' -> найдено оборудование: PP#%d реле #%d',
             [Dev.Number, TOrionObj(Dev.ChildsObj.Items[Param]).Number]);
         end;
       end
       else
-        s := s + '. Реле не найдено!'
+        s := s + '. Реле не найдено!';
     end;
 
   end;
@@ -2154,7 +2131,7 @@ begin
     mes.NumCard, mes.Monitor, mes.Camera, mes.Proga, mes.NumDevice]);
   if mes.Size > 0 then
     s1 := s1 + Format(' str(%d)=%s', [mes.Size, str]);
-  Log('READ: ' + s1);
+  Log(s1);
 
   case mes.Code of
     BASE_ROSTEK_MSG..BASE_ROSTEK_MSG + 999:
@@ -2208,6 +2185,8 @@ end;
 procedure TaMain.FormTimerTimer(Sender: TObject);
 begin
   SetIndicator;
+  LiveCount[1] := 0;
+  OutputLog;
 end;
 
 procedure TaMain.MenuItem1Click(Sender: TObject);
@@ -2328,26 +2307,32 @@ end;
 
 function ExistDebugKey(sub: string): boolean;
 var
-  p1: word;
+  pz: word;
 
 begin
   Result := False;
 
   with Option do
   begin
-    p1 := pos(sub, Debug);
-    if p1 = 0 then
+    pz := pos(sub, Debug);
+    if pz <= 0 then
       exit;
-    if p1 > 1 then
-      if not (Debug[p1 - 1] in [' ', ';', ',', '.']) then
+
+    {пропуск параметра с позицией=1}
+    if (pz > 1) then
+      {проверка отсутствия хлама перед параметром}
+      if not (Debug[pz - 1] in [' ', ';', ',', '.']) then
         exit;
-    if (p1 + Length(sub) - 1) < Length(Debug) then
-      if not (Debug[p1 + Length(sub)] in [' ', ';', ',', '.']) then
+    {не последний параметр}
+    if (pz + Length(sub) - 1) < Length(Debug) then
+      {проверка отсутствия хлама после параметра}
+      if not (Debug[pz + Length(sub)] in [' ', ';', ',', '.']) then
         exit;
   end;
 
   Result := True;
 end;
+
 
 function ArrayToStr(Ar: array of byte; Count: byte): string;
 var
@@ -2357,6 +2342,7 @@ begin
   for i := 1 to Count do
     Result := Result + IntToHex(Ar[i - 1], 2);
 end;
+
 
 procedure WriteLog(str: string);
 var
@@ -2394,7 +2380,7 @@ begin
       Append(tf)
     else
       rewrite(tf);
-    Writeln(tf, DateTimeToStr(Now) + ' ' + str);
+    Writeln(tf, str);
     Flush(tf);
   finally
     CloseFile(tf);
@@ -2402,25 +2388,64 @@ begin
 
 end;
 
+
 procedure Log(str: string);
+var
+  s: string;
+  AYear, AMonth, ADay, AHour, AMinute, ASecond, AMilliSecond: word;
+
 begin
-  if Option.LogFile then
-    WriteLog(str);
+  DecodeDateTime(now, AYear, AMonth, ADay, AHour, AMinute, ASecond, AMilliSecond);
 
-  if Option.LogForm then
-    with aMain.Memo1.Lines do
+  s := Format('%.2u.%.2u.%.4u %.2u:%.2u:%.2u:%.3u',
+    [ADay, AMonth, AYear, AHour, AMinute, ASecond, AMilliSecond]);
+
+  // if ls_log <> nil then
+  s := s + ' (' + ls_log.Count.ToString + ')';
+  cs_log.Acquire;
+  try
+    ls_log.Add(s + ' ' + str);
+  finally
+    cs_log.Release;
+  end;
+end;
+
+
+procedure OutputLog;
+var
+  i: word;
+
+begin
+  cs_log.Acquire;
+  try
+    i := 1000;
+    while (ls_log.Count > 0) and (i > 0) do
     begin
-      Add(DateTimeToStr(Now) + ' ' + str);
+      if i > 0 then
+        Dec(i);
+      WriteLog(ls_log.Strings[0]);
 
-      while Count > 1000 do
-      begin
-        BeginUpdate;
-        Delete(0);
-        EndUpdate;
-      end;
+      if Option.LogForm then
+        with aMain.Memo1.Lines do
+        begin
+          Add(ls_log.Strings[0]);
+          if Count > 1000 then
+          begin
+            BeginUpdate;
+            Clear;
+            EndUpdate;
+          end;
+        end;
+
+      ls_log.Delete(0);
     end;
 
+  finally
+    cs_log.Release;
+  end;
+
 end;
+
 
 function GetVersion(FileName: string): string;
 var
@@ -2600,7 +2625,7 @@ initialization
   Event[139] := 'Неудачный пуск ПТ';
   Event[140] := 'Ручной тест';
   Event[141] := 'Задержка пуска АУП';
-  Event[142] := 'Автоматика выключена';
+  Event[142] := 'Автоматика АУП выключена';
   Event[143] := 'Отмена пуска АУП';
   Event[144] := 'Тушение';
   Event[145] := 'Аварийный пуск АУП';
@@ -2738,7 +2763,14 @@ initialization
 
   RelayState[0] := 'Выкл.';
   RelayState[1] := 'Вкл.';
-  OrionState[0] := 'С2000-ПП не доступен';
-  OrionState[1] := 'С2000-ПП доступен';
+  OrionState[0] := 'Связь потеряна';
+  OrionState[1] := 'Связь установлена';
+
+  ls_log := TStringList.Create;
+  cs_log := TCriticalSection.Create;
+
+finalization
+  cs_log.Free;
+  ls_log.Free;
 
 end.

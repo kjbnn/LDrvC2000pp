@@ -1,10 +1,4 @@
 program DrvC2000pp;
-{
-ModuleNetDevice, ModuleBigDevice, Send (4)
-внеш stub (4)
-Логироание из потоков (4)
-}
-
 {$mode objfpc}{$H+}
 uses
 {$ifdef unix}

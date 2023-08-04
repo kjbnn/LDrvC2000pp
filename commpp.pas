@@ -5,28 +5,21 @@ unit commPP;
 interface
 
 uses
-  Classes, synaser, Graphics,
-  mMain;
+  Classes, synaser, Graphics, mMain, SysUtils;
 
 type
+  TProcess = function(IsWrite: boolean): boolean of object;
 
-  TProcessProc = function(IsWrite: boolean): boolean of object;
-
-  { TComPort }
-  TComPort = class(TThread)
+  { TPort }
+  TPort = class(TThread)
   protected
     ser: TBlockSerial;
     procedure Execute; override;
-  private
-    strLog: string;
-    procedure LocalLog;
-    procedure ThreadLog(s: string);
-    procedure DrawRead;
-    procedure DrawWrite;
   public
-    ProcessProc: TProcessProc;
-    Serial, Baud: string;
+    ProcessProc: TProcess;
+    Port, Baud, Bits, Stop: string;
     Owner: pointer;
+    procedure DumpExceptionCallStack(E: Exception);
   end;
 
 function GetCRC16(Buffer: array of byte; Number: byte): word;
@@ -36,18 +29,8 @@ function CRC16(Buffer: array of byte; Number: byte): word;
 implementation
 
 uses
-  SysUtils, Forms;
-
-procedure TComPort.LocalLog;
-begin
-  Log(strLog);
-end;
-
-procedure TComPort.ThreadLog(s: string);
-begin
-  strLog := s;
-  Synchronize(@LocalLog);
-end;
+  Forms,
+  mCheckDrv;
 
 function ArrayToStr(Ar: array of byte; Count: byte): string;
 var
@@ -58,113 +41,127 @@ begin
     Result := Result + IntToHex(Ar[i - 1], 2);
 end;
 
-procedure TComPort.DrawWrite;
-begin
-  if TLine(Owner).CurDev <> nil then
-    with TLine(Owner).CurDev do
-      try
-        if GraphicScannerHandle > 0 then
-          DrawGraphicScanner(w, wCount, clRed);
-        if ExistDebugKey('Port') then
-          ThreadLog('W> ' + ArrayToStr(w, wCount));
-      except
-        Log('WThread.DrawWrite');
-      end;
-end;
-
-procedure TComPort.DrawRead;
-begin
-  if TLine(Owner).CurDev <> nil then
-    with TLine(Owner).CurDev do
-      try
-        if GraphicScannerHandle > 0 then
-          DrawGraphicScanner(r, rCount, clLime);
-        if ExistDebugKey('Port') then
-          ThreadLog('R> ' + ArrayToStr(r, rCount));
-      except
-        Log('RThread.DrawReceive');
-      end;
-end;
-
-procedure TComPort.Execute;
+procedure TPort.Execute;
 var
   waiting: integer;
   TotalWaiting: word;
   crc: word;
+  s: string;
 
 begin
 
-  try
-    ser := TBlockSerial.Create;
-    ser.RaiseExcept := True;
-    ser.LinuxLock := False;
-    ser.Connect(Serial);
-    ser.Config(StrToInt(Baud), 8, 'N', 0, False, False);
-    strLog := Format('Последовательный порт %s открыт',
-      [Serial]);
-    ThreadLog(strLog);
+  while (not Terminated) do
+    try
+      ser := TBlockSerial.Create;
+      ser.RaiseExcept := True;
+      ser.LinuxLock := False;
+      Log(Format('Попытка открыть порт %s', [Port]));
+      ser.Connect(Port);
+      ser.Config(StrToInt(Baud), StrToInt(Bits), 'N', StrToInt(Stop), False, False);
+      Log(Format('Порт %s открыт', [Port]));
 
-    with Tline(Owner) do
-      while (not Terminated) do
-      begin
-        {отправка}
-        if not ProcessProc(True) then
+      with Tline(Owner) do
+        while (not Terminated) do
         begin
-          strLog := Format('ProcessProc: False, Serial: %s, ', [Serial]);
-          if CurDev<>Nil then
-            strLog := strLog + Format('CurDev.Op: %d, CurDev.ObjNum: %d', [ ord(CurDev.Op), CurDev.CmdObj ])
+
+          {отправка}
+          sleep(20);
+
+          if not ProcessProc(True) then
+          begin  {???}
+            s := Format('Ошибка ProcessProc(True), Serial: %s, ', [Port]);
+
+            if CurDev <> nil then
+              s := s + Format('CurDev.Op: %d, CurDev.ObjNum: %d',
+                [Ord(CurDev.Op), CurDev.CmdObj])
+            else
+              s := s + 'CurDev is nil';
+            Log(s);
+            sleep(5000);
+            continue;
+          end;
+
+          if TLine(Owner).CurDev <> nil then
+            with TLine(Owner).CurDev do
+              if ExistDebugKey('debug_log') then
+                Log(Format('%s W> %s', [Port, ArrayToStr(w, wCount)]));
+
+          ser.SendBuffer(@CurDev.w, CurDev.wCount);
+          LiveCount[2] := 0;
+
+
+          {прием}
+          FillChar(CurDev.r, 255, 0);
+          CurDev.rCount := 0;
+          TotalWaiting := 0;
+          waiting := 0;
+
+          s := 'waiting:';
+          repeat
+            waiting := ser.WaitingData;
+            if (CurDev.rCount > 0) and (waiting = 0) then
+              break;
+            s := s + Format(' %d', [waiting]);
+            ser.RecvBuffer(@CurDev.r[CurDev.rCount], waiting);
+            CurDev.rCount := CurDev.rCount + waiting;
+            Inc(TotalWaiting);
+            sleep(5);
+          until ((CurDev.rCount > 0) and (waiting = 0)) or (TotalWaiting >= 100);
+
+          if TLine(Owner).CurDev <> nil then
+            with TLine(Owner).CurDev do
+              if ExistDebugKey('debug_log') then
+                Log(Format('%s R> %s %s', [Port, ArrayToStr(r, rCount), s]));
+
+          if (CurDev.rCount < 5) or (CurDev.w[0] <> CurDev.r[0]) or
+            (CurDev.w[1] <> (CurDev.r[1] and $7F)) then
+          begin
+            CurDev.Connected := False;
+            continue;
+          end;
+          //raise exception.create(Format('Ошибка в работе порта %s', [Port]));
+
+          crc := CRC16(CurDev.r, CurDev.rCount - 2);
+          if (CurDev.r[CurDev.rCount - 2] = hi(crc)) and
+            (CurDev.r[CurDev.rCount - 1] = lo(crc)) then
+          begin
+            CurDev.Connected := True;
+            ProcessProc(False); {??? try}
+          end
           else
-            strLog := strLog + 'CurDev: Nil';
-          ThreadLog(strLog);
-          break;
-        end;
-        ser.SendBuffer(@CurDev.w, CurDev.wCount);
-        Synchronize(@DrawWrite);
-
-        {прием}
-        FillChar(CurDev.r, 255, 0);
-        CurDev.rCount := 0;
-        TotalWaiting := 0;
-        waiting := 0;
-        sleep(1);
-        repeat
-          waiting := ser.WaitingData;
-          if (CurDev.rCount > 0) and (waiting = 0) then
-            break;
-          //ThreadLog( Format('waiting=%d', [waiting]) );
-          ser.RecvBuffer(@CurDev.r[CurDev.rCount], waiting);
-          CurDev.rCount := CurDev.rCount + waiting;
-          Inc(TotalWaiting);
-          sleep(10);
-        until ((CurDev.rCount > 0) and (waiting = 0)) or (TotalWaiting >= 50);
-        Synchronize(@DrawRead);
-
-        CurDev.Connected := False;
-        if (CurDev.rCount < 5) or (CurDev.w[0] <> CurDev.r[0]) or (CurDev.w[1] <> (CurDev.r[1] and $7F)) then
-          continue;
-
-        crc := CRC16(CurDev.r, CurDev.rCount - 2);
-        if (CurDev.r[CurDev.rCount - 2] = hi(crc)) and (CurDev.r[CurDev.rCount - 1] = lo(crc)) then
-        begin
-          CurDev.Connected := True;
-          ProcessProc(False);
+            CurDev.Connected := False;
         end;
 
+    except
+      on E: Exception do
+      begin
+        if ExistDebugKey('debug_log') then
+          DumpExceptionCallStack(E);
+
+        if ser.LastError <> 0 then
+          Log(Format('Порт %s в ошибке #%d', [Port, ser.LastError]));
+
+        with Tline(Owner) do
+          if CurDev <> nil then
+          begin
+            CurDev.FNoAnswer := PP_DISCONNECTED;
+            CurDev.Connected := False;
+          end;
+
+        try
+          Log(Format('Порт %s закрыт', [Port]));
+          //ser.Free; // вызывает exception
+        finally
+          sleep(20000);
+        end;
       end;
 
-  finally
-    Terminate;
-    strLog := Format('Последовательный порт %s закрыт',
-      [Serial]);
-    if ser.LastError <> 0 then
-      strLog := strLog + Format(', ошибка %d', [ser.LastError]);
-    ThreadLog(strLog);
-    try
-      ser.Free;
-    finally
-      aMain.Close;
     end;
-  end;
+
+  Log(Format('Порт %s закрыт по сигналу завершения программы',
+    [Port]));
+  ser.Free;
+  aMain.Close;
 
 end;
 
@@ -267,5 +264,29 @@ begin
 end;
 
 
+procedure TPort.DumpExceptionCallStack(E: Exception);
+var
+  I: integer;
+  Frames: PPointer;
+  s: string;
+  //f: TextFile;
+begin
+  {
+  AssignFile(f, '.\stack.log');
+  Rewrite(f);
+  DumpExceptionBackTrace(f);
+  CloseFile(f);
+  }
+  s := 'Program exception! ' + LineEnding + 'Stacktrace:' + LineEnding;
+  if E <> nil then
+  begin
+    s := s + 'Exception class: ' + E.ClassName + 'Message: ' + E.Message + LineEnding;
+  end;
+  s := s + BackTraceStrFunc(ExceptAddr);
+  Log(s);
+  Frames := ExceptFrames;
+  for I := 0 to ExceptFrameCount - 1 do
+    Log(BackTraceStrFunc(Frames[I]));
+end;
 
 end.

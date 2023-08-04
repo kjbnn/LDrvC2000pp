@@ -1,7 +1,7 @@
 object aMain: TaMain
-  Left = 372
+  Left = 373
   Height = 288
-  Top = 115
+  Top = 123
   Width = 492
   ClientHeight = 268
   ClientWidth = 492
@@ -9,7 +9,7 @@ object aMain: TaMain
   OnClose = FormClose
   OnConstrainedResize = FormConstrainedResize
   OnCreate = FormCreate
-  LCLVersion = '2.0.8.0'
+  LCLVersion = '2.2.6.0'
   Visible = True
   object Indicator: TShape
     Left = 208
@@ -70,8 +70,8 @@ object aMain: TaMain
     Value = 1
   end
   object MainMenu1: TMainMenu
-    left = 24
-    top = 8
+    Left = 24
+    Top = 8
     object N4: TMenuItem
       Caption = 'Файл'
       object N1: TMenuItem
@@ -127,14 +127,14 @@ object aMain: TaMain
   end
   object TimerVisible: TTimer
     OnTimer = TimerVisibleTimer
-    left = 160
-    top = 8
+    Left = 160
+    Top = 40
   end
   object FormTimer: TTimer
     Enabled = False
-    Interval = 100
+    Interval = 50
     OnTimer = FormTimerTimer
-    left = 88
-    top = 80
+    Left = 88
+    Top = 80
   end
 end
