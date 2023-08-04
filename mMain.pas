@@ -300,11 +300,12 @@ begin
   TimerVisible.Enabled := True;
 
   try
+    FormTimer.Enabled := True;
+    Log('Старт модуля (вер. ' + GetVersion(Application.ExeName) + ')');
     Log('Чтение файла Setting.ini...');
     ReadParam;
     Log('Файл Setting.ini прочитан');
 
-    Log('Старт модуля (вер. ' + GetVersion(Application.ExeName) + ')');
     StatusBar1.Panels.Items[0].Text := ' Старт: ' + DateTimeToStr(Now);
     StatusBar1.Panels.Items[2].Text :=
       Format(' Net=%d Big=%d, ', [ModuleNetDevice, ModuleBigDevice]) +
@@ -325,12 +326,10 @@ begin
         'Модуль загружен в режиме без связи с C2000-ПП !!!',
         mtWarning, [mbOK], 0, mbOK);
 
-    FormTimer.Enabled := True;
-
   except
     On E: Exception do
     begin
-      Log(Format('Завершение работы с ошибкой #%s',
+      Log(Format('Завершение работы с ошибкой: %s',
         [E.Message]));
       Close;
     end;
