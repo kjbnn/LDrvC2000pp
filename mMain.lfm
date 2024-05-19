@@ -1,15 +1,15 @@
 object aMain: TaMain
-  Left = 373
+  Left = 417
   Height = 288
-  Top = 123
+  Top = 152
   Width = 492
-  ClientHeight = 268
+  ClientHeight = 288
   ClientWidth = 492
   Menu = MainMenu1
   OnClose = FormClose
   OnConstrainedResize = FormConstrainedResize
   OnCreate = FormCreate
-  LCLVersion = '2.2.6.0'
+  LCLVersion = '3.2.0.0'
   Visible = True
   object Indicator: TShape
     Left = 208
@@ -22,7 +22,7 @@ object aMain: TaMain
   object StatusBar1: TStatusBar
     Left = 0
     Height = 23
-    Top = 245
+    Top = 265
     Width = 492
     Panels = <    
       item
@@ -38,7 +38,7 @@ object aMain: TaMain
   end
   object Memo1: TMemo
     Left = 0
-    Height = 245
+    Height = 265
     Top = 0
     Width = 492
     Align = alClient

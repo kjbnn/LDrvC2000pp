@@ -17,7 +17,7 @@ type
   end;
 
 const
-  LiveTime = 60;
+  LiveTime = 120;  {kostiv 60}
 
 var
   LiveCount: array[1..2] of word; {FormTimer}

@@ -2002,7 +2002,7 @@ begin
 
     ZONE_DISARM_MSG:
     begin
-      s := Format('Снять шлейф Big=%d Small=%d.',
+      s := Format('Снять шлейф Big=%d Small=%d',
         [mes.BigDevice, mes.SmallDevice]);
 
       Dev := FindDevWithPultid(mes.BigDevice, ZONE, mes.SmallDevice);
@@ -2023,7 +2023,7 @@ begin
 
     ZONE_ARM_MSG:
     begin
-      s := Format('Взять шлейф Big=%d Small=%d.',
+      s := Format('Взять шлейф Big=%d Small=%d',
         [mes.BigDevice, mes.SmallDevice]);
       Dev := FindDevWithPultid(mes.BigDevice, ZONE, mes.SmallDevice);
       if Dev <> nil then
@@ -2043,7 +2043,7 @@ begin
 
     PART_DISARM_MSG:
     begin
-      s := Format('Снять раздел Big=%d Small=%d.',
+      s := Format('Снять раздел Big=%d Small=%d',
         [mes.BigDevice, mes.SmallDevice]);
       Dev := FindDevWithPultid(mes.BigDevice, PART, mes.SmallDevice);
       if Dev <> nil then
@@ -2063,7 +2063,7 @@ begin
 
     PART_ARM_MSG:
     begin
-      s := Format('Взять раздел Big=%d Small=%d.',
+      s := Format('Взять раздел Big=%d Small=%d',
         [mes.BigDevice, mes.SmallDevice]);
       Dev := FindDevWithPultid(mes.BigDevice, PART, mes.SmallDevice);
       if Dev <> nil then
@@ -2083,7 +2083,7 @@ begin
 
     RELAY_OFF_MSG:
     begin
-      s := Format('Выключить реле Big=%d Small=%d.',
+      s := Format('Выключить реле Big=%d Small=%d',
         [mes.BigDevice, mes.SmallDevice]);
       Dev := FindDevWithPultid(mes.BigDevice, OUTKEY, mes.SmallDevice);
       if Dev <> nil then
@@ -2103,7 +2103,7 @@ begin
 
     RELAY_ON_MSG:
     begin
-      s := Format('Включить реле Big=%d Small=%d.',
+      s := Format('Включить реле Big=%d Small=%d',
         [mes.BigDevice, mes.SmallDevice]);
       Dev := FindDevWithPultid(mes.BigDevice, OUTKEY, mes.SmallDevice);
       if Dev <> nil then
@@ -2523,11 +2523,22 @@ procedure _AppKsbConsider(strmes: string);
 var
   mes: KSBMES;
   tail: string;
+  step: byte;
+
 begin
   init(mes);
   tail := '';
-  Unpack(strmes, mes, tail);
-  Consider(mes, tail);
+  step:= 0;
+  try
+    Unpack(strmes, mes, tail);
+    step:= 1;
+    Consider(mes, tail);
+  except
+    if step=0 then
+      Log('Ошибка распаковки KSBMES сообщения !')
+    else
+      Log('Ошибка обработки KSBMES сообщения !');
+  end;
 end;
 
 

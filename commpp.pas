@@ -139,7 +139,8 @@ begin
           DumpExceptionCallStack(E);
 
         if ser.LastError <> 0 then
-          Log(Format('Порт %s в ошибке #%d', [Port, ser.LastError]));
+          Log(Format('Порт %s в ошибке #%d -> %s',
+            [Port, ser.LastError, ser.GetErrorDesc(ser.LastError)]));
 
         with Tline(Owner) do
           if CurDev <> nil then
@@ -149,8 +150,12 @@ begin
           end;
 
         try
-          Log(Format('Порт %s закрыт', [Port]));
-          //ser.Free; // вызывает exception
+          if not ser.InstanceActive then
+          begin
+            Log(Format('Порт %s закрыывается..', [Port]));
+            ser.Free; // вызывает exception при InstanceActive = True
+            Log(Format('Порт %s закрыт', [Port]));
+          end;
         finally
           sleep(20000);
         end;
