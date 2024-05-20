@@ -6,13 +6,13 @@ uses
   SysUtils, Variants, Classes,
   Graphics, Controls, Forms,
   Dialogs, StdCtrls, Buttons,
-  ExtCtrls, ComCtrls, Menus, Spin, UniqueInstance, FileUtil,
+  ExtCtrls, ComCtrls, Menus, Spin, FileUtil,
   laz2_DOM,
   laz2_XMLRead, FileInfo, syncobjs,
   cKsbmes;
 
 const
-  MAX_LOG_SIZE = 3e10;
+  MAX_LOG_SIZE = 1e7;
 
   MB_BASE_ADR_ZONE = 40000;
   MB_BASE_ADR_OUTKEY = 10000;
@@ -220,7 +220,6 @@ type
     Indicator: TShape;
     FormTimer: TTimer;
     TimerVisible: TTimer;
-    UniqueInstance1: TUniqueInstance;
 
     procedure FormCreate(Sender: TObject);
     procedure FormClose(Sender: TObject; var CloseAction: TCloseAction);
@@ -240,8 +239,6 @@ type
     procedure N1Click(Sender: TObject);
     procedure IndicatorMouseMove(Sender: TObject);
     procedure TimerVisibleTimer(Sender: TObject);
-    procedure UniqueInstance1OtherInstance(Sender: TObject;
-      ParamCount: Integer; const Parameters: array of String);
   private
     XML: TXMLDocument;
     procedure ReadConfiguration;
@@ -1968,7 +1965,6 @@ begin
     exit;
 
   //parse
-
   SetLength(l, mes.Size);
   if mes.Size > 0 then
     Simbol2Bin(str, @l[0], mes.Size);
@@ -2307,11 +2303,6 @@ begin
   AppKsbTimer();
 end;
 
-procedure TaMain.UniqueInstance1OtherInstance(Sender: TObject;
-  ParamCount: Integer; const Parameters: array of String);
-begin
-
-end;
 
 function ExistDebugKey(sub: string): boolean;
 var
@@ -2355,7 +2346,7 @@ end;
 procedure WriteLog(str: string);
 var
   tf: TextFile;
-  FileName, OldFileName, CurDir, OldDir, s: string;
+  FileName, OldFileName, CurDir, s: string;
   AYear, AMonth, ADay, AHour, AMinute, ASecond, AMilliSecond: word;
   fSize: integer;
 
@@ -2371,12 +2362,7 @@ begin
       s := '_' + Format('%u%.2u%.2u_%.2u%.2u_%.2u%.3u',
         [AYear, AMonth, ADay, AHour, AMinute, ASecond, AMilliSecond]);
       OldFileName := Option.FileMask + s + '.log';
-
-      OldDir := CurDir + 'DrvC2000ppFiles\';
-      if not DirectoryExists(OldDir) then
-        CreateDir(OldDir);
-
-      if not RenameFile(CurDir + FileName, OldDir + OldFileName) then
+      if not RenameFile(CurDir + FileName, CurDir + OldFileName) then
         str := str + #13#10' Ошибка переименования файла (' +
           CurDir + FileName + '): ' + IntToStr(GetLastOSError);
     end;
