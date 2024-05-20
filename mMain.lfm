@@ -137,4 +137,9 @@ object aMain: TaMain
     Left = 88
     Top = 80
   end
+  object UniqueInstance1: TUniqueInstance
+    OnOtherInstance = UniqueInstance1OtherInstance
+    Left = 246
+    Top = 87
+  end
 end

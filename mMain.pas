@@ -6,7 +6,7 @@ uses
   SysUtils, Variants, Classes,
   Graphics, Controls, Forms,
   Dialogs, StdCtrls, Buttons,
-  ExtCtrls, ComCtrls, Menus, Spin, FileUtil,
+  ExtCtrls, ComCtrls, Menus, Spin, UniqueInstance, FileUtil,
   laz2_DOM,
   laz2_XMLRead, FileInfo, syncobjs,
   cKsbmes;
@@ -220,6 +220,7 @@ type
     Indicator: TShape;
     FormTimer: TTimer;
     TimerVisible: TTimer;
+    UniqueInstance1: TUniqueInstance;
 
     procedure FormCreate(Sender: TObject);
     procedure FormClose(Sender: TObject; var CloseAction: TCloseAction);
@@ -239,6 +240,8 @@ type
     procedure N1Click(Sender: TObject);
     procedure IndicatorMouseMove(Sender: TObject);
     procedure TimerVisibleTimer(Sender: TObject);
+    procedure UniqueInstance1OtherInstance(Sender: TObject;
+      ParamCount: Integer; const Parameters: array of String);
   private
     XML: TXMLDocument;
     procedure ReadConfiguration;
@@ -2302,6 +2305,12 @@ end;
 procedure TaMain.TimerVisibleTimer(Sender: TObject);
 begin
   AppKsbTimer();
+end;
+
+procedure TaMain.UniqueInstance1OtherInstance(Sender: TObject;
+  ParamCount: Integer; const Parameters: array of String);
+begin
+
 end;
 
 function ExistDebugKey(sub: string): boolean;
