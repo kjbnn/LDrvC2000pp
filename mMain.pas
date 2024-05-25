@@ -438,6 +438,7 @@ begin
   setkey('POS_WIDTH', Width);
   setkey('POS_HEIGHT', Height);
   Log('Останов модуля');
+  OutputLog;
   inherited;
 end;
 
@@ -1986,7 +1987,7 @@ end;
 
 procedure Consider(mes: KSBMES; str: string);
 var
-  s, s1: string;
+  s: string;
   i: word;
   l: TBytes;
   Dev: TDev;
@@ -1995,7 +1996,6 @@ var
 
 begin
   catch := False;
-
   if (mes.Proga <> KsbAppType) and (mes.NetDevice = ModuleNetDevice) then
     case mes.Code of
       //CHECK_LIVE_PROGRAM,
@@ -2004,7 +2004,6 @@ begin
       BASE_ROSTEK_MSG..(BASE_ROSTEK_MSG + 999):
         catch := True;
     end;
-
   if not catch then
     exit;
 
@@ -2013,6 +2012,16 @@ begin
   if mes.Size > 0 then
     Simbol2Bin(str, @l[0], mes.Size);
 
+  s := Format('READ: Code=%d Sys=%d Type=%d Net=%d Big=%d Small=%d ' +
+    'Mode=%d Part=%d Lev=%d Us=%d Card=%d Mon=%d Cam=%d Prog=%d NumDev=%d',
+    [mes.Code, mes.SysDevice, mes.TypeDevice, mes.NetDevice, mes.BigDevice,
+    mes.SmallDevice, mes.Mode, mes.Partion, mes.Level, mes.User,
+    mes.NumCard, mes.Monitor, mes.Camera, mes.Proga, mes.NumDevice]);
+  if mes.Size > 0 then
+    s := s + Format(' str(%d)=%s', [mes.Size, str]);
+  Log(s);
+
+  s:='';
   case mes.Code of
 
     GET_STATES_MSG:
@@ -2166,20 +2175,8 @@ begin
 
   end;
 
-  s1 := Format('READ: Code=%d Sys=%d Type=%d Net=%d Big=%d Small=%d ' +
-    'Mode=%d Part=%d Lev=%d Us=%d Card=%d Mon=%d Cam=%d Prog=%d NumDev=%d',
-    [mes.Code, mes.SysDevice, mes.TypeDevice, mes.NetDevice, mes.BigDevice,
-    mes.SmallDevice, mes.Mode, mes.Partion, mes.Level, mes.User,
-    mes.NumCard, mes.Monitor, mes.Camera, mes.Proga, mes.NumDevice]);
-  if mes.Size > 0 then
-    s1 := s1 + Format(' str(%d)=%s', [mes.Size, str]);
-  Log(s1);
-
-  case mes.Code of
-    BASE_ROSTEK_MSG..BASE_ROSTEK_MSG + 999:
-      Log('READ: Получена команда. ' + s);
-  end;
-
+  if s<>'' then
+    Log('READ: Получена команда: ' + s);
 end;
 
 procedure TaMain.N1Click(Sender: TObject);
