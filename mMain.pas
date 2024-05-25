@@ -294,7 +294,12 @@ const
   IndicatorSize = 15;
 
 var
-  i: byte;
+  i, i1, i2, i3: byte;
+  mes: KSBMES;
+  line: TLine;
+  dev: TDev;
+  Obj: TOrionObj;
+
 begin
   AppKsbInit(self);
   TimerVisible.Enabled := True;
@@ -315,9 +320,48 @@ begin
     ReadConfiguration;
     Log('Файл ' + Option.FileMask + '.xml прочитан');
 
+    Log('Инициализация состояний элементов');
+    for i1:=1 to Lines.Count do
+    begin
+      line:= Lines.Items[i1-1];
+      for i2:=1 to line.ChildsObj.Count do
+      begin
+        dev:= line.ChildsObj.Items[i2-1];
+        for i3:=1 to dev.ChildsObj.Count do //TOrionObj
+        begin
+          Obj:= dev.ChildsObj.Items[i3-1];
+          if (Obj.Kind = ZONE) and (Obj.ZnType in [1,2,4,5]) then
+          begin
+            Init(mes);
+            mes.NetDevice := ModuleNetDevice;
+            mes.BigDevice := Obj.Bigdevice;
+            mes.SmallDevice := Obj.Smalldevice;
+            mes.Level := 250;
+            mes.TypeDevice := TYPEDEVICE_ZONE;
+            mes.Code := STATEZONE_MSG;
+
+            if (Obj.ZnType = 3) then
+              if (mes.Smalldevice = 0) then
+              begin
+                mes.TypeDevice := TYPEDEVICE_PULT;
+                mes.Code := STATEPULT_MSG;
+              end
+              else
+              begin
+                mes.TypeDevice := TYPEDEVICE_DEVICE;
+                mes.Code := STATEDEVICE_MSG;
+              end;
+
+            Send(mes);
+          end;
+        end;
+      end;
+    end;
+    Log('Инициализация состояний элементов выполнена');
+
     if not ExistDebugKey('noport') then
     begin
-      Log('Инициализация опроса');
+      Log('Инициализация связи с C2000-ПП');
       for i := 1 to Lines.Count do
         (TLine(Lines.Items[i - 1]).Serial as TPort).Start;
     end
@@ -1614,21 +1658,21 @@ begin
                   2, 41, 45, 82, 165, 189,
                   190, 192, 194, 196, 198,
                   202, 205, 211, 212, 214,
-                  215, 222, 224, 225:
+                  215, 222, 224, 225, 250:
                     SyntNorma := False;
                 end;
               STATEDEVICE_MSG,
               STATEPULT_MSG:
                 case mes.Level of
                   2, 189, 190, 198,
-                  202, 215, 222:
+                  202, 215, 222, 250:
                     SyntNorma := False;
                 end;
               {
               STATEOUTKEY_MSG:
                 case mes.Level of
                   121, 122, 126, 189,
-                  190, 215, 222:
+                  190, 215, 222, 250:
                     SyntNorma:= False;
                 end;
               STATEPARTGROUP_MSG:;
