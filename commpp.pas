@@ -17,8 +17,9 @@ type
     procedure Execute; override;
   public
     ProcessProc: TProcess;
-    Port, Baud, Bits, Stop: string;
+    PortName, Baud, Bits, Stop: string;
     Owner: pointer;
+    LiveId: byte;
     procedure DumpExceptionCallStack(E: Exception);
   end;
 
@@ -30,7 +31,7 @@ implementation
 
 uses
   Forms,
-  mCheckDrv;
+  mCheckDrv, mLogging;
 
 function ArrayToStr(Ar: array of byte; Count: byte): string;
 var
@@ -52,24 +53,25 @@ begin
 
   while (not Terminated) do
     try
+      if length(Live)>0 then Live[LiveId] := 0;
       ser := TBlockSerial.Create;
       ser.RaiseExcept := True;
       ser.LinuxLock := False;
-      Log(Format('Попытка открыть порт %s', [Port]));
-      ser.Connect(Port);
+      Log(Format('Попытка открыть %s', [PortName]));
+      ser.Connect(PortName);
       ser.Config(StrToInt(Baud), StrToInt(Bits), 'N', StrToInt(Stop), False, False);
-      Log(Format('Порт %s открыт', [Port]));
+      Log(Format('%s открыт', [PortName]));
 
       with Tline(Owner) do
         while (not Terminated) do
         begin
-
           {отправка}
+          if length(Live)>0 then Live[LiveId] := 0;
           sleep(20);
 
           if not ProcessProc(True) then
           begin  {???}
-            s := Format('Ошибка ProcessProc(True), Serial: %s, ', [Port]);
+            s := Format('Ошибка ProcessProc(True), Serial: %s, ', [PortName]);
 
             if CurDev <> nil then
               s := s + Format('CurDev.Op: %d, CurDev.ObjNum: %d',
@@ -77,18 +79,16 @@ begin
             else
               s := s + 'CurDev is nil';
             Log(s);
-            sleep(5000);
+            sleep(3000);
             continue;
           end;
 
           if TLine(Owner).CurDev <> nil then
-            with TLine(Owner).CurDev do
-              if ExistDebugKey('debug_log') then
-                Log(Format('%s W> %s', [Port, ArrayToStr(w, wCount)]));
+          with TLine(Owner).CurDev do
+          if Option.Debug then
+            Log(Format('%s W> %s', [PortName, ArrayToStr(w, wCount)]));
 
           ser.SendBuffer(@CurDev.w, CurDev.wCount);
-          LiveCount[2] := 0;
-
 
           {прием}
           FillChar(CurDev.r, 255, 0);
@@ -109,9 +109,9 @@ begin
           until ((CurDev.rCount > 0) and (waiting = 0)) or (TotalWaiting >= 100);
 
           if TLine(Owner).CurDev <> nil then
-            with TLine(Owner).CurDev do
-              if ExistDebugKey('debug_log') then
-                Log(Format('%s R> %s %s', [Port, ArrayToStr(r, rCount), s]));
+          with TLine(Owner).CurDev do
+          if Option.Debug then
+            Log(Format('%s R> %s %s', [PortName, ArrayToStr(r, rCount), s]));
 
           if (CurDev.rCount < 5) or (CurDev.w[0] <> CurDev.r[0]) or
             (CurDev.w[1] <> (CurDev.r[1] and $7F)) then
@@ -119,7 +119,7 @@ begin
             CurDev.Connected := False;
             continue;
           end;
-          //raise exception.create(Format('Ошибка в работе порта %s', [Port]));
+          //raise exception.create(Format('Ошибка в работе %s', [Port]));
 
           crc := CRC16(CurDev.r, CurDev.rCount - 2);
           if (CurDev.r[CurDev.rCount - 2] = hi(crc)) and
@@ -135,12 +135,12 @@ begin
     except
       on E: Exception do
       begin
-        if ExistDebugKey('debug_log') then
+        if Option.Debug then
           DumpExceptionCallStack(E);
 
         if ser.LastError <> 0 then
-          Log(Format('Порт %s в ошибке #%d -> %s',
-            [Port, ser.LastError, ser.GetErrorDesc(ser.LastError)]));
+          Log(Format('%s в ошибке #%d -> %s',
+            [PortName, ser.LastError, ser.GetErrorDesc(ser.LastError)]));
 
         with Tline(Owner) do
           if CurDev <> nil then
@@ -149,25 +149,24 @@ begin
             CurDev.Connected := False;
           end;
 
+        Log(Format('%s закрывается..', [PortName]));
         try
-          if not ser.InstanceActive then
-          begin
-            Log(Format('Порт %s закрыывается..', [Port]));
-            ser.Free; // вызывает exception при InstanceActive = True
-            Log(Format('Порт %s закрыт', [Port]));
-          end;
+          if ser.InstanceActive then
+	    ser.CloseSocket;	
         finally
-          sleep(20000);
+          if not ser.InstanceActive then
+	    ser.Free; // вызывает exception при InstanceActive = True
+          Log(Format('%s закрыт', [PortName]));
+          sleep(30000);
         end;
       end;
 
     end;
 
-  Log(Format('Порт %s закрыт по сигналу завершения программы или исключению',
-    [Port]));
+  Log(Format('%s закрыт по сигналу завершения программы или исключению',
+    [PortName]));
   ser.Free;
   aMain.Close;
-
 end;
 
 
@@ -282,7 +281,7 @@ begin
   DumpExceptionBackTrace(f);
   CloseFile(f);
   }
-  s := 'Program exception! ' + LineEnding + 'Stacktrace:' + LineEnding;
+  s := 'Trace exception:' + LineEnding;
   if E <> nil then
   begin
     s := s + 'Exception class: ' + E.ClassName + 'Message: ' + E.Message + LineEnding;

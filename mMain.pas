@@ -8,7 +8,7 @@ uses
   Dialogs, StdCtrls, Buttons,
   ExtCtrls, ComCtrls, Menus, Spin, FileUtil,
   laz2_DOM,
-  laz2_XMLRead, FileInfo, syncobjs,
+  laz2_XMLRead, FileInfo,
   cKsbmes;
 
 const
@@ -127,7 +127,9 @@ type
   TOption = record
     LogForm: boolean;
     FileMask: string;
-    Debug: string;
+    Debug: boolean;
+    Test: boolean;
+    Noport: boolean;
   end;
 
   TObjectType = (UNKNOWN, LINE, DEVPP, ZONE, OUTKEY, PART, USER);
@@ -155,7 +157,7 @@ type
 
   TLine = class(TOrionObj)
   private
-    Serial: TObject;
+    Port: TObject;
     procedure Read;
     function NextDev: TDev;
     function Process(IsWrite: boolean): boolean;
@@ -181,10 +183,8 @@ type
     function GetConnect: boolean;
     procedure SetConnect(Value: boolean);
     procedure AddCrc;
-    procedure AddCmd(Op: TDevOp; ObjNum: word);
+    procedure AddCmd(Opn: TDevOp; ObjNum: word);
     procedure GetCmd(var Op: TDevOp; var ObjNum: word);
-
-
   public
     w, r: TBuf;
     constructor Create;
@@ -248,11 +248,7 @@ type
   end;
 
 
-function ExistDebugKey(sub: string): boolean;
 function ArrayToStr(Ar: array of byte; Count: byte): string;
-procedure WriteLog(str: string);
-procedure Log(str: string);
-procedure OutputLog;
 function GetVersion(FileName: string): string;
 function FindDev(Number: word): TDev;
 function FindDevWithPultid(DevId: word; KindObj: TObjectType; ObjId: word): TDev;
@@ -268,8 +264,7 @@ var
   Event: array [0..511] of string;
   RelayState: array [0..1] of string;
   OrionState: array [0..1] of string;
-  ls_log: TStringList;
-  cs_log: TCriticalSection;
+
 
 
 implementation
@@ -282,7 +277,8 @@ uses
   constants,
   cmesdriver_api,
   typinfo,
-  mCheckDrv;
+  mCheckDrv,
+  mLogging;
 
 {$R *.lfm}
 
@@ -303,6 +299,9 @@ var
 begin
   AppKsbInit(self);
   TimerVisible.Enabled := True;
+  CheckDrv := TCheckDrv.Create(False);
+  CheckDrv.AddId;
+  MyLog := TLog.Create(False);
 
   try
     FormTimer.Enabled := True;
@@ -359,11 +358,11 @@ begin
     end;
     Log('Инициализация состояний элементов выполнена');
 
-    if not ExistDebugKey('noport') then
+    if not Option.Noport then
     begin
       Log('Инициализация связи с C2000-ПП');
       for i := 1 to Lines.Count do
-        (TLine(Lines.Items[i - 1]).Serial as TPort).Start;
+         (TLine(Lines.Items[i-1]).Port as TPort).Start;
     end
     else
       MessageDlg('Внимание',
@@ -383,7 +382,9 @@ begin
   Indicator.BorderSpacing.Left := StatusBar1.Panels[0].Width + 4;
   Indicator.BorderSpacing.Top := ((StatusBar1.Height - IndicatorSize) div 2);
   {$ifdef MSWINDOWS}
-  Indicator.BorderSpacing.Top := Indicator.BorderSpacing.Top + 1;
+  Indicator.BorderSpacing.Left := Indicator.BorderSpacing.Left + 2;
+  Indicator.BorderSpacing.Top := Indicator.BorderSpacing.Top - 2;
+
   {$endif}
   Indicator.Shape := stCircle;
   Indicator.Visible := True;
@@ -393,15 +394,13 @@ begin
   Indicator.Brush.Color := clRed;
   Indicator.ShowHint := True;
 
-  if not ExistDebugKey('send_check') then
+  if not Option.Test then
   begin
     SpinEdit1.Visible := False;
     SpinEdit2.Visible := False;
     SpinEdit3.Visible := False;
     MenuItem2.Visible := False;
   end;
-
-  CheckDrv := TCheckDrv.Create(False);
 end;
 
 procedure TaMain.ReadParam;
@@ -409,11 +408,16 @@ var
   i: integer;
 begin
   KsbAppType := GetKey('NUMBER', APPLICATION_C2000PP);
+  ModuleNetDevice := getkey('ModuleNetDevice', 1);
+  ModuleBigDevice := getkey('ModuleBigDevice', 1);
+
   with Option do
   begin
-    ModuleNetDevice := getkey('ModuleNetDevice', 1);
-    ModuleBigDevice := getkey('ModuleBigDevice', 1);
+    LogForm := StrToInt(getkey('LogForm', '1')) = 1;
     FileMask := GetKey('FileMask', '');
+    Debug := StrToInt(getkey('Debug', '0')) = 1;
+    Test := StrToInt(getkey('Test', '0')) = 1;
+    Noport := StrToInt(getkey('Noport', '0')) = 1;
     if FileMask = '' then
     begin
       FileMask := ExtractFileName(ParamStr(0));
@@ -421,9 +425,8 @@ begin
       if i > 0 then
         SetLength(FileMask, Length(FileMask) - 4);
     end;
-    LogForm := StrToInt(getkey('LogForm', '1')) = 1;
-    Debug := getkey('Debug', '_debug_log _send_check _noport');
   end;
+
   Left := StrToInt(getkey('POS_LEFT', '0'));
   Top := StrToInt(getkey('POS_TOP', '0'));
   Width := StrToInt(getkey('POS_WIDTH', '400'));
@@ -432,13 +435,15 @@ end;
 
 procedure TaMain.FormClose(Sender: TObject; var CloseAction: TCloseAction);
 begin
+  MyLog.Free;
+  Log('Останов модуля');
+  OutputLog;
+
   CloseAction := caFree;
   setkey('POS_LEFT', left);
   setkey('POS_TOP', top);
   setkey('POS_WIDTH', Width);
   setkey('POS_HEIGHT', Height);
-  Log('Останов модуля');
-  OutputLog;
   inherited;
 end;
 
@@ -488,10 +493,11 @@ begin
       with TLine(pObj) do
       begin
         ParentObj := pParent;
-        Serial := TPort.Create(True);
-        with (Serial as TPort) do
+        Port:= TPort.Create(True);
+        with Port as TPort do
         begin
-          Port := TDOMElement(XmlDocNode).GetAttribute('Port');
+          LiveId:= CheckDrv.AddId;
+          PortName := TDOMElement(XmlDocNode).GetAttribute('Port');
           Baud := TDOMElement(XmlDocNode).GetAttribute('Baud');
           Bits := TDOMElement(XmlDocNode).GetAttribute('Bits');
           Stop := TDOMElement(XmlDocNode).GetAttribute('Stop');
@@ -726,7 +732,7 @@ begin
       mes.BigDevice := Bigdevice;
       mes.Code := ORION_ENABLE_MSG;
       Send(mes);
-      s := Format('%s PP#%d %s', [(TLine(ParentObj).Serial as TPort).Port,
+      s := Format('%s PP#%d %s', [(TLine(ParentObj).Port as TPort).PortName,
         Number, OrionState[1]]);
       Log(s);
     end;
@@ -746,7 +752,7 @@ begin
       mes.BigDevice := Bigdevice;
       mes.Code := ORION_DISABLE_MSG;
       Send(mes);
-      s := Format('%s PP#%d %s', [(TLine(ParentObj).Serial as TPort).Port,
+      s := Format('%s PP#%d %s', [(TLine(ParentObj).Port as TPort).PortName,
         Number, OrionState[0]]);
       Log(s);
     end;
@@ -789,13 +795,13 @@ begin
   Inc(wCount, 2);
 end;
 
-procedure TDev.AddCmd(Op: TDevOp; ObjNum: word);
+procedure TDev.AddCmd(Opn: TDevOp; ObjNum: word);
 var
   internalList: TList;
   pCmdRec: ^TCmdRec;
 begin
   new(pCmdRec);
-  pCmdRec^.Op := Op;
+  pCmdRec^.Op := Opn;
   pCmdRec^.ObjNum := ObjNum;
   internalList := Cmds.LockList;
   internalList.Add(pCmdRec);
@@ -843,18 +849,18 @@ begin
 
 
   if CurDev <> nil then
-    s := Format('%s PP#%d ', [TPort(Serial).Port, CurDev.Number])
+    s := Format('%s PP#%d ', [TPort(Port).PortName, CurDev.Number])
   else
-    s := Format('%s PP(unknown) ', [TPort(Serial).Port]);
+    s := Format('%s PP(unknown) ', [TPort(Port).PortName]);
 
   ch := 'W';
   if not IsWrite then
     ch := 'R';
 
-  if ExistDebugKey('debug_log') then
-    if CurDev <> nil then
-      log(Format('%s%s %s (%d)', [s, ch, GetEnumName(TypeInfo(TDevOp), Ord(CurDev.Op)),
-        Ord(CurDev.Op)]));
+  if Option.Debug then
+  if CurDev <> nil then
+    log(Format('%s%s %s (%d)', [s, ch, GetEnumName(TypeInfo(TDevOp), Ord(CurDev.Op)),
+      Ord(CurDev.Op)]));
 
 
   { IsWrite }
@@ -864,7 +870,7 @@ begin
     if CurDev = nil then
     begin
       Log(Format('Отсутсвуют в конфигурации С2000-ПП для %s',
-        [TPort(self.Serial).Port]));
+        [TPort(self.Port).PortName]));
       exit;  {???}
     end;
 
@@ -1587,7 +1593,7 @@ var
 begin
   with CurDev, aMain do
   begin
-    s := Format('%s PP#%d ', [(Serial as TPort).Port, Number]);
+    s := Format('%s PP#%d ', [(Port as TPort).PortName, Number]);
 
     case Op of
 
@@ -1989,12 +1995,18 @@ procedure Consider(mes: KSBMES; str: string);
 var
   s: string;
   i: word;
-  l: TBytes;
+  arr: array of Byte;
   Dev: TDev;
   Param: word;
   catch: boolean;
 
 begin
+  if mes.Size > 0 then
+  begin
+    SetLength(arr, Int64(mes.Size));
+    Simbol2Bin(str, @arr[0], mes.Size);
+  end;
+
   catch := False;
   if (mes.Proga <> KsbAppType) and (mes.NetDevice = ModuleNetDevice) then
     case mes.Code of
@@ -2008,10 +2020,6 @@ begin
     exit;
 
   //parse
-  SetLength(l, mes.Size);
-  if mes.Size > 0 then
-    Simbol2Bin(str, @l[0], mes.Size);
-
   s := Format('READ: Code=%d Sys=%d Type=%d Net=%d Big=%d Small=%d ' +
     'Mode=%d Part=%d Lev=%d Us=%d Card=%d Mon=%d Cam=%d Prog=%d NumDev=%d',
     [mes.Code, mes.SysDevice, mes.TypeDevice, mes.NetDevice, mes.BigDevice,
@@ -2224,8 +2232,7 @@ end;
 procedure TaMain.FormTimerTimer(Sender: TObject);
 begin
   SetIndicator;
-  LiveCount[1] := 0;
-  OutputLog;
+  if length(Live)>0 then Live[0] := 0;
 end;
 
 procedure TaMain.MenuItem1Click(Sender: TObject);
@@ -2344,36 +2351,6 @@ begin
   AppKsbTimer();
 end;
 
-
-function ExistDebugKey(sub: string): boolean;
-var
-  pz: word;
-
-begin
-  Result := False;
-
-  with Option do
-  begin
-    pz := pos(sub, Debug);
-    if pz <= 0 then
-      exit;
-
-    {пропуск параметра с позицией=1}
-    if (pz > 1) then
-      {проверка отсутствия хлама перед параметром}
-      if not (Debug[pz - 1] in [' ', ';', ',', '.']) then
-        exit;
-    {не последний параметр}
-    if (pz + Length(sub) - 1) < Length(Debug) then
-      {проверка отсутствия хлама после параметра}
-      if not (Debug[pz + Length(sub)] in [' ', ';', ',', '.']) then
-        exit;
-  end;
-
-  Result := True;
-end;
-
-
 function ArrayToStr(Ar: array of byte; Count: byte): string;
 var
   i: byte;
@@ -2383,103 +2360,6 @@ begin
     Result := Result + IntToHex(Ar[i - 1], 2);
 end;
 
-
-procedure WriteLog(str: string);
-var
-  tf: TextFile;
-  FileName, OldFileName, CurDir, s: string;
-  AYear, AMonth, ADay, AHour, AMinute, ASecond, AMilliSecond: word;
-  fSize: integer;
-
-begin
-  DecodeDateTime(now, AYear, AMonth, ADay, AHour, AMinute, ASecond, AMilliSecond);
-  CurDir := ExtractFilePath(ParamStr(0));
-  with Option do
-  begin
-    FileName := FileMask + '.log';
-    fSize := FileSize(CurDir + FileName);
-    if fSize > MAX_LOG_SIZE then
-    begin
-      s := '_' + Format('%u%.2u%.2u_%.2u%.2u_%.2u%.3u',
-        [AYear, AMonth, ADay, AHour, AMinute, ASecond, AMilliSecond]);
-      OldFileName := Option.FileMask + s + '.log';
-      if not RenameFile(CurDir + FileName, CurDir + OldFileName) then
-        str := str + #13#10' Ошибка переименования файла (' +
-          CurDir + FileName + '): ' + IntToStr(GetLastOSError);
-    end;
-  end;
-
-  AssignFile(tf, CurDir + FileName);
-  try
-    if FileExists(CurDir + FileName) then
-      Append(tf)
-    else
-      rewrite(tf);
-    Writeln(tf, str);
-    Flush(tf);
-  finally
-    CloseFile(tf);
-  end;
-
-end;
-
-
-procedure Log(str: string);
-var
-  s: string;
-  AYear, AMonth, ADay, AHour, AMinute, ASecond, AMilliSecond: word;
-
-begin
-  DecodeDateTime(now, AYear, AMonth, ADay, AHour, AMinute, ASecond, AMilliSecond);
-
-  s := Format('%.2u.%.2u.%.4u %.2u:%.2u:%.2u:%.3u',
-    [ADay, AMonth, AYear, AHour, AMinute, ASecond, AMilliSecond]);
-
-  // if ls_log <> nil then
-  s := s + ' (' + ls_log.Count.ToString + ')';
-  cs_log.Acquire;
-  try
-    ls_log.Add(s + ' ' + str);
-  finally
-    cs_log.Release;
-  end;
-end;
-
-
-procedure OutputLog;
-var
-  i: word;
-
-begin
-  cs_log.Acquire;
-  try
-    i := 1000;
-    while (ls_log.Count > 0) and (i > 0) do
-    begin
-      if i > 0 then
-        Dec(i);
-      WriteLog(ls_log.Strings[0]);
-
-      if Option.LogForm then
-        with aMain.Memo1.Lines do
-        begin
-          Add(ls_log.Strings[0]);
-          if Count > 1000 then
-          begin
-            BeginUpdate;
-            Clear;
-            EndUpdate;
-          end;
-        end;
-
-      ls_log.Delete(0);
-    end;
-
-  finally
-    cs_log.Release;
-  end;
-
-end;
 
 
 function GetVersion(FileName: string): string;
@@ -2812,11 +2692,5 @@ initialization
   OrionState[0] := 'Связь потеряна';
   OrionState[1] := 'Связь установлена';
 
-  ls_log := TStringList.Create;
-  cs_log := TCriticalSection.Create;
-
-finalization
-  cs_log.Free;
-  ls_log.Free;
 
 end.

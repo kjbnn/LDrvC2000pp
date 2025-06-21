@@ -24,7 +24,7 @@
       <MajorVersionNr Value="3"/>
       <MinorVersionNr Value="1"/>
       <RevisionNr Value="4"/>
-      <BuildNr Value="65"/>
+      <BuildNr Value="84"/>
       <Language Value="0419"/>
       <StringTable CompanyName="ООО &quot;Рост-ВСП&quot;" FileDescription="Драйвер С2000-ПП" LegalCopyright="ООО &quot;Рост-ВСП&quot;" ProductName="РОСТЭК" ProductVersion="3.1"/>
     </VersionInfo>
@@ -49,7 +49,7 @@
         <PackageName Value="LCL"/>
       </Item3>
     </RequiredPackages>
-    <Units Count="11">
+    <Units Count="12">
       <Unit0>
         <Filename Value="DrvC2000pp.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -98,6 +98,10 @@
         <Filename Value="..\LKsb\ksbmesapi\cmesdriver_api.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit10>
+      <Unit11>
+        <Filename Value="mLogging.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit11>
     </Units>
   </ProjectOptions>
   <CompilerOptions>
@@ -132,7 +136,7 @@
     </Linking>
     <Other>
       <Verbosity>
-        <ShoLineNum Value="True"/>
+        <ShowLineNum Value="True"/>
         <ShowDebugInfo Value="True"/>
         <ShowCond Value="True"/>
         <ShowHintsForUnusedUnitsInMainSrc Value="True"/>

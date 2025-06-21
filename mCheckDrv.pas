@@ -8,57 +8,73 @@ uses
 type
 
   { TCheckDrv }
-
   TCheckDrv = class(TThread)
   private
   protected
     procedure Execute; override;
     procedure AppExit;
+  public
+    function AddId: byte;
   end;
 
+
 const
-  LiveTime = 120;  {kostiv 60}
+  LiveTime = 120;
 
 var
-  LiveCount: array[1..2] of word; {FormTimer}
+  Live: array of byte;
   CheckDrv: TCheckDrv;
 
 implementation
 
 uses
-  mMain, SysUtils, DateUtils;
+  mLogging, SysUtils, DateUtils;
 
 procedure TCheckDrv.Execute;
 var
-  i: byte;
+  i,j: byte;
+  LiveCheck: string;
+
 begin
+
   while not Terminated do
   begin
     sleep(1000);
-    if (LiveCount[1] + LiveCount[2]) > 0 then
-      if ExistDebugKey('debug_log') then
-        Log(Format('main=%d, comm=%d', [LiveCount[1], LiveCount[2]]));
+    if length(Live)=0 then
+      continue;
 
-    for i := 1 to 2 do
+    {Log}
+    LiveCheck:='Check: ';
+    for i in Live do
+    if i>0 then
     begin
-      if LiveCount[i] = LiveTime then
-      begin
-        Log('Аварийный останов модуля!!!');
-        break;
-      end
-      else if LiveCount[i] > LiveTime then
-        Synchronize(AppExit);
+      for j in Live do LiveCheck:= LiveCheck + IntToStr(j) + ' ';
+      Log(LiveCheck);
+      break;
     end;
 
-    Inc(LiveCount[1]);
-    Inc(LiveCount[2]);
-  end;
+    {Pulling or halt}
+    for i:= low(Live) to high(Live) do
+    if Live[i] < LiveTime then
+      inc(Live[i])
+    else begin
+      Log(Format('Поток #%d завис. Аварийный останов модуля !!!', [i]));
+      Synchronize(AppExit);
+      break;
+    end;
 
+  end;
 end;
 
 procedure TCheckDrv.AppExit;
 begin
   Halt;
+end;
+
+function TCheckDrv.AddId: byte;
+begin
+  SetLength(Live, length(Live) + 1);
+  result:= length(Live) - 1;
 end;
 
 
