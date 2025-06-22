@@ -56,7 +56,7 @@ begin
       CurDev.FNoAnswer := PP_DISCONNECTED;
       CurDev.Connected := False;
     end;
-    s:= Format('%s. Ошибка #%d -> %s', [
+    s:= Format('%s ошибка #%d -> %s', [
         PortName,
         ser.LastError,
         ser.GetErrorDesc(ser.LastError)]);

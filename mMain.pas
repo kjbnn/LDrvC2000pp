@@ -1588,7 +1588,7 @@ var
   i: word;
   Childindex: word;
   Child: TOrionObj;
-  SyntNorma: boolean;
+  SynNorma, SynConnect: boolean;
 
 begin
   with CurDev, aMain do
@@ -1631,7 +1631,8 @@ begin
 
         s := s + Format('Зона #%d Состояние >>', [256 * r[3] + r[4]]);
 
-        SyntNorma := True; // new 1.1
+        SynNorma := True;
+        SynConnect := True;
         for i := 1 to r[5] do
         begin
           s := s + Format(' %s (%d)', [Event[r[5 + i]], r[5 + i]]);
@@ -1661,19 +1662,26 @@ begin
 
             case mes.Code of
               STATEZONE_MSG:
+              begin
                 case mes.Level of
                   2, 41, 45, 82, 165, 187, 189,
                   190, 192, 194, 196, 198,
                   202, 205, 211, 212, 214,
                   215, 222, 224, 225, 250:
-                    SyntNorma := False;
+                    SynNorma := False;
                 end;
+                case mes.Level of
+                  45, 46, 90, 187, 189,
+                  190, 250:
+                    SynConnect := False;
+                end;
+              end;
               STATEDEVICE_MSG,
               STATEPULT_MSG:
                 case mes.Level of
                   2, 189, 190, 198,
                   202, 215, 222, 250:
-                    SyntNorma := False;
+                    SynNorma := False;
                 end;
               {
               STATEOUTKEY_MSG:
@@ -1689,11 +1697,17 @@ begin
         end;
         Log(s);
 
-        if SyntNorma then
+        if SynNorma then
         begin
           mes.Level := $FFFF;
           send(mes);
         end;
+        if SynConnect then
+        begin
+          mes.Level := 250;
+          send(mes);
+        end;
+
       end;
 
 
