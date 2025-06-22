@@ -1702,7 +1702,7 @@ begin
           mes.Level := $FFFF;
           send(mes);
         end;
-        if SynConnect then
+        if not SynConnect then
         begin
           mes.Level := 250;
           send(mes);
