@@ -160,9 +160,9 @@ begin
 
   except
     on E: Exception do
-    if Option.Debug then
     begin
-      DumpExceptionCallStack(E);
+      if Option.Debug then
+        DumpExceptionCallStack(E);
       Log(Format('%s закрытие...', [PortName]));
       ser.Free;
       Log(Format('%s закрыт', [PortName]));
