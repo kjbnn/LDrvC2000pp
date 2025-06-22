@@ -871,7 +871,7 @@ begin
     begin
       Log(Format('Отсутсвуют в конфигурации С2000-ПП для %s',
         [TPort(self.Port).PortName]));
-      exit;  {???}
+      exit;
     end;
 
     with CurDev do
