@@ -1,79 +1,78 @@
 object aMain: TaMain
   Left = 417
-  Height = 360
+  Height = 288
   Top = 152
-  Width = 615
-  ClientHeight = 360
-  ClientWidth = 615
-  DesignTimePPI = 120
+  Width = 492
+  ClientHeight = 288
+  ClientWidth = 492
   Menu = MainMenu1
-  LCLVersion = '4.0.0.4'
   Visible = True
   OnClose = FormClose
   OnConstrainedResize = FormConstrainedResize
   OnCreate = FormCreate
   object Indicator: TShape
-    Left = 260
-    Height = 70
-    Top = 310
-    Width = 61
+    Left = 208
+    Height = 56
+    Top = 248
+    Width = 49
     ParentShowHint = False
     OnMouseMove = IndicatorMouseMove
   end
   object StatusBar1: TStatusBar
     Left = 0
-    Height = 29
-    Top = 331
-    Width = 615
+    Height = 23
+    Top = 265
+    Width = 492
     Panels = <    
       item
-        Width = 200
+        Width = 160
       end    
       item
-        Width = 26
+        Width = 21
       end    
       item
-        Width = 62
+        Width = 50
       end>
     SimplePanel = False
   end
   object Memo1: TMemo
     Left = 0
-    Height = 331
+    Height = 265
     Top = 0
-    Width = 615
+    Width = 492
     Align = alClient
+    ReadOnly = True
     ScrollBars = ssBoth
     TabOrder = 1
     WordWrap = False
   end
   object SpinEdit1: TSpinEdit
-    Left = 440
-    Height = 28
-    Top = 40
-    Width = 122
+    Left = 352
+    Height = 23
+    Top = 32
+    Width = 98
     TabOrder = 2
     Value = 1
   end
   object SpinEdit2: TSpinEdit
-    Left = 440
-    Height = 28
-    Top = 70
-    Width = 120
+    Left = 352
+    Height = 23
+    Top = 56
+    Width = 96
     TabOrder = 3
     Value = 1
   end
   object SpinEdit3: TSpinEdit
-    Left = 440
-    Height = 28
-    Top = 100
-    Width = 120
+    Left = 352
+    Height = 23
+    Top = 80
+    Width = 96
     TabOrder = 4
     Value = 1
   end
   object MainMenu1: TMainMenu
-    Left = 30
-    Top = 10
+    Left = 24
+    Top = 8
     object N4: TMenuItem
       Caption = 'Файл'
       object N1: TMenuItem
@@ -129,14 +128,14 @@ object aMain: TaMain
   end
   object TimerVisible: TTimer
     OnTimer = TimerVisibleTimer
-    Left = 200
-    Top = 50
+    Left = 160
+    Top = 40
   end
   object FormTimer: TTimer
     Enabled = False
     Interval = 50
     OnTimer = FormTimerTimer
-    Left = 110
-    Top = 100
+    Left = 88
+    Top = 80
   end
 end

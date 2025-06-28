@@ -6,11 +6,15 @@ uses
   Classes, syncobjs;
 
 type
+
+  { TLog }
+
   TLog = class(TThread)
   private
   protected
     procedure Execute; override;
   public
+    procedure OutputLog;
   end;
 
 var
@@ -20,10 +24,10 @@ var
 
 procedure WriteLog(str: string);
 procedure Log(const str: string);
-procedure OutputLog;
 
 
 implementation
+
 uses
   mMain, SysUtils, FileUtil, DateUtils;
 
@@ -31,8 +35,9 @@ procedure TLog.Execute;
 begin
   while not Terminated do
   try
+    Queue(nil, OutputLog);
+    //Synchronize(nil, OutputLog);
     sleep(50);
-    OutputLog;
   except
   end;
 end;
@@ -44,7 +49,6 @@ var
   FileName, OldFileName, CurDir, s: string;
   AYear, AMonth, ADay, AHour, AMinute, ASecond, AMilliSecond: word;
   fSize: integer;
-
 begin
   DecodeDateTime(now, AYear, AMonth, ADay, AHour, AMinute, ASecond, AMilliSecond);
   CurDir := ExtractFilePath(ParamStr(0));
@@ -82,7 +86,6 @@ procedure Log(const str: string);
 var
   s: string;
   AYear, AMonth, ADay, AHour, AMinute, ASecond, AMilliSecond: word;
-
 begin
   cs_log.Acquire;
   try
@@ -97,40 +100,37 @@ begin
 end;
 
 
-procedure OutputLog;
+procedure TLog.OutputLog;
 var
-  i: word;
-
+  hasData: boolean;
 begin
   cs_log.Acquire;
+  aMain.Memo1.Lines.BeginUpdate;
+  hasData:= sl_log.Count > 0;
+
   try
-    i := 1000;
-    while (sl_log.Count > 0) and (i > 0) do
+    if Option.LogForm then
+      with aMain.Memo1.Lines do
+      begin
+        if Count > 10000 then Clear;
+        AddStrings(sl_log);
+      end;
+
+    while (sl_log.Count > 0) do
     begin
-      if i > 0 then
-        Dec(i);
       WriteLog(sl_log.Strings[0]);
-
-      {LogForm}
-      if Option.LogForm then
-        with aMain.Memo1.Lines do
-        begin
-          Add(sl_log.Strings[0]);
-          if Count > 1000 then
-          begin
-            BeginUpdate;
-            Clear;
-            EndUpdate;
-          end;
-        end;
-
       sl_log.Delete(0);
     end;
 
   finally
+    aMain.Memo1.Lines.EndUpdate;
     cs_log.Release;
+    if hasData then
+    begin
+      aMain.Memo1.SelStart := Length(aMain.Memo1.Text);
+      aMain.Memo1.SelLength := 0;
+    end;
   end;
-
 end;
 
 
@@ -142,6 +142,4 @@ finalization
   sl_log.Free;
   cs_log.Free;
 
-
 end.
-

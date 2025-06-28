@@ -437,7 +437,7 @@ procedure TaMain.FormClose(Sender: TObject; var CloseAction: TCloseAction);
 begin
   MyLog.Free;
   Log('Останов модуля');
-  OutputLog;
+  MyLog.OutputLog;
 
   CloseAction := caFree;
   setkey('POS_LEFT', left);
@@ -2012,28 +2012,23 @@ var
   arr: array of Byte;
   Dev: TDev;
   Param: word;
-  catch: boolean;
 
 begin
+  if (mes.Proga <> KsbAppType) and (mes.NetDevice = ModuleNetDevice) then
+  case mes.Code of
+    //CHECK_LIVE_PROGRAM,
+    KILL_PROGRAM,
+    EXIT_PROGRAM,
+    BASE_ROSTEK_MSG..(BASE_ROSTEK_MSG + 999):;
+    else exit;
+  end;
+
   if mes.Size > 0 then
   begin
     SetLength(arr, Int64(mes.Size));
     Simbol2Bin(str, @arr[0], mes.Size);
   end;
 
-  catch := False;
-  if (mes.Proga <> KsbAppType) and (mes.NetDevice = ModuleNetDevice) then
-    case mes.Code of
-      //CHECK_LIVE_PROGRAM,
-      KILL_PROGRAM,
-      EXIT_PROGRAM,
-      BASE_ROSTEK_MSG..(BASE_ROSTEK_MSG + 999):
-        catch := True;
-    end;
-  if not catch then
-    exit;
-
-  //parse
   s := Format('READ: Code=%d Sys=%d Type=%d Net=%d Big=%d Small=%d ' +
     'Mode=%d Part=%d Lev=%d Us=%d Card=%d Mon=%d Cam=%d Prog=%d NumDev=%d',
     [mes.Code, mes.SysDevice, mes.TypeDevice, mes.NetDevice, mes.BigDevice,
