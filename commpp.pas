@@ -44,133 +44,131 @@ end;
 
 procedure TPort.Execute;
 
-procedure ErrorInfo;
-var
-  s: string;
-begin
-  if ser.LastError <> 0 then
+  procedure ErrorInfo;
+  var
+    s: string;
   begin
-    with Tline(Owner) do
-    if CurDev <> nil then
+    if ser.LastError <> 0 then
     begin
-      CurDev.FNoAnswer := PP_DISCONNECTED;
-      CurDev.Connected := False;
+      with Tline(Owner) do
+        if CurDev <> nil then
+        begin
+          CurDev.FNoAnswer := PP_DISCONNECTED;
+          CurDev.Connected := False;
+        end;
+      s := Format('%s ошибка #%d -> %s', [PortName,
+        ser.LastError, ser.GetErrorDesc(ser.LastError)]);
+      Log(s);
+      raise Exception.Create(s);
     end;
-    s:= Format('%s ошибка #%d -> %s', [
-        PortName,
-        ser.LastError,
-        ser.GetErrorDesc(ser.LastError)]);
-    Log(s);
-    raise exception.create(s);
   end;
-end;
 
 var
   waiting: integer;
   TotalWaiting: word;
   crc: word;
   s: string;
-
 begin
   while (not Terminated) do
-  with Tline(Owner) do
-  try
-    if length(Live)>0 then Live[LiveId] := 0;
+    with Tline(Owner) do
+    try
+      if length(Live) > 0 then Live[LiveId] := 0;
 
-    ser := TBlockSerial.Create;
-    ser.RaiseExcept := False;
-    ser.LinuxLock := False;
-    Log(Format('%s открытие...', [PortName]));
-    ser.Connect(PortName);
-    ser.Config(StrToInt(Baud), StrToInt(Bits), 'N', StrToInt(Stop), False, False);
-    if ser.LastError <> 0 then
-      ErrorInfo
-    else
-      Log(Format('%s открыт, handle %d', [PortName, ser.Handle]));
-
-    {process}
-    while (not Terminated) do
-    begin
-      if length(Live)>0 then Live[LiveId] := 0;
-      sleep(20);
-
-      if not ProcessProc(True) then
-      begin
-        s := Format('%s. Ошибка ProcessProc(True), ', [PortName]);
-        if CurDev <> nil then
-          s := s + Format('CurDev.Op: %d, CurDev.ObjNum: %d',
-            [Ord(CurDev.Op), CurDev.CmdObj])
-        else
-          s := s + 'CurDev is nil';
-        Log(s);
-        sleep(3000);
-        raise exception.create(s);
-      end;
-
-      {отправка}
-      if TLine(Owner).CurDev <> nil then
-      with TLine(Owner).CurDev do
-      if Option.Debug then
-        Log(Format('%s W> %s', [PortName, ArrayToStr(w, wCount)]));
-      ser.SendBuffer(@CurDev.w, CurDev.wCount);
+      ser := TBlockSerial.Create;
+      ser.RaiseExcept := False;
+      ser.LinuxLock := False;
+      Log(Format('%s открытие...', [PortName]));
+      ser.Connect(PortName);
+      ser.Config(StrToInt(Baud), StrToInt(Bits), 'N', StrToInt(Stop), False, False);
       if ser.LastError <> 0 then
-        ErrorInfo;
-
-      {прием}
-      FillChar(CurDev.r, 255, 0);
-      CurDev.rCount := 0;
-      TotalWaiting := 0;
-      waiting := 0;
-      s := 'waiting:';
-      repeat
-        waiting := ser.WaitingData;
-        if (CurDev.rCount > 0) and (waiting = 0) then
-          break;
-        s := s + Format(' %d', [waiting]);
-        ser.RecvBuffer(@CurDev.r[CurDev.rCount], waiting);
-        CurDev.rCount := CurDev.rCount + waiting;
-        Inc(TotalWaiting);
-        sleep(5);
-      until ((CurDev.rCount > 0) and (waiting = 0)) or (TotalWaiting >= 100);
-
-      if TLine(Owner).CurDev <> nil then
-      with TLine(Owner).CurDev do
-      if Option.Debug then
-        Log(Format('%s R> %s %s', [PortName, ArrayToStr(r, rCount), s]));
-
-      if ser.LastError <> 0 then
-        ErrorInfo;
-
-      if (CurDev.rCount < 5) or (CurDev.w[0] <> CurDev.r[0]) or
-        (CurDev.w[1] <> (CurDev.r[1] and $7F)) then
-        CurDev.Connected := False
+        ErrorInfo
       else
+        Log(Format('%s открыт, handle %d', [PortName, ser.Handle]));
+
+      {process}
+      while (not Terminated) do
       begin
-        crc := CRC16(CurDev.r, CurDev.rCount - 2);
-        if (CurDev.r[CurDev.rCount - 2] = hi(crc)) and
-          (CurDev.r[CurDev.rCount - 1] = lo(crc)) then
+        if length(Live) > 0 then Live[LiveId] := 0;
+        sleep(20);
+
+        if not ProcessProc(True) then
         begin
-          CurDev.Connected := True;
-          ProcessProc(False);
-        end
+          s := Format('%s. Ошибка ProcessProc(True), ', [PortName]);
+          if CurDev <> nil then
+            s := s + Format('CurDev.Op: %d, CurDev.ObjNum: %d',
+              [Ord(CurDev.Op), CurDev.CmdObj])
+          else
+            s := s + 'CurDev is nil';
+          Log(s);
+          sleep(3000);
+          raise Exception.Create(s);
+        end;
+
+        {отправка}
+        if TLine(Owner).CurDev <> nil then
+          with TLine(Owner).CurDev do
+            if Option.Debug then
+              Log(Format('%s W> %s', [PortName, ArrayToStr(w, wCount)]));
+        ser.SendBuffer(@CurDev.w, CurDev.wCount);
+        if ser.LastError <> 0 then
+          ErrorInfo;
+
+        {прием}
+        FillChar(CurDev.r, 255, 0);
+        CurDev.rCount := 0;
+        TotalWaiting := 0;
+        waiting := 0;
+        s := 'waiting:';
+        repeat
+          waiting := ser.WaitingData;
+          if (CurDev.rCount > 0) and (waiting = 0) then
+            break;
+          s := s + Format(' %d', [waiting]);
+          ser.RecvBuffer(@CurDev.r[CurDev.rCount], waiting);
+          CurDev.rCount := CurDev.rCount + waiting;
+          Inc(TotalWaiting);
+          sleep(5);
+        until ((CurDev.rCount > 0) and (waiting = 0)) or (TotalWaiting >= 100);
+
+        if TLine(Owner).CurDev <> nil then
+          with TLine(Owner).CurDev do
+            if Option.Debug then
+              Log(Format('%s R> %s %s', [PortName, ArrayToStr(r, rCount), s]));
+
+        if ser.LastError <> 0 then
+          ErrorInfo;
+
+        if (CurDev.rCount < 5) or (CurDev.w[0] <> CurDev.r[0]) or
+          (CurDev.w[1] <> (CurDev.r[1] and $7F)) then
+          CurDev.Connected := False
         else
-          CurDev.Connected := False;
+        begin
+          crc := CRC16(CurDev.r, CurDev.rCount - 2);
+          if (CurDev.r[CurDev.rCount - 2] = hi(crc)) and
+            (CurDev.r[CurDev.rCount - 1] = lo(crc)) then
+          begin
+            CurDev.Connected := True;
+            ProcessProc(False);
+          end
+          else
+            CurDev.Connected := False;
+        end;
+      end;
+
+    except
+      on E: Exception do
+      begin
+        if Option.Debug then
+          DumpExceptionCallStack(E);
+        Log(Format('%s закрытие...', [PortName]));
+        ser.Free;
+        Log(Format('%s закрыт', [PortName]));
+        sleep(10000)
       end;
     end;
 
-  except
-    on E: Exception do
-    begin
-      if Option.Debug then
-        DumpExceptionCallStack(E);
-      Log(Format('%s закрытие...', [PortName]));
-      ser.Free;
-      Log(Format('%s закрыт', [PortName]));
-      sleep(10000);
-    end;
-  end;
-
-  Log(Format('%s закрыт по сигналу завершения приложения', [PortName]));
+  Log(Format('%s закрыт по сигналу завершения приложения',
+    [PortName]));
   aMain.Close;
 end;
 

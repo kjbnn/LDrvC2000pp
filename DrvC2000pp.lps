@@ -19,11 +19,15 @@
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
         <IsVisibleTab Value="True"/>
-        <EditorIndex Value="1"/>
-        <TopLine Value="1647"/>
-        <CursorPos X="58" Y="1683"/>
-        <FoldState Value=" T0^96HL"/>
+        <EditorIndex Value="3"/>
+        <TopLine Value="465"/>
+        <CursorPos X="32" Y="467"/>
+        <FoldState Value=" T0^B6H;"/>
         <UsageCount Value="209"/>
+        <Bookmarks Count="2">
+          <Item0 Y="437" Left="1" Top="407" ID="1"/>
+          <Item1 X="46" Y="362" Left="1" Top="326" ID="2"/>
+        </Bookmarks>
         <Loaded Value="True"/>
         <LoadedDesigner Value="True"/>
       </Unit1>
@@ -31,8 +35,8 @@
         <Filename Value="commpp.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="commPP"/>
-        <TopLine Value="16"/>
-        <CursorPos X="17" Y="36"/>
+        <TopLine Value="34"/>
+        <CursorPos Y="71"/>
         <ExtraEditorCount Value="1"/>
         <ExtraEditor1>
           <EditorIndex Value="-1"/>
@@ -40,8 +44,8 @@
         </ExtraEditor1>
         <UsageCount Value="220"/>
         <Bookmarks Count="2">
-          <Item0 X="11" Y="173" Left="1" Top="158" ID="5"/>
-          <Item1 X="11" Y="175" Left="1" Top="158" ID="6"/>
+          <Item0 Y="170" Left="1" Top="156" ID="5"/>
+          <Item1 X="11" Y="173" Left="1" Top="156" ID="6"/>
         </Bookmarks>
         <Loaded Value="True"/>
       </Unit2>
@@ -56,10 +60,12 @@
       <Unit4>
         <Filename Value="..\LKsb\windows\cOsFeature.pas"/>
         <IsPartOfProject Value="True"/>
-        <EditorIndex Value="-1"/>
-        <TopLine Value="148"/>
-        <CursorPos X="35" Y="167"/>
+        <EditorIndex Value="1"/>
+        <TopLine Value="34"/>
+        <CursorPos X="7" Y="61"/>
         <UsageCount Value="220"/>
+        <Loaded Value="True"/>
+        <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit4>
       <Unit5>
         <Filename Value="..\LKsb\constants.pas"/>
@@ -117,14 +123,10 @@
       <Unit11>
         <Filename Value="mLogging.pas"/>
         <IsPartOfProject Value="True"/>
-        <EditorIndex Value="3"/>
-        <TopLine Value="11"/>
-        <CursorPos X="7" Y="39"/>
+        <EditorIndex Value="5"/>
+        <TopLine Value="63"/>
+        <CursorPos Y="90"/>
         <UsageCount Value="140"/>
-        <Bookmarks Count="2">
-          <Item0 Left="1" Top="1" ID="1"/>
-          <Item1 Y="125" Left="13" Top="102" ID="2"/>
-        </Bookmarks>
         <Loaded Value="True"/>
       </Unit11>
       <Unit12>
@@ -149,7 +151,7 @@
       </Unit14>
       <Unit15>
         <Filename Value="mCheckDrv.pas"/>
-        <EditorIndex Value="2"/>
+        <EditorIndex Value="4"/>
         <CursorPos X="22" Y="52"/>
         <UsageCount Value="104"/>
         <Loaded Value="True"/>
@@ -162,10 +164,11 @@
       </Unit16>
       <Unit17>
         <Filename Value="C:\Users\uk\AppData\Local\lazarus\onlinepackagemanager\packages\synapse40.1\synaser.pas"/>
-        <EditorIndex Value="-1"/>
-        <TopLine Value="680"/>
-        <CursorPos X="29" Y="708"/>
+        <EditorIndex Value="2"/>
+        <TopLine Value="961"/>
+        <CursorPos Y="974"/>
         <UsageCount Value="25"/>
+        <Loaded Value="True"/>
       </Unit17>
       <Unit18>
         <Filename Value="C:\lazarus\fpc\3.2.2\source\rtl\objpas\classes\classesh.inc"/>
@@ -261,122 +264,124 @@
     </OtherDefines>
     <JumpHistory Count="30" HistoryIndex="29">
       <Position1>
-        <Filename Value="commpp.pas"/>
-        <Caret Line="203" Column="28" TopLine="195"/>
+        <Filename Value="mMain.pas"/>
+        <Caret Line="439" Column="20" TopLine="414"/>
       </Position1>
       <Position2>
-        <Filename Value="commpp.pas"/>
-        <Caret Line="27" Column="28" TopLine="13"/>
+        <Filename Value="mMain.pas"/>
+        <Caret Line="447" Column="22" TopLine="414"/>
       </Position2>
       <Position3>
         <Filename Value="commpp.pas"/>
-        <Caret Line="26" Column="10" TopLine="12"/>
+        <Caret Line="170" Column="60" TopLine="5"/>
       </Position3>
       <Position4>
-        <Filename Value="commpp.pas"/>
-        <Caret Line="179" Column="31" TopLine="178"/>
+        <Filename Value="mMain.pas"/>
+        <Caret Line="163" Column="20" TopLine="134"/>
       </Position4>
       <Position5>
-        <Filename Value="commpp.pas"/>
-        <Caret Line="36" Column="10" TopLine="22"/>
+        <Filename Value="mMain.pas"/>
+        <Caret Line="362" Column="46" TopLine="326"/>
       </Position5>
       <Position6>
-        <Filename Value="commpp.pas"/>
-        <Caret Line="114" Column="43" TopLine="101"/>
+        <Filename Value="mMain.pas"/>
+        <Caret Line="438" Column="35" TopLine="415"/>
       </Position6>
       <Position7>
-        <Filename Value="commpp.pas"/>
-        <Caret Line="139" Column="46" TopLine="126"/>
+        <Filename Value="mMain.pas"/>
+        <Caret Line="160" Column="5" TopLine="136"/>
       </Position7>
       <Position8>
-        <Filename Value="commpp.pas"/>
-        <Caret Line="36" Column="17" TopLine="16"/>
+        <Filename Value="mMain.pas"/>
+        <Caret Line="438" Column="36" TopLine="415"/>
       </Position8>
       <Position9>
         <Filename Value="mMain.pas"/>
-        <Caret Line="114" Column="27" TopLine="109"/>
+        <Caret Line="160" Column="5" TopLine="136"/>
       </Position9>
       <Position10>
         <Filename Value="mMain.pas"/>
-        <Caret Line="1671" Column="29" TopLine="1651"/>
+        <Caret Line="439" Column="23" TopLine="414"/>
       </Position10>
       <Position11>
         <Filename Value="mMain.pas"/>
-        <Caret Line="1634" Column="9" TopLine="1606"/>
+        <Caret Line="261" Column="8" TopLine="237"/>
       </Position11>
       <Position12>
         <Filename Value="mMain.pas"/>
-        <Caret Line="1674" Column="57" TopLine="1610"/>
+        <Caret Line="320" Column="25" TopLine="279"/>
       </Position12>
       <Position13>
         <Filename Value="mMain.pas"/>
-        <Caret Line="1634" Column="17" TopLine="1587"/>
+        <Caret Line="322" Column="20" TopLine="281"/>
       </Position13>
       <Position14>
         <Filename Value="mMain.pas"/>
-        <Caret Line="1671" Column="29" TopLine="1624"/>
+        <Caret Line="362" Column="50" TopLine="321"/>
       </Position14>
       <Position15>
         <Filename Value="mMain.pas"/>
-        <Caret Line="1636" Column="14" TopLine="1625"/>
+        <Caret Line="438" Column="51" TopLine="414"/>
       </Position15>
       <Position16>
-        <Filename Value="mMain.pas"/>
-        <Caret Line="1638" Column="64" TopLine="1625"/>
+        <Filename Value="commpp.pas"/>
+        <Caret Line="45" Column="12" TopLine="14"/>
       </Position16>
       <Position17>
         <Filename Value="mMain.pas"/>
-        <Caret Line="1645" Column="33" TopLine="1625"/>
+        <Caret Line="437" Column="13" TopLine="424"/>
       </Position17>
       <Position18>
-        <Filename Value="mMain.pas"/>
-        <Caret Line="1637" TopLine="1619"/>
+        <Filename Value="commpp.pas"/>
+        <Caret Line="170" Column="11"/>
       </Position18>
       <Position19>
-        <Filename Value="mMain.pas"/>
-        <Caret Line="1905" Column="15" TopLine="1865"/>
+        <Filename Value="commpp.pas"/>
+        <Caret Line="167" TopLine="141"/>
       </Position19>
       <Position20>
-        <Filename Value="mMain.pas"/>
-        <Caret Line="899" Column="22" TopLine="871"/>
+        <Filename Value="commpp.pas"/>
+        <Caret Line="162" TopLine="141"/>
       </Position20>
       <Position21>
-        <Filename Value="mMain.pas"/>
-        <Caret Line="1905" Column="15" TopLine="1876"/>
+        <Filename Value="mLogging.pas"/>
+        <Caret Line="90" TopLine="63"/>
       </Position21>
       <Position22>
-        <Filename Value="mMain.pas"/>
-        <Caret Line="969" Column="9" TopLine="941"/>
+        <Filename Value="commpp.pas"/>
+        <Caret Line="62" TopLine="34"/>
       </Position22>
       <Position23>
-        <Filename Value="mMain.pas"/>
-        <Caret Line="1905" Column="15" TopLine="1876"/>
+        <Filename Value="C:\Users\uk\AppData\Local\lazarus\onlinepackagemanager\packages\synapse40.1\synaser.pas"/>
+        <Caret Line="974" TopLine="961"/>
       </Position23>
       <Position24>
-        <Filename Value="mMain.pas"/>
-        <Caret Line="934" Column="13" TopLine="905"/>
+        <Filename Value="mLogging.pas"/>
+        <Caret Line="90" TopLine="63"/>
       </Position24>
       <Position25>
-        <Filename Value="mMain.pas"/>
+        <Filename Value="commpp.pas"/>
+        <Caret Line="71" TopLine="34"/>
       </Position25>
       <Position26>
-        <Filename Value="mMain.pas"/>
-        <Caret Line="21" Column="35"/>
+        <Filename Value="..\LKsb\windows\cOsFeature.pas"/>
+        <Caret Line="84" Column="59" TopLine="45"/>
       </Position26>
       <Position27>
-        <Filename Value="mMain.pas"/>
+        <Filename Value="..\LKsb\windows\cOsFeature.pas"/>
+        <Caret Line="61" Column="7" TopLine="34"/>
       </Position27>
       <Position28>
         <Filename Value="mMain.pas"/>
-        <Caret Line="2040" Column="3" TopLine="2057"/>
+        <Caret Line="435" Column="3" TopLine="411"/>
       </Position28>
       <Position29>
         <Filename Value="mMain.pas"/>
-        <Caret Line="1905" Column="15" TopLine="323"/>
+        <Caret Line="316" Column="22" TopLine="282"/>
       </Position29>
       <Position30>
         <Filename Value="mMain.pas"/>
-        <Caret Line="1593" Column="11" TopLine="1546"/>
+        <Caret Line="463" Column="19" TopLine="422"/>
       </Position30>
     </JumpHistory>
     <RunParams>
@@ -394,6 +399,13 @@
         <WatchKind Value="wpkWrite"/>
         <Source Value="C:\lazarus\fpc\3.2.2\source\rtl\inc\objpas.inc"/>
         <Line Value="335"/>
+      </Item>
+      <Item>
+        <Kind Value="bpkSource"/>
+        <WatchScope Value="wpsLocal"/>
+        <WatchKind Value="wpkWrite"/>
+        <Source Value="commpp.pas"/>
+        <Line Value="162"/>
       </Item>
     </BreakPoints>
     <Watches>
