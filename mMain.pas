@@ -1171,8 +1171,8 @@ begin
         else
         begin
           Op := DOP_OUTKEYS_STATE;
-          Log(s + Format('HW: %d %d', [256 * r[3] + r[4],
-            256 * r[5] + r[6]]));
+          Log(s + Format('HW: %d %d', [256 * r[3] + r[4], 256 *
+            r[5] + r[6]]));
         end;
 
       DOP_STATE:
@@ -1631,6 +1631,7 @@ begin
 
         s := s + Format('Зона #%d Состояние >>', [256 * r[3] + r[4]]);
 
+        {защита: в пакете после неготов, потеря связи приходит взято, норма и т п.}
         SynNorma := True;
         SynConnect := True;
         for i := 1 to r[5] do
@@ -1664,15 +1665,14 @@ begin
               STATEZONE_MSG:
               begin
                 case mes.Level of
-                  2, 41, 45, 82, 165, 187, 189,
+                  2, 41, 45, 82, 90, 165, 189,
                   190, 192, 194, 196, 198,
                   202, 205, 211, 212, 214,
-                  215, 222, 224, 225, 250:
+                  215, 222, 224, 225:
                     SynNorma := False;
                 end;
                 case mes.Level of
-                  45, 46, 90, 187, 189,
-                  190, 250:
+                  187, 250:
                     SynConnect := False;
                 end;
               end;
@@ -1869,7 +1869,6 @@ begin
 
             7:
             begin
-
               Childindex := FindChild(OUTKEY, 256 * r[i + 2] + r[i + 3]);
               if Childindex <> $FFFF then
               begin
