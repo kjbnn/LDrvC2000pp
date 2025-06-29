@@ -23,8 +23,8 @@ type
     procedure DumpExceptionCallStack(E: Exception);
   end;
 
-function GetCRC16(Buffer: array of byte; Number: byte): word;
-function CRC16(Buffer: array of byte; Number: byte): word;
+function GetCRC16(Buffer: TBuf; Number: byte): word;
+function CRC16(Buffer: TBuf; Number: byte): word;
 
 
 implementation
@@ -33,7 +33,7 @@ uses
   Forms,
   mCheckDrv, mLogging;
 
-function ArrayToStr(Ar: array of byte; Count: byte): string;
+function ArrayToStr(Ar: TBuf; Count: byte): string;
 var
   i: byte;
 begin
@@ -176,7 +176,7 @@ end;
 
 
 //**Original Code from Sky devil**
-function GetCRC16(Buffer: array of byte; Number: byte): word;
+function GetCRC16(Buffer: TBuf; Number: byte): word;
 var
   crc: word;
   Mask: word;
@@ -200,7 +200,7 @@ begin
 end;
 
 
-function CRC16(Buffer: array of byte; Number: byte): word;
+function CRC16(Buffer: TBuf; Number: byte): word;
 const
   ArrayCRCHi: array [0..255] of byte = (
     $00, $C1, $81, $40, $01, $C0, $80, $41, $01, $C0,

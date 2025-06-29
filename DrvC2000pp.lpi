@@ -24,7 +24,7 @@
       <MajorVersionNr Value="3"/>
       <MinorVersionNr Value="1"/>
       <RevisionNr Value="5"/>
-      <BuildNr Value="11"/>
+      <BuildNr Value="22"/>
       <Language Value="0419"/>
       <StringTable CompanyName="ООО &quot;Рост-ВСП&quot;" FileDescription="Драйвер С2000-ПП" LegalCopyright="ООО &quot;Рост-ВСП&quot;" ProductName="РОСТЭК" ProductVersion="3.1"/>
     </VersionInfo>
@@ -112,6 +112,8 @@
           </CodeGeneration>
           <Linking>
             <Debugging>
+              <GenerateDebugInfo Value="False"/>
+              <RunWithoutDebug Value="True"/>
               <DebugInfoType Value="dsDwarf3"/>
               <StripSymbols Value="True"/>
             </Debugging>

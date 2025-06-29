@@ -3,12 +3,12 @@
   <ProjectSession>
     <PathDelim Value="\"/>
     <Version Value="12"/>
-    <BuildModes Active="Release"/>
+    <BuildModes Active="Debug"/>
     <Units Count="30">
       <Unit0>
         <Filename Value="DrvC2000pp.lpr"/>
         <IsPartOfProject Value="True"/>
-        <EditorIndex Value="5"/>
+        <EditorIndex Value="7"/>
         <CursorPos Y="29"/>
         <UsageCount Value="220"/>
         <Loaded Value="True"/>
@@ -21,8 +21,8 @@
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
         <EditorIndex Value="1"/>
-        <TopLine Value="1166"/>
-        <CursorPos X="48" Y="1199"/>
+        <TopLine Value="109"/>
+        <CursorPos X="7" Y="123"/>
         <UsageCount Value="209"/>
         <Loaded Value="True"/>
         <LoadedDesigner Value="True"/>
@@ -32,9 +32,8 @@
         <Filename Value="commpp.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="commPP"/>
-        <IsVisibleTab Value="True"/>
-        <TopLine Value="50"/>
-        <CursorPos X="84" Y="61"/>
+        <TopLine Value="16"/>
+        <CursorPos X="17" Y="36"/>
         <ExtraEditorCount Value="1"/>
         <ExtraEditor1>
           <EditorIndex Value="-1"/>
@@ -59,10 +58,12 @@
       <Unit4>
         <Filename Value="..\LKsb\windows\cOsFeature.pas"/>
         <IsPartOfProject Value="True"/>
-        <EditorIndex Value="-1"/>
-        <TopLine Value="41"/>
-        <CursorPos X="37" Y="58"/>
+        <IsVisibleTab Value="True"/>
+        <EditorIndex Value="2"/>
+        <TopLine Value="147"/>
+        <CursorPos X="35" Y="167"/>
         <UsageCount Value="220"/>
+        <Loaded Value="True"/>
         <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit4>
       <Unit5>
@@ -104,8 +105,8 @@
         <Filename Value="..\LKsb\ksbmesapi\cKsbmes.pas"/>
         <IsPartOfProject Value="True"/>
         <EditorIndex Value="-1"/>
-        <TopLine Value="157"/>
-        <CursorPos X="3" Y="190"/>
+        <TopLine Value="192"/>
+        <CursorPos X="13" Y="205"/>
         <UsageCount Value="220"/>
         <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit9>
@@ -121,10 +122,10 @@
       <Unit11>
         <Filename Value="mLogging.pas"/>
         <IsPartOfProject Value="True"/>
-        <EditorIndex Value="3"/>
+        <EditorIndex Value="5"/>
         <TopLine Value="11"/>
         <CursorPos X="7" Y="39"/>
-        <UsageCount Value="136"/>
+        <UsageCount Value="138"/>
         <Bookmarks Count="2">
           <Item0 Left="1" Top="1" ID="1"/>
           <Item1 Y="125" Left="13" Top="102" ID="2"/>
@@ -154,8 +155,8 @@
       </Unit14>
       <Unit15>
         <Filename Value="mCheckDrv.pas"/>
-        <EditorIndex Value="2"/>
-        <CursorPos X="61" Y="52"/>
+        <EditorIndex Value="4"/>
+        <CursorPos X="22" Y="52"/>
         <UsageCount Value="104"/>
         <Loaded Value="True"/>
         <DefaultSyntaxHighlighter Value="Delphi"/>
@@ -168,17 +169,18 @@
       </Unit16>
       <Unit17>
         <Filename Value="C:\Users\uk\AppData\Local\lazarus\onlinepackagemanager\packages\synapse40.1\synaser.pas"/>
-        <EditorIndex Value="-1"/>
-        <TopLine Value="544"/>
-        <CursorPos X="22" Y="573"/>
-        <UsageCount Value="24"/>
+        <EditorIndex Value="3"/>
+        <TopLine Value="680"/>
+        <CursorPos X="29" Y="708"/>
+        <UsageCount Value="25"/>
+        <Loaded Value="True"/>
       </Unit17>
       <Unit18>
         <Filename Value="C:\lazarus\fpc\3.2.2\source\rtl\objpas\classes\classesh.inc"/>
-        <EditorIndex Value="4"/>
+        <EditorIndex Value="6"/>
         <TopLine Value="1773"/>
         <CursorPos X="21" Y="1801"/>
-        <UsageCount Value="28"/>
+        <UsageCount Value="29"/>
         <Loaded Value="True"/>
       </Unit18>
       <Unit19>
@@ -193,7 +195,7 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="2127"/>
         <CursorPos Y="2163"/>
-        <UsageCount Value="0"/>
+        <UsageCount Value="10"/>
       </Unit20>
       <Unit21>
         <Filename Value="C:\lazarus\fpc\3.2.2\source\rtl\win\wininc\func.inc"/>
@@ -268,124 +270,124 @@
     </OtherDefines>
     <JumpHistory Count="30" HistoryIndex="29">
       <Position1>
-        <Filename Value="mLogging.pas"/>
-        <Caret Line="160" Column="20" TopLine="133"/>
+        <Filename Value="commpp.pas"/>
+        <Caret Line="27" Column="21" TopLine="13"/>
       </Position1>
       <Position2>
-        <Filename Value="mLogging.pas"/>
-        <Caret Line="162" Column="24" TopLine="134"/>
+        <Filename Value="commpp.pas"/>
+        <Caret Line="203" Column="22" TopLine="189"/>
       </Position2>
       <Position3>
-        <Filename Value="mLogging.pas"/>
-        <Caret Line="163" Column="15" TopLine="134"/>
+        <Filename Value="commpp.pas"/>
+        <Caret Line="41" Column="26" TopLine="22"/>
       </Position3>
       <Position4>
-        <Filename Value="mLogging.pas"/>
-        <Caret Line="172" Column="11" TopLine="134"/>
+        <Filename Value="commpp.pas"/>
+        <Caret Line="31" Column="21" TopLine="12"/>
       </Position4>
       <Position5>
-        <Filename Value="mLogging.pas"/>
-        <Caret Line="145" Column="9" TopLine="132"/>
+        <Filename Value="commpp.pas"/>
+        <Caret Line="26" Column="19" TopLine="12"/>
       </Position5>
       <Position6>
-        <Filename Value="mLogging.pas"/>
-        <Caret Line="154" Column="26" TopLine="127"/>
+        <Filename Value="commpp.pas"/>
+        <Caret Line="27" Column="22" TopLine="13"/>
       </Position6>
       <Position7>
-        <Filename Value="mLogging.pas"/>
-        <Caret Line="140" Column="25" TopLine="127"/>
+        <Filename Value="commpp.pas"/>
+        <Caret Line="26" Column="19" TopLine="12"/>
       </Position7>
       <Position8>
-        <Filename Value="mLogging.pas"/>
-        <Caret Line="17" Column="24" TopLine="8"/>
+        <Filename Value="commpp.pas"/>
+        <Caret Line="27" Column="22" TopLine="13"/>
       </Position8>
       <Position9>
-        <Filename Value="mMain.pas"/>
-        <Caret Line="440" Column="18" TopLine="411"/>
+        <Filename Value="commpp.pas"/>
+        <Caret Line="26" Column="19" TopLine="12"/>
       </Position9>
       <Position10>
-        <Filename Value="mLogging.pas"/>
-        <Caret Line="29" Column="17" TopLine="95"/>
+        <Filename Value="commpp.pas"/>
+        <Caret Line="27" Column="22" TopLine="13"/>
       </Position10>
       <Position11>
-        <Filename Value="mLogging.pas"/>
-        <Caret Line="137" TopLine="93"/>
+        <Filename Value="commpp.pas"/>
+        <Caret Line="26" Column="19" TopLine="12"/>
       </Position11>
       <Position12>
-        <Filename Value="mLogging.pas"/>
-        <Caret Line="111" Column="3" TopLine="91"/>
+        <Filename Value="commpp.pas"/>
+        <Caret Line="27" Column="22" TopLine="13"/>
       </Position12>
       <Position13>
-        <Filename Value="mMain.pas"/>
-        <Caret Line="1195" Column="29" TopLine="1166"/>
+        <Filename Value="commpp.pas"/>
+        <Caret Line="26" Column="16" TopLine="13"/>
       </Position13>
       <Position14>
-        <Filename Value="mLogging.pas"/>
-        <Caret Line="104" TopLine="77"/>
+        <Filename Value="commpp.pas"/>
+        <Caret Line="188" Column="3" TopLine="178"/>
       </Position14>
       <Position15>
-        <Filename Value="mMain.pas"/>
-        <Caret Line="1195" Column="29" TopLine="1166"/>
+        <Filename Value="commpp.pas"/>
+        <Caret Line="27" Column="10" TopLine="12"/>
       </Position15>
       <Position16>
-        <Filename Value="mMain.pas"/>
-        <Caret Line="1199" Column="48" TopLine="1166"/>
+        <Filename Value="commpp.pas"/>
+        <Caret Line="203" Column="15" TopLine="189"/>
       </Position16>
       <Position17>
         <Filename Value="commpp.pas"/>
-        <Caret Line="73" Column="36" TopLine="40"/>
+        <Caret Line="27" Column="10" TopLine="13"/>
       </Position17>
       <Position18>
         <Filename Value="commpp.pas"/>
-        <Caret Line="66" TopLine="40"/>
+        <Caret Line="149" Column="28" TopLine="136"/>
       </Position18>
       <Position19>
         <Filename Value="commpp.pas"/>
-        <Caret Line="50" TopLine="40"/>
+        <Caret Line="203" Column="10" TopLine="189"/>
       </Position19>
       <Position20>
         <Filename Value="commpp.pas"/>
-        <Caret Line="170" TopLine="144"/>
+        <Caret Line="149" Column="30" TopLine="136"/>
       </Position20>
       <Position21>
-        <Filename Value="commpp.pas"/>
-        <Caret Line="164" TopLine="144"/>
+        <Filename Value="mMain.pas"/>
+        <Caret Line="189" Column="8" TopLine="177"/>
       </Position21>
       <Position22>
-        <Filename Value="commpp.pas"/>
-        <Caret Line="166" TopLine="144"/>
+        <Filename Value="mMain.pas"/>
+        <Caret Line="123" Column="7" TopLine="109"/>
       </Position22>
       <Position23>
         <Filename Value="commpp.pas"/>
-        <Caret Line="167" TopLine="144"/>
+        <Caret Line="203" Column="28" TopLine="195"/>
       </Position23>
       <Position24>
         <Filename Value="commpp.pas"/>
-        <Caret Line="168" TopLine="144"/>
+        <Caret Line="27" Column="28" TopLine="13"/>
       </Position24>
       <Position25>
         <Filename Value="commpp.pas"/>
-        <Caret Line="169" TopLine="144"/>
+        <Caret Line="26" Column="10" TopLine="12"/>
       </Position25>
       <Position26>
         <Filename Value="commpp.pas"/>
-        <Caret Line="170" TopLine="144"/>
+        <Caret Line="179" Column="31" TopLine="178"/>
       </Position26>
       <Position27>
         <Filename Value="commpp.pas"/>
-        <Caret Line="75" TopLine="49"/>
+        <Caret Line="36" Column="10" TopLine="22"/>
       </Position27>
       <Position28>
         <Filename Value="commpp.pas"/>
-        <Caret Line="76" TopLine="49"/>
+        <Caret Line="114" Column="43" TopLine="101"/>
       </Position28>
       <Position29>
-        <Filename Value="mLogging.pas"/>
-        <Caret Line="38" Column="10" TopLine="11"/>
+        <Filename Value="commpp.pas"/>
+        <Caret Line="139" Column="46" TopLine="126"/>
       </Position29>
       <Position30>
-        <Filename Value="mLogging.pas"/>
-        <Caret Line="39" Column="7" TopLine="11"/>
+        <Filename Value="commpp.pas"/>
+        <Caret Line="36" Column="17" TopLine="16"/>
       </Position30>
     </JumpHistory>
     <RunParams>

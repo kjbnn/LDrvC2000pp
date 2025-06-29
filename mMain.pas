@@ -248,13 +248,12 @@ type
   end;
 
 
-function ArrayToStr(Ar: array of byte; Count: byte): string;
 function GetVersion(FileName: string): string;
 function FindDev(Number: word): TDev;
 function FindDevWithPultid(DevId: word; KindObj: TObjectType; ObjId: word): TDev;
 procedure Consider(mes: KSBMES; str: string);
 procedure Send(mes: KSBMES); overload;
-procedure Send(mes: KSBMES; str: PChar); overload;
+procedure Send(mes: KSBMES; str: pchar); overload;
 
 var
   aMain: TaMain;
@@ -280,7 +279,7 @@ uses
   mCheckDrv,
   mLogging;
 
-{$R *.lfm}
+  {$R *.lfm}
 
 var
   ModuleNetDevice, ModuleBigDevice: word;
@@ -288,14 +287,12 @@ var
 procedure TaMain.FormCreate(Sender: TObject);
 const
   IndicatorSize = 15;
-
 var
-  i, i1, i2, i3: byte;
+  i, i1, i2, i3: word;
   mes: KSBMES;
   line: TLine;
   dev: TDev;
   Obj: TOrionObj;
-
 begin
   AppKsbInit(self);
   TimerVisible.Enabled := True;
@@ -320,16 +317,16 @@ begin
     Log('Файл ' + Option.FileMask + '.xml прочитан');
 
     Log('Инициализация состояний элементов');
-    for i1:=1 to Lines.Count do
+    for i1 := 1 to Lines.Count do
     begin
-      line:= Lines.Items[i1-1];
-      for i2:=1 to line.ChildsObj.Count do
+      line := Lines.Items[i1 - 1];
+      for i2 := 1 to line.ChildsObj.Count do
       begin
-        dev:= line.ChildsObj.Items[i2-1];
-        for i3:=1 to dev.ChildsObj.Count do //TOrionObj
+        dev := line.ChildsObj.Items[i2 - 1];
+        for i3 := 1 to dev.ChildsObj.Count do //TOrionObj
         begin
-          Obj:= dev.ChildsObj.Items[i3-1];
-          if (Obj.Kind = ZONE) and (Obj.ZnType in [1,2,4,5]) then
+          Obj := dev.ChildsObj.Items[i3 - 1];
+          if (Obj.Kind = ZONE) and (Obj.ZnType in [1, 2, 4, 5]) then
           begin
             Init(mes);
             mes.NetDevice := ModuleNetDevice;
@@ -362,7 +359,7 @@ begin
     begin
       Log('Инициализация связи с C2000-ПП');
       for i := 1 to Lines.Count do
-         (TLine(Lines.Items[i-1]).Port as TPort).Start;
+        (TLine(Lines.Items[i - 1]).Port as TPort).Start;
     end
     else
       MessageDlg('Внимание',
@@ -458,7 +455,7 @@ end;
 
 procedure TaMain.ReadConfiguration;
 begin
-  with  Option do
+  with Option do
   begin
     ReadXMLFile(Xml, ExtractFilePath(Application.ExeName) + FileMask + '.xml');
     ReadConfigNode(Xml.FindNode('C2000ppConfig'), nil);
@@ -471,7 +468,6 @@ var
   i: word;
   pObj: pointer;
   s: string;
-
 begin
   if Node = nil then
     exit;
@@ -493,10 +489,10 @@ begin
       with TLine(pObj) do
       begin
         ParentObj := pParent;
-        Port:= TPort.Create(True);
+        Port := TPort.Create(True);
         with Port as TPort do
         begin
-          LiveId:= CheckDrv.AddId;
+          LiveId := CheckDrv.AddId;
           PortName := TDOMElement(XmlDocNode).GetAttribute('Port');
           Baud := TDOMElement(XmlDocNode).GetAttribute('Baud');
           Bits := TDOMElement(XmlDocNode).GetAttribute('Bits');
@@ -719,7 +715,6 @@ procedure TDev.SetConnect(Value: boolean);
 var
   mes: KSBMES;
   s: string;
-
 begin
   if Value then
   begin
@@ -858,9 +853,9 @@ begin
     ch := 'R';
 
   if Option.Debug then
-  if CurDev <> nil then
-    log(Format('%s%s %s (%d)', [s, ch, GetEnumName(TypeInfo(TDevOp), Ord(CurDev.Op)),
-      Ord(CurDev.Op)]));
+    if CurDev <> nil then
+      log(Format('%s%s %s (%d)', [s, ch, GetEnumName(TypeInfo(TDevOp), Ord(CurDev.Op)),
+        Ord(CurDev.Op)]));
 
 
   { IsWrite }
@@ -1176,8 +1171,8 @@ begin
         else
         begin
           Op := DOP_OUTKEYS_STATE;
-          Log(s + Format('HW: %d %d',
-            [256 * r[3] + r[4], 256 * r[5] + r[6]]));
+          Log(s + Format('HW: %d %d', [256 * r[3] + r[4],
+            256 * r[5] + r[6]]));
         end;
 
       DOP_STATE:
@@ -1189,7 +1184,13 @@ begin
           else if cObj.Kind = OUTKEY then
             Address := MB_BASE_ADR_OUTKEY + cObj.Number
           else if cObj.Kind = PART then
-            Address := MB_BASE_ADR_PART + cObj.Number;
+            Address := MB_BASE_ADR_PART + cObj.Number
+          else
+          begin
+            Address := 0;
+            raise Exception.Create(
+              'DOP_STATE: ошибка вычисления Address!');
+          end;
           w[0] := Number;
           w[1] := $03;
           w[2] := hi(Address);
@@ -1589,7 +1590,6 @@ var
   Childindex: word;
   Child: TOrionObj;
   SynNorma, SynConnect: boolean;
-
 begin
   with CurDev, aMain do
   begin
@@ -1945,7 +1945,6 @@ function TLine.NextDev: TDev;
 var
   Index: word;
   Value: integer;
-
 begin
   Result := nil;
   Value := ChildsObj.Count;
@@ -1975,13 +1974,11 @@ end;
 (* --------------- *)
 (*      KSBMES     *)
 (* --------------- *)
-procedure Send(mes: KSBMES; str: PChar);
+procedure Send(mes: KSBMES; str: pchar);
 const
   max_str_len = 100;
-
 var
   s: string;
-
 begin
   mes.Proga := KsbAppType;
   mes.NumDevice := mes.SmallDevice;
@@ -2009,23 +2006,24 @@ procedure Consider(mes: KSBMES; str: string);
 var
   s: string;
   i: word;
-  arr: array of Byte;
+  arr: array of byte;
   Dev: TDev;
   Param: word;
-
 begin
   if (mes.Proga <> KsbAppType) and (mes.NetDevice = ModuleNetDevice) then
-  case mes.Code of
-    //CHECK_LIVE_PROGRAM,
-    KILL_PROGRAM,
-    EXIT_PROGRAM,
-    BASE_ROSTEK_MSG..(BASE_ROSTEK_MSG + 999):;
-    else exit;
-  end;
+    case mes.Code of
+      //CHECK_LIVE_PROGRAM,
+      KILL_PROGRAM,
+      EXIT_PROGRAM,
+      BASE_ROSTEK_MSG..(BASE_ROSTEK_MSG + 999): ;
+      else
+        exit;
+    end;
 
+  arr := nil;
   if mes.Size > 0 then
   begin
-    SetLength(arr, Int64(mes.Size));
+    SetLength(arr, int64(mes.Size));
     Simbol2Bin(str, @arr[0], mes.Size);
   end;
 
@@ -2038,7 +2036,7 @@ begin
     s := s + Format(' str(%d)=%s', [mes.Size, str]);
   Log(s);
 
-  s:='';
+  s := '';
   case mes.Code of
 
     GET_STATES_MSG:
@@ -2082,7 +2080,8 @@ begin
         begin
           Dev.AddCmd(DOP_CMD_ZONE_DISARM,
             TOrionObj(Dev.ChildsObj.Items[Param]).Number);
-          s := s + Format(' -> найдено оборудование: PP#%d шлейф #%d',
+          s := s + Format(
+            ' -> найдено оборудование: PP#%d шлейф #%d',
             [Dev.Number, TOrionObj(Dev.ChildsObj.Items[Param]).Number]);
         end;
       end
@@ -2102,7 +2101,8 @@ begin
         begin
           Dev.AddCmd(DOP_CMD_ZONE_ARM,
             TOrionObj(Dev.ChildsObj.Items[Param]).Number);
-          s := s + Format(' -> найдено оборудование: PP#%d шлейф #%d',
+          s := s + Format(
+            ' -> найдено оборудование: PP#%d шлейф #%d',
             [Dev.Number, TOrionObj(Dev.ChildsObj.Items[Param]).Number]);
         end;
       end
@@ -2162,7 +2162,8 @@ begin
         begin
           Dev.AddCmd(DOP_CMD_RELAY_OFF,
             TOrionObj(Dev.ChildsObj.Items[Param]).Number);
-          s := s + Format(' -> найдено оборудование: PP#%d реле #%d',
+          s := s + Format(
+            ' -> найдено оборудование: PP#%d реле #%d',
             [Dev.Number, TOrionObj(Dev.ChildsObj.Items[Param]).Number]);
         end;
       end
@@ -2182,7 +2183,8 @@ begin
         begin
           Dev.AddCmd(DOP_CMD_RELAY_ON,
             TOrionObj(Dev.ChildsObj.Items[Param]).Number);
-          s := s + Format(' -> найдено оборудование: PP#%d реле #%d',
+          s := s + Format(
+            ' -> найдено оборудование: PP#%d реле #%d',
             [Dev.Number, TOrionObj(Dev.ChildsObj.Items[Param]).Number]);
         end;
       end
@@ -2192,7 +2194,7 @@ begin
 
   end;
 
-  if s<>'' then
+  if s <> '' then
     Log('READ: Получена команда: ' + s);
 end;
 
@@ -2241,7 +2243,7 @@ end;
 procedure TaMain.FormTimerTimer(Sender: TObject);
 begin
   SetIndicator;
-  if length(Live)>0 then Live[0] := 0;
+  if length(Live) > 0 then Live[0] := 0;
 end;
 
 procedure TaMain.MenuItem1Click(Sender: TObject);
@@ -2360,17 +2362,6 @@ begin
   AppKsbTimer();
 end;
 
-function ArrayToStr(Ar: array of byte; Count: byte): string;
-var
-  i: byte;
-begin
-  Result := '';
-  for i := 1 to Count do
-    Result := Result + IntToHex(Ar[i - 1], 2);
-end;
-
-
-
 function GetVersion(FileName: string): string;
 var
   Version: TFileVersionInfo;
@@ -2407,7 +2398,6 @@ function FindDevWithPultid(DevId: word; KindObj: TObjectType; ObjId: word): TDev
 var
   i: word;
   Dev: TDev;
-
 begin
   Result := nil;
   for i := 1 to Devs.Count do
@@ -2449,17 +2439,16 @@ var
   mes: KSBMES;
   tail: string;
   step: byte;
-
 begin
   init(mes);
   tail := '';
-  step:= 0;
+  step := 0;
   try
     Unpack(strmes, mes, tail);
-    step:= 1;
+    step := 1;
     Consider(mes, tail);
   except
-    if step=0 then
+    if step = 0 then
       Log('Ошибка распаковки KSBMES сообщения !')
     else
       Log('Ошибка обработки KSBMES сообщения !');
@@ -2700,6 +2689,5 @@ initialization
   RelayState[1] := 'Вкл.';
   OrionState[0] := 'Связь потеряна';
   OrionState[1] := 'Связь установлена';
-
 
 end.
