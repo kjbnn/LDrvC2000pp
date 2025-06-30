@@ -8,11 +8,9 @@
       <Unit0>
         <Filename Value="DrvC2000pp.lpr"/>
         <IsPartOfProject Value="True"/>
-        <EditorIndex Value="1"/>
+        <EditorIndex Value="-1"/>
         <CursorPos Y="29"/>
         <UsageCount Value="220"/>
-        <Loaded Value="True"/>
-        <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit0>
       <Unit1>
         <Filename Value="mMain.pas"/>
@@ -21,33 +19,30 @@
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
         <IsVisibleTab Value="True"/>
-        <TopLine Value="341"/>
-        <CursorPos Y="370"/>
+        <TopLine Value="1659"/>
+        <CursorPos X="28" Y="1671"/>
         <UsageCount Value="209"/>
         <Bookmarks Count="2">
-          <Item0 X="20" Y="1167" Left="1" Top="1136" ID="1"/>
-          <Item1 X="7" Y="2053" Left="1" Top="2042" ID="2"/>
+          <Item0 X="20" Y="1165" Left="1" Top="1134" ID="1"/>
+          <Item1 X="7" Y="2051" Left="1" Top="2040" ID="2"/>
         </Bookmarks>
         <Loaded Value="True"/>
         <LoadedDesigner Value="True"/>
-        <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit1>
       <Unit2>
         <Filename Value="commpp.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="commPP"/>
-        <EditorIndex Value="2"/>
-        <TopLine Value="84"/>
-        <CursorPos X="46" Y="120"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="103"/>
+        <CursorPos X="77" Y="133"/>
         <ExtraEditorCount Value="1"/>
         <ExtraEditor1>
           <EditorIndex Value="-1"/>
-          <TopLine Value="103"/>
-          <CursorPos X="77" Y="133"/>
+          <TopLine Value="84"/>
+          <CursorPos X="46" Y="120"/>
         </ExtraEditor1>
         <UsageCount Value="220"/>
-        <Loaded Value="True"/>
-        <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit2>
       <Unit3>
         <Filename Value="..\LKsb\common\cIniKey.pas"/>
@@ -126,7 +121,7 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="64"/>
         <CursorPos X="41" Y="73"/>
-        <UsageCount Value="164"/>
+        <UsageCount Value="166"/>
         <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit11>
       <Unit12>
@@ -284,127 +279,118 @@
       <Define1 Value="PUREPASCAL"/>
       <Define2 Value="IS_WINDOWS"/>
     </OtherDefines>
-    <JumpHistory Count="30" HistoryIndex="29">
+    <JumpHistory Count="28" HistoryIndex="27">
       <Position1>
         <Filename Value="mMain.pas"/>
-        <Caret Line="535" Column="35" TopLine="504"/>
+        <Caret Line="2261" Column="6" TopLine="2252"/>
       </Position1>
       <Position2>
         <Filename Value="mMain.pas"/>
-        <Caret Line="244" Column="32" TopLine="214"/>
+        <Caret Line="248" Column="21" TopLine="218"/>
       </Position2>
       <Position3>
         <Filename Value="mMain.pas"/>
-        <Caret Line="314" Column="66" TopLine="264"/>
+        <Caret Line="372" Column="8" TopLine="363"/>
       </Position3>
       <Position4>
         <Filename Value="mMain.pas"/>
-        <Caret Line="1218" Column="7" TopLine="1188"/>
+        <Caret Line="364" Column="27" TopLine="363"/>
       </Position4>
       <Position5>
         <Filename Value="mMain.pas"/>
-        <Caret Line="1344" Column="21" TopLine="1313"/>
+        <Caret Line="248" Column="15" TopLine="218"/>
       </Position5>
       <Position6>
         <Filename Value="mMain.pas"/>
-        <Caret Line="1606" Column="7" TopLine="1574"/>
+        <Caret Line="364" Column="18" TopLine="332"/>
       </Position6>
       <Position7>
         <Filename Value="mMain.pas"/>
-        <Caret Line="2070" TopLine="2043"/>
+        <Caret Line="2259" Column="19" TopLine="2230"/>
       </Position7>
       <Position8>
         <Filename Value="mMain.pas"/>
-        <Caret Line="2254" Column="18" TopLine="2248"/>
+        <Caret Line="244" TopLine="214"/>
       </Position8>
       <Position9>
         <Filename Value="mMain.pas"/>
-        <Caret Line="224" Column="28" TopLine="217"/>
+        <Caret Line="360" TopLine="329"/>
       </Position9>
       <Position10>
         <Filename Value="mMain.pas"/>
-        <Caret Line="361" Column="25" TopLine="320"/>
+        <Caret Line="2256" TopLine="2225"/>
       </Position10>
       <Position11>
         <Filename Value="mMain.pas"/>
-        <Caret Line="2055" Column="13" TopLine="2019"/>
+        <Caret Line="247" Column="15" TopLine="219"/>
       </Position11>
       <Position12>
         <Filename Value="mMain.pas"/>
-        <Caret Line="852" TopLine="820"/>
+        <Caret Line="362" Column="18" TopLine="332"/>
       </Position12>
       <Position13>
         <Filename Value="mMain.pas"/>
-        <Caret Line="2261" Column="6" TopLine="2252"/>
+        <Caret Line="2055" Column="13" TopLine="2026"/>
       </Position13>
       <Position14>
         <Filename Value="mMain.pas"/>
-        <Caret Line="248" Column="21" TopLine="218"/>
+        <Caret Line="362" Column="18" TopLine="332"/>
       </Position14>
       <Position15>
         <Filename Value="mMain.pas"/>
-        <Caret Line="372" Column="8" TopLine="363"/>
+        <Caret Line="2055" Column="9" TopLine="2026"/>
       </Position15>
       <Position16>
-        <Filename Value="DrvC2000pp.lpr"/>
-        <Caret Line="29"/>
+        <Filename Value="mMain.pas"/>
+        <Caret Line="362" Column="27" TopLine="338"/>
       </Position16>
       <Position17>
         <Filename Value="mMain.pas"/>
-        <Caret Line="364" Column="27" TopLine="363"/>
+        <Caret Line="2048" Column="68" TopLine="2025"/>
       </Position17>
       <Position18>
         <Filename Value="mMain.pas"/>
-        <Caret Line="248" Column="15" TopLine="218"/>
+        <Caret Line="2274" TopLine="2244"/>
       </Position18>
       <Position19>
         <Filename Value="mMain.pas"/>
-        <Caret Line="364" Column="18" TopLine="332"/>
+        <Caret Line="2273" TopLine="2243"/>
       </Position19>
       <Position20>
         <Filename Value="mMain.pas"/>
-        <Caret Line="2259" Column="19" TopLine="2230"/>
+        <Caret Line="344" Column="41" TopLine="326"/>
       </Position20>
       <Position21>
         <Filename Value="mMain.pas"/>
-        <Caret Line="244" TopLine="214"/>
       </Position21>
       <Position22>
         <Filename Value="mMain.pas"/>
-        <Caret Line="360" TopLine="329"/>
+        <Caret Line="75" Column="16" TopLine="23"/>
       </Position22>
       <Position23>
         <Filename Value="mMain.pas"/>
-        <Caret Line="2256" TopLine="2225"/>
+        <Caret Line="386" Column="36" TopLine="355"/>
       </Position23>
       <Position24>
-        <Filename Value="DrvC2000pp.lpr"/>
-        <Caret Line="29"/>
+        <Filename Value="mMain.pas"/>
+        <Caret Line="1654" Column="38" TopLine="1633"/>
       </Position24>
       <Position25>
         <Filename Value="mMain.pas"/>
-        <Caret Line="247" Column="15" TopLine="219"/>
+        <Caret Line="1671" Column="28" TopLine="1651"/>
       </Position25>
       <Position26>
         <Filename Value="mMain.pas"/>
-        <Caret Line="362" Column="18" TopLine="332"/>
+        <Caret Line="75" Column="16" TopLine="45"/>
       </Position26>
       <Position27>
         <Filename Value="mMain.pas"/>
-        <Caret Line="2055" Column="13" TopLine="2026"/>
+        <Caret Line="386" Column="36" TopLine="334"/>
       </Position27>
       <Position28>
         <Filename Value="mMain.pas"/>
-        <Caret Line="362" Column="18" TopLine="332"/>
+        <Caret Line="1654" Column="38" TopLine="1603"/>
       </Position28>
-      <Position29>
-        <Filename Value="mMain.pas"/>
-        <Caret Line="2055" Column="9" TopLine="2026"/>
-      </Position29>
-      <Position30>
-        <Filename Value="mMain.pas"/>
-        <Caret Line="362" Column="18" TopLine="332"/>
-      </Position30>
     </JumpHistory>
     <RunParams>
       <FormatVersion Value="2"/>

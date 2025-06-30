@@ -212,7 +212,6 @@ type
     N5: TMenuItem;
     SpinEdit1: TSpinEdit;
     SpinEdit2: TSpinEdit;
-    SpinEdit3: TSpinEdit;
     StatusBar1: TStatusBar;
     Memo1: TMemo;
     N1: TMenuItem;
@@ -353,7 +352,6 @@ begin
   begin
     SpinEdit1.Visible := False;
     SpinEdit2.Visible := False;
-    SpinEdit3.Visible := False;
     MenuItem2.Visible := False;
   end;
 
@@ -2263,7 +2261,6 @@ end;
 procedure TaMain.MenuItem3Click(Sender: TObject);
 var
   mes: KSBMES;
-  i: word;
 begin
   init(mes);
   mes.Proga := 1;
@@ -2272,14 +2269,12 @@ begin
   mes.Bigdevice := SpinEdit1.Value;
   mes.Smalldevice := SpinEdit2.Value;
   mes.Code := ZONE_ARM_MSG;
-  for i := 1 to SpinEdit3.Value do
-    Consider(mes, '');
+  Consider(mes, '');
 end;
 
 procedure TaMain.MenuItem4Click(Sender: TObject);
 var
   mes: KSBMES;
-  i: word;
 begin
   init(mes);
   mes.Proga := 1;
@@ -2288,14 +2283,12 @@ begin
   mes.Bigdevice := SpinEdit1.Value;
   mes.Smalldevice := SpinEdit2.Value;
   mes.Code := ZONE_DISARM_MSG;
-  for i := 1 to SpinEdit3.Value do
-    Consider(mes, '');
+  Consider(mes, '');
 end;
 
 procedure TaMain.MenuItem5Click(Sender: TObject);
 var
   mes: KSBMES;
-  i: word;
 begin
   init(mes);
   mes.Proga := 1;
@@ -2304,14 +2297,12 @@ begin
   mes.Bigdevice := SpinEdit1.Value;
   mes.Smalldevice := SpinEdit2.Value;
   mes.Code := PART_ARM_MSG;
-  for i := 1 to SpinEdit3.Value do
-    Consider(mes, '');
+  Consider(mes, '');
 end;
 
 procedure TaMain.MenuItem6Click(Sender: TObject);
 var
   mes: KSBMES;
-  i: word;
 begin
   init(mes);
   mes.Proga := 1;
@@ -2320,14 +2311,12 @@ begin
   mes.Bigdevice := SpinEdit1.Value;
   mes.Smalldevice := SpinEdit2.Value;
   mes.Code := PART_DISARM_MSG;
-  for i := 1 to SpinEdit3.Value do
-    Consider(mes, '');
+  Consider(mes, '');
 end;
 
 procedure TaMain.MenuItem7Click(Sender: TObject);
 var
   mes: KSBMES;
-  i: word;
 begin
   init(mes);
   mes.Proga := 1;
@@ -2336,14 +2325,12 @@ begin
   mes.Bigdevice := SpinEdit1.Value;
   mes.Smalldevice := SpinEdit2.Value;
   mes.Code := RELAY_ON_MSG;
-  for i := 1 to SpinEdit3.Value do
-    Consider(mes, '');
+  Consider(mes, '');
 end;
 
 procedure TaMain.MenuItem8Click(Sender: TObject);
 var
   mes: KSBMES;
-  i: word;
 begin
   init(mes);
   mes.Proga := 1;
@@ -2352,8 +2339,7 @@ begin
   mes.Bigdevice := SpinEdit1.Value;
   mes.Smalldevice := SpinEdit2.Value;
   mes.Code := RELAY_OFF_MSG;
-  for i := 1 to SpinEdit3.Value do
-    Consider(mes, '');
+  Consider(mes, '');
 end;
 
 procedure TaMain.MenuItem9Click(Sender: TObject);
