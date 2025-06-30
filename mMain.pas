@@ -244,6 +244,7 @@ type
     procedure ReadConfiguration;
     procedure ReadConfigNode(Node: TDOMNode; pParent: Pointer);
     procedure SetIndicator;
+    procedure InitState;
   public
   end;
 
@@ -288,11 +289,7 @@ procedure TaMain.FormCreate(Sender: TObject);
 const
   IndicatorSize = 15;
 var
-  i, i1, i2, i3: word;
-  mes: KSBMES;
-  line: TLine;
-  dev: TDev;
-  Obj: TOrionObj;
+  i: word;
 begin
   AppKsbInit(self);
   TimerVisible.Enabled := True;
@@ -315,45 +312,6 @@ begin
     Log('Чтение файла ' + Option.FileMask + '.xml...');
     ReadConfiguration;
     Log('Файл ' + Option.FileMask + '.xml прочитан');
-
-    Log('Инициализация состояний элементов');
-    for i1 := 1 to Lines.Count do
-    begin
-      line := Lines.Items[i1 - 1];
-      for i2 := 1 to line.ChildsObj.Count do
-      begin
-        dev := line.ChildsObj.Items[i2 - 1];
-        for i3 := 1 to dev.ChildsObj.Count do //TOrionObj
-        begin
-          Obj := dev.ChildsObj.Items[i3 - 1];
-          if (Obj.Kind = ZONE) and (Obj.ZnType in [1, 2, 4, 5]) then
-          begin
-            Init(mes);
-            mes.NetDevice := ModuleNetDevice;
-            mes.BigDevice := Obj.Bigdevice;
-            mes.SmallDevice := Obj.Smalldevice;
-            mes.Level := 250;
-            mes.TypeDevice := TYPEDEVICE_ZONE;
-            mes.Code := STATEZONE_MSG;
-
-            if (Obj.ZnType = 3) then
-              if (mes.Smalldevice = 0) then
-              begin
-                mes.TypeDevice := TYPEDEVICE_PULT;
-                mes.Code := STATEPULT_MSG;
-              end
-              else
-              begin
-                mes.TypeDevice := TYPEDEVICE_DEVICE;
-                mes.Code := STATEDEVICE_MSG;
-              end;
-
-            Send(mes);
-          end;
-        end;
-      end;
-    end;
-    Log('Инициализация состояний элементов выполнена');
 
     if not Option.Noport then
     begin
@@ -398,6 +356,56 @@ begin
     SpinEdit3.Visible := False;
     MenuItem2.Visible := False;
   end;
+
+end;
+
+procedure TaMain.InitState;
+var
+  i1, i2, i3: word;
+  mes: KSBMES;
+  line: TLine;
+  dev: TDev;
+  Obj: TOrionObj;
+begin
+  Log('Инициализация состояний элементов');
+  for i1 := 1 to Lines.Count do
+  begin
+    line := Lines.Items[i1 - 1];
+    for i2 := 1 to line.ChildsObj.Count do
+    begin
+      dev := line.ChildsObj.Items[i2 - 1];
+      for i3 := 1 to dev.ChildsObj.Count do //TOrionObj
+      begin
+        Obj := dev.ChildsObj.Items[i3 - 1];
+        if (Obj.Kind = ZONE) and (Obj.ZnType in [1, 2, 4, 5]) then
+        begin
+          Init(mes);
+          mes.NetDevice := ModuleNetDevice;
+          mes.BigDevice := Obj.Bigdevice;
+          mes.SmallDevice := Obj.Smalldevice;
+          mes.Level := 250;
+          mes.TypeDevice := TYPEDEVICE_ZONE;
+          mes.Code := STATEZONE_MSG;
+
+          if (Obj.ZnType = 3) then
+            if (mes.Smalldevice = 0) then
+            begin
+              mes.TypeDevice := TYPEDEVICE_PULT;
+              mes.Code := STATEPULT_MSG;
+            end
+            else
+            begin
+              mes.TypeDevice := TYPEDEVICE_DEVICE;
+              mes.Code := STATEDEVICE_MSG;
+            end;
+
+          Send(mes);
+          sleep(1);
+        end;
+      end;
+    end;
+  end;
+  Log('Инициализация состояний элементов выполнена');
 end;
 
 procedure TaMain.ReadParam;
@@ -858,7 +866,7 @@ begin
         Ord(CurDev.Op)]));
 
 
-  { IsWrite }
+  { Write }
   if IsWrite then
   begin
     CurDev := NextDev;
@@ -899,7 +907,7 @@ begin
     end;
   end
 
-  { not IsWrite }
+  { Read }
   else
     with CurDev do
     begin
@@ -954,7 +962,7 @@ begin
 
           6:
             s := s +
-              'Ведомый занят обработкой команды. Повторите запрос позже';
+              'Ведомый занят обработкой команды. Повторите запрос позже иди сбросьте ведомый по питанию.';
 
           15: s := s +
               'Запрошенные данные пока не получены. Повторите запрос позже';
@@ -2017,7 +2025,9 @@ begin
       BASE_ROSTEK_MSG..(BASE_ROSTEK_MSG + 999): ;
       else
         exit;
-    end;
+    end
+  else
+    exit;
 
   arr := nil;
   if mes.Size > 0 then
@@ -2041,6 +2051,7 @@ begin
     GET_STATES_MSG:
     begin
       Log('Запрос состояний');
+      //aMain.InitState;
 
       for i := 1 to Devs.Count do
       begin
@@ -2056,12 +2067,10 @@ begin
           mes.Level := ORION_DISABLE_MSG;
         mes.Code := STATEORION_MSG;
         Send(mes);
-
         Log(
           Format('PP#%d Состояние >> %s',
           [Dev.Number, OrionState[Ord(Dev.Connected)]])
           );
-
         Dev.NextOp := DOP_OUTKEYS_STATE;
       end;
     end;

@@ -24,7 +24,7 @@
       <MajorVersionNr Value="3"/>
       <MinorVersionNr Value="1"/>
       <RevisionNr Value="5"/>
-      <BuildNr Value="26"/>
+      <BuildNr Value="34"/>
       <Language Value="0419"/>
       <StringTable CompanyName="ООО &quot;Рост-ВСП&quot;" FileDescription="Драйвер С2000-ПП" LegalCopyright="ООО &quot;Рост-ВСП&quot;" ProductName="РОСТЭК" ProductVersion="3.1"/>
     </VersionInfo>
@@ -268,7 +268,7 @@
     </Other>
   </CompilerOptions>
   <Debugging>
-    <Exceptions Count="3">
+    <Exceptions Count="4">
       <Item1>
         <Name Value="EAbort"/>
       </Item1>
@@ -278,6 +278,9 @@
       <Item3>
         <Name Value="EFOpenError"/>
       </Item3>
+      <Item4>
+        <Name Value="Exception"/>
+      </Item4>
     </Exceptions>
   </Debugging>
 </CONFIG>
