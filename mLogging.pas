@@ -37,7 +37,7 @@ begin
   try
     Queue(nil, OutputLog);
     //Synchronize(nil, OutputLog);
-    sleep(50);
+    sleep(100);
   except
   end;
 end;
@@ -101,18 +101,21 @@ end;
 
 
 procedure TLog.OutputLog;
-var
-  hasData: boolean;
 begin
   cs_log.Acquire;
-  aMain.Memo1.Lines.BeginUpdate;
-  hasData:= sl_log.Count > 0;
+  if sl_log.Count = 0 then
+  begin
+    cs_log.Release;
+    exit;
+  end;
 
+  aMain.Memo1.Lines.BeginUpdate;
   try
+    {all to memo1}
     if Option.LogForm then
       with aMain.Memo1.Lines do
       begin
-        if Count > 10000 then Clear;
+        if Count > 500 then Clear;
         AddStrings(sl_log);
       end;
 
@@ -124,12 +127,9 @@ begin
 
   finally
     aMain.Memo1.Lines.EndUpdate;
+    aMain.Memo1.SelStart := Length(aMain.Memo1.Text);
+    aMain.Memo1.SelLength := 0;
     cs_log.Release;
-    if hasData then
-    begin
-      aMain.Memo1.SelStart := Length(aMain.Memo1.Text);
-      aMain.Memo1.SelLength := 0;
-    end;
   end;
 end;
 

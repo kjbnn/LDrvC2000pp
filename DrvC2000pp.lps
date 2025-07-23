@@ -9,7 +9,7 @@
         <Filename Value="DrvC2000pp.lpr"/>
         <IsPartOfProject Value="True"/>
         <EditorIndex Value="-1"/>
-        <CursorPos Y="29"/>
+        <CursorPos X="20" Y="29"/>
         <UsageCount Value="220"/>
       </Unit0>
       <Unit1>
@@ -18,9 +18,8 @@
         <ComponentName Value="aMain"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
-        <IsVisibleTab Value="True"/>
-        <TopLine Value="1659"/>
-        <CursorPos X="28" Y="1671"/>
+        <TopLine Value="2034"/>
+        <CursorPos X="7" Y="2051"/>
         <UsageCount Value="209"/>
         <Bookmarks Count="2">
           <Item0 X="20" Y="1165" Left="1" Top="1134" ID="1"/>
@@ -43,6 +42,7 @@
           <CursorPos X="46" Y="120"/>
         </ExtraEditor1>
         <UsageCount Value="220"/>
+        <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit2>
       <Unit3>
         <Filename Value="..\LKsb\common\cIniKey.pas"/>
@@ -118,11 +118,12 @@
       <Unit11>
         <Filename Value="mLogging.pas"/>
         <IsPartOfProject Value="True"/>
-        <EditorIndex Value="-1"/>
-        <TopLine Value="64"/>
-        <CursorPos X="41" Y="73"/>
-        <UsageCount Value="166"/>
-        <DefaultSyntaxHighlighter Value="Delphi"/>
+        <IsVisibleTab Value="True"/>
+        <EditorIndex Value="1"/>
+        <TopLine Value="103"/>
+        <CursorPos X="13" Y="117"/>
+        <UsageCount Value="168"/>
+        <Loaded Value="True"/>
       </Unit11>
       <Unit12>
         <Filename Value="mlog.pas"/>
@@ -167,8 +168,8 @@
       <Unit18>
         <Filename Value="C:\lazarus\fpc\3.2.2\source\rtl\objpas\classes\classesh.inc"/>
         <EditorIndex Value="-1"/>
-        <TopLine Value="1920"/>
-        <CursorPos X="14" Y="1950"/>
+        <TopLine Value="688"/>
+        <CursorPos X="13" Y="704"/>
         <UsageCount Value="29"/>
       </Unit18>
       <Unit19>
@@ -282,114 +283,114 @@
     <JumpHistory Count="28" HistoryIndex="27">
       <Position1>
         <Filename Value="mMain.pas"/>
-        <Caret Line="2261" Column="6" TopLine="2252"/>
+        <Caret Line="2274" TopLine="2244"/>
       </Position1>
       <Position2>
         <Filename Value="mMain.pas"/>
-        <Caret Line="248" Column="21" TopLine="218"/>
+        <Caret Line="2273" TopLine="2243"/>
       </Position2>
       <Position3>
         <Filename Value="mMain.pas"/>
-        <Caret Line="372" Column="8" TopLine="363"/>
+        <Caret Line="344" Column="41" TopLine="326"/>
       </Position3>
       <Position4>
         <Filename Value="mMain.pas"/>
-        <Caret Line="364" Column="27" TopLine="363"/>
       </Position4>
       <Position5>
         <Filename Value="mMain.pas"/>
-        <Caret Line="248" Column="15" TopLine="218"/>
+        <Caret Line="75" Column="16" TopLine="23"/>
       </Position5>
       <Position6>
         <Filename Value="mMain.pas"/>
-        <Caret Line="364" Column="18" TopLine="332"/>
+        <Caret Line="386" Column="36" TopLine="355"/>
       </Position6>
       <Position7>
         <Filename Value="mMain.pas"/>
-        <Caret Line="2259" Column="19" TopLine="2230"/>
+        <Caret Line="1654" Column="38" TopLine="1633"/>
       </Position7>
       <Position8>
         <Filename Value="mMain.pas"/>
-        <Caret Line="244" TopLine="214"/>
+        <Caret Line="1671" Column="28" TopLine="1651"/>
       </Position8>
       <Position9>
         <Filename Value="mMain.pas"/>
-        <Caret Line="360" TopLine="329"/>
+        <Caret Line="75" Column="16" TopLine="45"/>
       </Position9>
       <Position10>
         <Filename Value="mMain.pas"/>
-        <Caret Line="2256" TopLine="2225"/>
+        <Caret Line="386" Column="36" TopLine="334"/>
       </Position10>
       <Position11>
         <Filename Value="mMain.pas"/>
-        <Caret Line="247" Column="15" TopLine="219"/>
+        <Caret Line="1654" Column="38" TopLine="1603"/>
       </Position11>
       <Position12>
-        <Filename Value="mMain.pas"/>
-        <Caret Line="362" Column="18" TopLine="332"/>
+        <Filename Value="mLogging.pas"/>
+        <Caret Line="39" Column="31" TopLine="32"/>
       </Position12>
       <Position13>
-        <Filename Value="mMain.pas"/>
-        <Caret Line="2055" Column="13" TopLine="2026"/>
+        <Filename Value="mLogging.pas"/>
+        <Caret Line="103" Column="25" TopLine="99"/>
       </Position13>
       <Position14>
         <Filename Value="mMain.pas"/>
-        <Caret Line="362" Column="18" TopLine="332"/>
+        <Caret Line="441" Column="9" TopLine="425"/>
       </Position14>
       <Position15>
         <Filename Value="mMain.pas"/>
-        <Caret Line="2055" Column="9" TopLine="2026"/>
+        <Caret Line="445" TopLine="425"/>
       </Position15>
       <Position16>
-        <Filename Value="mMain.pas"/>
-        <Caret Line="362" Column="27" TopLine="338"/>
+        <Filename Value="mLogging.pas"/>
+        <Caret Line="17" Column="15"/>
       </Position16>
       <Position17>
-        <Filename Value="mMain.pas"/>
-        <Caret Line="2048" Column="68" TopLine="2025"/>
+        <Filename Value="mLogging.pas"/>
+        <Caret Line="39" Column="22" TopLine="21"/>
       </Position17>
       <Position18>
-        <Filename Value="mMain.pas"/>
-        <Caret Line="2274" TopLine="2244"/>
+        <Filename Value="mLogging.pas"/>
+        <Caret Line="38" Column="18" TopLine="21"/>
       </Position18>
       <Position19>
-        <Filename Value="mMain.pas"/>
-        <Caret Line="2273" TopLine="2243"/>
+        <Filename Value="mLogging.pas"/>
+        <Caret Line="103" Column="16" TopLine="86"/>
       </Position19>
       <Position20>
-        <Filename Value="mMain.pas"/>
-        <Caret Line="344" Column="41" TopLine="326"/>
+        <Filename Value="mLogging.pas"/>
+        <Caret Line="39" Column="22" TopLine="22"/>
       </Position20>
       <Position21>
-        <Filename Value="mMain.pas"/>
+        <Filename Value="mLogging.pas"/>
+        <Caret Line="17" Column="15"/>
       </Position21>
       <Position22>
         <Filename Value="mMain.pas"/>
-        <Caret Line="75" Column="16" TopLine="23"/>
+        <Caret Line="443" Column="9" TopLine="425"/>
       </Position22>
       <Position23>
-        <Filename Value="mMain.pas"/>
-        <Caret Line="386" Column="36" TopLine="355"/>
+        <Filename Value="mLogging.pas"/>
+        <Caret Line="104" TopLine="100"/>
       </Position23>
       <Position24>
-        <Filename Value="mMain.pas"/>
-        <Caret Line="1654" Column="38" TopLine="1633"/>
+        <Filename Value="mLogging.pas"/>
+        <Caret Line="120" TopLine="86"/>
       </Position24>
       <Position25>
-        <Filename Value="mMain.pas"/>
-        <Caret Line="1671" Column="28" TopLine="1651"/>
+        <Filename Value="mLogging.pas"/>
+        <Caret Line="40" Column="13" TopLine="22"/>
       </Position25>
       <Position26>
-        <Filename Value="mMain.pas"/>
-        <Caret Line="75" Column="16" TopLine="45"/>
+        <Filename Value="mLogging.pas"/>
+        <Caret Line="116" Column="19" TopLine="99"/>
       </Position26>
       <Position27>
         <Filename Value="mMain.pas"/>
-        <Caret Line="386" Column="36" TopLine="334"/>
+        <Caret Line="1165" Column="20" TopLine="1149"/>
       </Position27>
       <Position28>
-        <Filename Value="mMain.pas"/>
-        <Caret Line="1654" Column="38" TopLine="1603"/>
+        <Filename Value="mLogging.pas"/>
+        <Caret Line="115" Column="17" TopLine="99"/>
       </Position28>
     </JumpHistory>
     <RunParams>
@@ -415,6 +416,13 @@
         <Source Value="..\LKsb\ksbmesapi\cmesdriver_api.pas"/>
         <InitialEnabled Value="False"/>
         <Line Value="44"/>
+      </Item>
+      <Item>
+        <Kind Value="bpkSource"/>
+        <WatchScope Value="wpsLocal"/>
+        <WatchKind Value="wpkWrite"/>
+        <Source Value="mMain.pas"/>
+        <Line Value="445"/>
       </Item>
     </BreakPoints>
     <Watches>
