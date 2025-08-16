@@ -87,7 +87,7 @@ var
   s: string;
   AYear, AMonth, ADay, AHour, AMinute, ASecond, AMilliSecond: word;
 begin
-  cs_log.Acquire;
+  if cs_log.TryEnter then
   try
     DecodeDateTime(now, AYear, AMonth, ADay, AHour, AMinute, ASecond, AMilliSecond);
     s := Format('%.2u.%.2u.%.4u %.2u:%.2u:%.2u:%.3u',
@@ -95,29 +95,27 @@ begin
     s := s + ' (' + sl_log.Count.ToString + ')';
     sl_log.Add(s + ' ' + str);
   finally
-    cs_log.Release;
+    cs_log.Leave;
   end;
 end;
 
 
 procedure TLog.OutputLog;
-begin
-  cs_log.Acquire;
-  if sl_log.Count = 0 then
-  begin
-    cs_log.Release;
-    exit;
-  end;
+var
+  was_mes: boolean;
 
-  aMain.Memo1.Lines.BeginUpdate;
+begin
+  if cs_log.TryEnter then
   try
+    was_mes:= sl_log.Count > 0;
     {all to memo1}
-    if Option.LogForm then
-      with aMain.Memo1.Lines do
-      begin
-        if Count > 500 then Clear;
-        AddStrings(sl_log);
-      end;
+    if Option.LogForm and was_mes then
+    begin
+      aMain.Memo1.Lines.BeginUpdate;
+      if aMain.Memo1.Lines.Count > 500 then
+        aMain.Memo1.Lines.Clear;
+      aMain.Memo1.Lines.AddStrings(sl_log);
+    end;
 
     while (sl_log.Count > 0) do
     begin
@@ -126,10 +124,13 @@ begin
     end;
 
   finally
-    aMain.Memo1.Lines.EndUpdate;
-    aMain.Memo1.SelStart := Length(aMain.Memo1.Text);
-    aMain.Memo1.SelLength := 0;
-    cs_log.Release;
+    if Option.LogForm and was_mes then
+    begin
+      aMain.Memo1.Lines.EndUpdate;
+      aMain.Memo1.SelStart := Length(aMain.Memo1.Text);
+      aMain.Memo1.SelLength := 0;
+    end;
+    cs_log.Leave;
   end;
 end;
 
