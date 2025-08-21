@@ -9,7 +9,8 @@ uses
   ExtCtrls, ComCtrls, Menus, Spin, FileUtil,
   laz2_DOM,
   laz2_XMLRead, FileInfo,
-  cKsbmes;
+  cKsbmes,
+  commPP;
 
 const
   MAX_LOG_SIZE = 1e7;
@@ -78,7 +79,6 @@ const
   STATEPART_MSG = 13607;
   STATEPARTGROUP_MSG = 13608;
 
-  PORT_BUF_SIZE = 256;
   BASE_MSG = 13000;
 
   PP_DISCONNECTED = 10;
@@ -120,8 +120,6 @@ type
 
   ParamKind = (PARAM_WORD, PARAM_TIME);
 
-  TBuf = array [0..PORT_BUF_SIZE - 1] of byte;
-
   TAct = (ComPortList, DeviceList, ShleifList, RelayList, ReaderList);
 
   TOption = record
@@ -130,6 +128,7 @@ type
     Debug: boolean;
     Test: boolean;
     Noport: boolean;
+    LastConDevs: word;
   end;
 
   TObjectType = (UNKNOWN, LINE, DEVPP, ZONE, OUTKEY, PART, USER);
@@ -157,7 +156,7 @@ type
 
   TLine = class(TOrionObj)
   private
-    Port: TObject;
+    Port: TPort;
     procedure Read;
     function NextDev: TDev;
     function Process(IsWrite: boolean): boolean;
@@ -199,6 +198,10 @@ type
   TaMain = class(TForm)
     MainMenu1: TMainMenu;
     MenuItem1: TMenuItem;
+    MenuItem10: TMenuItem;
+    MenuItem11: TMenuItem;
+    MenuItem12: TMenuItem;
+    MenuItem13: TMenuItem;
     MenuItem2: TMenuItem;
     MenuItem3: TMenuItem;
     MenuItem4: TMenuItem;
@@ -223,6 +226,10 @@ type
     procedure FormCreate(Sender: TObject);
     procedure FormClose(Sender: TObject; var CloseAction: TCloseAction);
     procedure FormTimerTimer(Sender: TObject);
+    procedure MenuItem10Click(Sender: TObject);
+    procedure MenuItem11Click(Sender: TObject);
+    procedure MenuItem12Click(Sender: TObject);
+    procedure MenuItem13Click(Sender: TObject);
     procedure MenuItem1Click(Sender: TObject);
     procedure MenuItem3Click(Sender: TObject);
     procedure MenuItem4Click(Sender: TObject);
@@ -239,9 +246,11 @@ type
     procedure IndicatorMouseMove(Sender: TObject);
     procedure TimerVisibleTimer(Sender: TObject);
   private
+    LiveId, LiveDev: byte;
     XML: TXMLDocument;
     procedure ReadConfiguration;
     procedure ReadConfigNode(Node: TDOMNode; pParent: Pointer);
+    function ConDevs: word;
     procedure SetIndicator;
     procedure InitState;
   public
@@ -270,7 +279,6 @@ implementation
 
 uses
   DateUtils,
-  commPP,
   cForFormKsb,
   cIniKey,
   constants,
@@ -292,11 +300,19 @@ var
 begin
   AppKsbInit(self);
   TimerVisible.Enabled := True;
-  CheckDrv := TCheckDrv.Create(False);
-  CheckDrv.AddId;
-  MyLog := TLog.Create(False);
+  LiveId := CheckDrv.AddId;
+  LiveDev := CheckDrv.AddId;
 
   try
+    with Option do
+    begin
+      FileMask := GetKey('FileMask', '');
+      if FileMask = '' then
+        FileMask := ExtractFileName(ParamStr(0));
+      if Pos('.exe', FileMask) > 0 then
+        SetLength(FileMask, Length(FileMask) - 4);
+    end;
+
     FormTimer.Enabled := True;
     Log('Старт модуля (вер. ' + GetVersion(Application.ExeName) + ')');
     Log('Чтение файла Setting.ini...');
@@ -407,8 +423,6 @@ begin
 end;
 
 procedure TaMain.ReadParam;
-var
-  i: integer;
 begin
   KsbAppType := GetKey('NUMBER', APPLICATION_C2000PP);
   ModuleNetDevice := getkey('ModuleNetDevice', 1);
@@ -417,17 +431,10 @@ begin
   with Option do
   begin
     LogForm := StrToInt(getkey('LogForm', '1')) = 1;
-    FileMask := GetKey('FileMask', '');
     Debug := StrToInt(getkey('Debug', '0')) = 1;
     Test := StrToInt(getkey('Test', '0')) = 1;
     Noport := StrToInt(getkey('Noport', '0')) = 1;
-    if FileMask = '' then
-    begin
-      FileMask := ExtractFileName(ParamStr(0));
-      i := Pos('.exe', FileMask);
-      if i > 0 then
-        SetLength(FileMask, Length(FileMask) - 4);
-    end;
+    LastConDevs := StrToInt(getkey('LastConDevs', '0'));
   end;
 
   Left := StrToInt(getkey('POS_LEFT', '0'));
@@ -438,10 +445,7 @@ end;
 
 procedure TaMain.FormClose(Sender: TObject; var CloseAction: TCloseAction);
 begin
-  MyLog.Free;
   Log('Останов модуля');
-  MyLog.OutputLog;
-
   CloseAction := caFree;
   setkey('POS_LEFT', left);
   setkey('POS_TOP', top);
@@ -468,7 +472,7 @@ begin
   end;
 end;
 
-procedure TaMain.ReadConfigNode(Node: TDOMNode; pParent: pointer);
+procedure TaMain.ReadConfigNode(Node: TDOMNode; pParent: Pointer);
 var
   XmlDocNode: TDOMNode;
   i: word;
@@ -496,10 +500,12 @@ begin
       begin
         ParentObj := pParent;
         Port := TPort.Create(True);
+        Port.FreeOnTerminate := True;
+        Port.LiveId := CheckDrv.AddId;
         with Port as TPort do
         begin
-          LiveId := CheckDrv.AddId;
           PortName := TDOMElement(XmlDocNode).GetAttribute('Port');
+          NameThreadForDebugging(PortName, Port.ThreadID);
           Baud := TDOMElement(XmlDocNode).GetAttribute('Baud');
           Bits := TDOMElement(XmlDocNode).GetAttribute('Bits');
           Stop := TDOMElement(XmlDocNode).GetAttribute('Stop');
@@ -628,6 +634,7 @@ begin
     ReadConfigNode(XmlDocNode, pObj);
   end;
 end;
+
 
 (* ------------------------------------- *)
 (*   O R I O N O B J,  L I N E,  D E V   *)
@@ -2228,15 +2235,21 @@ begin
     [total, Devs.Count]);
 end;
 
-procedure TaMain.SetIndicator;
+function TaMain.ConDevs: word;
 var
-  i, total: word;
+  i: word;
 begin
-  total := 0;
+  Result := 0;
   for i := 1 to Devs.Count do
     if TDev(Devs.Items[i - 1]).Connected then
-      Inc(total);
+      Inc(Result);
+end;
 
+procedure TaMain.SetIndicator;
+var
+  total: word;
+begin
+  total := ConDevs;
   with Indicator.Brush do
     if total = 0 then
       Color := clRed
@@ -2249,7 +2262,49 @@ end;
 procedure TaMain.FormTimerTimer(Sender: TObject);
 begin
   SetIndicator;
-  if length(Live) > 0 then Live[0] := 0;
+  if length(Live) > 0 then
+    Live[LiveId] := 0;
+  if (length(Live) > 1) and
+    ((ConDevs = Devs.Count) or (ConDevs >= Option.LastConDevs)) then
+    Live[LiveDev] := 0;
+
+  if Option.LogForm then
+    if cs_log.TryEnter then
+    try
+      if (sl_log.Count > 0) then
+      begin
+        Memo1.Lines.BeginUpdate;
+        if Memo1.Lines.Count > 500 then
+          Memo1.Lines.Clear;
+        Memo1.Lines.AddStrings(sl_log);
+        Memo1.Lines.EndUpdate;
+        Memo1.SelStart := Length(Memo1.Text);
+        Memo1.SelLength := 0;
+      end;
+    finally
+      sl_log.Clear;
+      cs_log.Leave;
+    end;
+end;
+
+procedure TaMain.MenuItem10Click(Sender: TObject);
+begin
+  sleep(140000);
+end;
+
+procedure TaMain.MenuItem11Click(Sender: TObject);
+begin
+  Live[LiveDev] := 200;
+end;
+
+procedure TaMain.MenuItem12Click(Sender: TObject);
+begin
+  Live[2] := 200;
+end;
+
+procedure TaMain.MenuItem13Click(Sender: TObject);
+begin
+  Live[3] := 200;
 end;
 
 procedure TaMain.MenuItem1Click(Sender: TObject);

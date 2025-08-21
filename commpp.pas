@@ -5,10 +5,12 @@ unit commPP;
 interface
 
 uses
-  Classes, synaser, Graphics, mMain, SysUtils;
+  Classes, synaser, Graphics, SysUtils;
 
 type
   TProcess = function(IsWrite: boolean): boolean of object;
+
+  TBuf = array [0..255] of byte;
 
   { TPort }
   TPort = class(TThread)
@@ -31,7 +33,8 @@ implementation
 
 uses
   Forms,
-  mCheckDrv, mLogging;
+  mCheckDrv, mLogging,
+  mMain;
 
 function ArrayToStr(Ar: TBuf; Count: byte): string;
 var
@@ -44,7 +47,7 @@ end;
 
 procedure TPort.Execute;
 
-  procedure ErrorInfo;
+  procedure RaiseErrorInfo;
   var
     s: string;
   begin
@@ -56,8 +59,8 @@ procedure TPort.Execute;
           CurDev.FNoAnswer := PP_DISCONNECTED;
           CurDev.Connected := False;
         end;
-      s := Format('%s ошибка #%d -> %s', [PortName,
-        ser.LastError, ser.GetErrorDesc(ser.LastError)]);
+      s := Format('%s ошибка #%d -> %s',
+        [PortName, ser.LastError, ser.GetErrorDesc(ser.LastError)]);
       Log(s);
       raise Exception.Create(s);
     end;
@@ -81,7 +84,7 @@ begin
       ser.Connect(PortName);
       ser.Config(StrToInt(Baud), StrToInt(Bits), 'N', StrToInt(Stop), False, False);
       if ser.LastError <> 0 then
-        ErrorInfo
+        RaiseErrorInfo
       else
         Log(Format('%s открыт, handle %d', [PortName, ser.Handle]));
 
@@ -111,7 +114,7 @@ begin
               Log(Format('%s W> %s', [PortName, ArrayToStr(w, wCount)]));
         ser.SendBuffer(@CurDev.w, CurDev.wCount);
         if ser.LastError <> 0 then
-          ErrorInfo;
+          RaiseErrorInfo;
 
         {прием}
         FillChar(CurDev.r, 255, 0);
@@ -136,7 +139,7 @@ begin
               Log(Format('%s R> %s %s', [PortName, ArrayToStr(r, rCount), s]));
 
         if ser.LastError <> 0 then
-          ErrorInfo;
+          RaiseErrorInfo;
 
         if (CurDev.rCount < 5) or (CurDev.w[0] <> CurDev.r[0]) or
           (CurDev.w[1] <> (CurDev.r[1] and $7F)) then
@@ -161,15 +164,13 @@ begin
         if Option.Debug then
           DumpExceptionCallStack(E);
         Log(Format('%s закрытие...', [PortName]));
-        ser.Free;
+        FreeAndNil(ser);
         Log(Format('%s закрыт', [PortName]));
-        sleep(10000)
+        sleep(60000);
       end;
     end;
 
-  Log(Format('%s закрыт по сигналу завершения приложения',
-    [PortName]));
-  aMain.Close;
+  Log(Format('%s завершение потока порта', [PortName]));
 end;
 
 
