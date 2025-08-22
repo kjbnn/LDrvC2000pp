@@ -21,7 +21,7 @@ type
 
 
 const
-  LiveTime: array [0..3] of word = (120,600,600,600);
+  LiveTime: array [0..3] of word = (120,3600,600,600);
 
 var
   Live: array of word;
