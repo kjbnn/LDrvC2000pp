@@ -34,7 +34,7 @@ uses
 
 procedure TCheckDrv.Execute;
 var
-  i, j: byte;
+  i, j: word;
   LiveCheck: string;
 
 begin
