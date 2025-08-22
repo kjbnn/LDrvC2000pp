@@ -128,7 +128,6 @@ type
     Debug: boolean;
     Test: boolean;
     Noport: boolean;
-    LastConDevs: word;
   end;
 
   TObjectType = (UNKNOWN, LINE, DEVPP, ZONE, OUTKEY, PART, USER);
@@ -434,7 +433,6 @@ begin
     Debug := StrToInt(getkey('Debug', '0')) = 1;
     Test := StrToInt(getkey('Test', '0')) = 1;
     Noport := StrToInt(getkey('Noport', '0')) = 1;
-    LastConDevs := StrToInt(getkey('LastConDevs', '0'));
   end;
 
   Left := StrToInt(getkey('POS_LEFT', '0'));
@@ -2264,8 +2262,8 @@ begin
   SetIndicator;
   if length(Live) > 0 then
     Live[LiveId] := 0;
-  if (length(Live) > 1) and
-    ((ConDevs = Devs.Count) or (ConDevs >= Option.LastConDevs)) then
+
+  if (length(Live) > 1) and (ConDevs = Devs.Count) then
     Live[LiveDev] := 0;
 
   if Option.LogForm then

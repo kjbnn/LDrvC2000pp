@@ -12,8 +12,7 @@ uses
   mLogging,
   mCheckDrv,
   SysUtils,
-  mMain in 'mMain.pas' {aMain},
-  cIniKey;
+  mMain in 'mMain.pas' {aMain};
 
   {$R *.res}
 
@@ -38,7 +37,6 @@ begin
     Application.Run;
   finally
     MyProg.Free;
-    setkey('LastConDevs', Option.LastConDevs);
   end;
 end.
 

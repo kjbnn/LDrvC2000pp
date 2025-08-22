@@ -75,8 +75,6 @@ begin
   while (not Terminated) do
     with Tline(Owner) do
     try
-      if length(Live) > 0 then Live[LiveId] := 0;
-
       ser := TBlockSerial.Create;
       ser.RaiseExcept := False;
       ser.LinuxLock := False;
@@ -91,7 +89,6 @@ begin
       {process}
       while (not Terminated) do
       begin
-        if length(Live) > 0 then Live[LiveId] := 0;
         sleep(20);
 
         if not ProcessProc(True) then

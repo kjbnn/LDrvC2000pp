@@ -21,10 +21,10 @@ type
 
 
 const
-  LiveTime = 120;
+  LiveTime: array [0..3] of word = (120,3600,180,180);
 
 var
-  Live: array of byte;
+  Live: array of word;
   CheckDrv: TCheckDrv;
 
 implementation
@@ -36,8 +36,8 @@ procedure TCheckDrv.Execute;
 var
   i, j: byte;
   LiveCheck: string;
-begin
 
+begin
   LiveCheck:= '';
   try
     while not Terminated do
@@ -46,7 +46,7 @@ begin
       if length(Live) = 0 then
         continue;
 
-      LiveCheck := 'Check: ';
+      LiveCheck := 'Check ';
       for i in Live do
         if i > 0 then
         begin
@@ -56,7 +56,7 @@ begin
         end;
 
       for i := low(Live) to high(Live) do
-        if Live[i] < LiveTime then
+        if Live[i] < LiveTime[i] then
           Inc(Live[i])
         else
         begin
