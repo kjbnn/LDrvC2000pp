@@ -1,77 +1,81 @@
 object aMain: TaMain
   Left = 417
-  Height = 415
+  Height = 277
   Top = 152
-  Width = 557
-  ClientHeight = 415
-  ClientWidth = 557
-  DesignTimePPI = 144
+  Width = 371
+  ClientHeight = 257
+  ClientWidth = 371
   Menu = MainMenu1
-  Visible = True
   OnClose = FormClose
   OnConstrainedResize = FormConstrainedResize
   OnCreate = FormCreate
+  LCLVersion = '2.0.8.0'
+  Visible = True
   object Indicator: TShape
-    Left = 312
-    Height = 84
-    Top = 372
-    Width = 74
+    Left = 208
+    Height = 56
+    Top = 248
+    Width = 49
     ParentShowHint = False
     OnMouseMove = IndicatorMouseMove
   end
   object StatusBar1: TStatusBar
     Left = 0
-    Height = 36
-    Top = 379
-    Width = 557
+    Height = 23
+    Top = 234
+    Width = 371
     Panels = <    
       item
-        Width = 240
+        Width = 160
       end    
       item
-        Width = 32
+        Width = 21
       end    
       item
-        Width = 75
+        Width = 50
       end>
+    ParentFont = False
     SimplePanel = False
   end
   object Memo1: TMemo
     Left = 0
-    Height = 379
+    Height = 234
     Top = 0
-    Width = 557
+    Width = 371
     Align = alClient
+    ParentFont = False
     ReadOnly = True
     ScrollBars = ssBoth
     TabOrder = 1
     WordWrap = False
   end
   object SpinEdit1: TSpinEdit
-    Left = 312
-    Height = 33
+    Left = 208
+    Height = 23
     Hint = 'Bigdevice'
-    Top = 8
-    Width = 96
+    Top = 5
+    Width = 64
+    ParentFont = False
     ParentShowHint = False
     ShowHint = True
     TabOrder = 2
     Value = 1
   end
   object SpinEdit2: TSpinEdit
-    Left = 312
-    Height = 33
+    Left = 208
+    Height = 23
     Hint = 'Smalldevice'
-    Top = 40
-    Width = 96
+    Top = 27
+    Width = 64
+    ParentFont = False
     ParentShowHint = False
     ShowHint = True
     TabOrder = 3
     Value = 1
   end
   object MainMenu1: TMainMenu
-    Left = 36
-    Top = 12
+    left = 24
+    top = 8
     object N4: TMenuItem
       Caption = 'Файл'
       object N1: TMenuItem
@@ -143,14 +147,14 @@ object aMain: TaMain
   end
   object TimerVisible: TTimer
     OnTimer = TimerVisibleTimer
-    Left = 240
-    Top = 60
+    left = 160
+    top = 40
   end
   object FormTimer: TTimer
     Enabled = False
     Interval = 50
     OnTimer = FormTimerTimer
-    Left = 132
-    Top = 120
+    left = 88
+    top = 80
   end
 end

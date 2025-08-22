@@ -769,7 +769,8 @@ end;
 
 function TDev.NextObj(ObjKind: TObjectType): word;
 var
-  i: word;
+  i: word; //???
+  childs: word;
 begin
   Result := $FFFF;
 
@@ -783,7 +784,8 @@ begin
     if r_c = 0 then
       exit;
 
-  for i := TempIndex + 1 to ChildsObj.Count - 1 do
+  childs:= ChildsObj.Count;
+  for i := (TempIndex + 1) mod $10000 to {ChildsObj.Count} childs - 1 do
     if (TOrionObj(ChildsObj.Items[i]).Kind = ObjKind) then
     begin
       Result := i;
