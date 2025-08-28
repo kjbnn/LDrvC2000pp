@@ -251,8 +251,8 @@ type
     procedure ReadConfigNode(Node: TDOMNode; pParent: Pointer);
     function ConDevs: word;
     procedure SetIndicator;
-    procedure InitState;
   public
+    procedure InitState;
   end;
 
 
@@ -374,51 +374,21 @@ end;
 
 procedure TaMain.InitState;
 var
-  i1, i2, i3: word;
-  mes: KSBMES;
+  i1, i2: word;
   line: TLine;
   dev: TDev;
-  Obj: TOrionObj;
 begin
-  Log('Инициализация состояний элементов');
+  Log('Вычитывание состояний элементов');
   for i1 := 1 to Lines.Count do
   begin
     line := Lines.Items[i1 - 1];
     for i2 := 1 to line.ChildsObj.Count do
     begin
       dev := line.ChildsObj.Items[i2 - 1];
-      for i3 := 1 to dev.ChildsObj.Count do //TOrionObj
-      begin
-        Obj := dev.ChildsObj.Items[i3 - 1];
-        if (Obj.Kind = ZONE) and (Obj.ZnType in [1, 2, 4, 5]) then
-        begin
-          Init(mes);
-          mes.NetDevice := ModuleNetDevice;
-          mes.BigDevice := Obj.Bigdevice;
-          mes.SmallDevice := Obj.Smalldevice;
-          mes.Level := 250;
-          mes.TypeDevice := TYPEDEVICE_ZONE;
-          mes.Code := STATEZONE_MSG;
-
-          if (Obj.ZnType = 3) then
-            if (mes.Smalldevice = 0) then
-            begin
-              mes.TypeDevice := TYPEDEVICE_PULT;
-              mes.Code := STATEPULT_MSG;
-            end
-            else
-            begin
-              mes.TypeDevice := TYPEDEVICE_DEVICE;
-              mes.Code := STATEDEVICE_MSG;
-            end;
-
-          Send(mes);
-          sleep(1);
-        end;
-      end;
+      dev.Op:= DOP_HW_INFO;
     end;
   end;
-  Log('Инициализация состояний элементов выполнена');
+  Log('Вычитывание состояний элементов выполнено');
 end;
 
 procedure TaMain.ReadParam;
@@ -967,7 +937,7 @@ begin
 
           6:
             s := s +
-              'Ведомый занят обработкой команды. Повторите запрос позже иди сбросьте ведомый по питанию.';
+              'Ведомый занят обработкой команды. Повторите запрос позже или сбросьте ведомый по питанию';
 
           15: s := s +
               'Запрошенные данные пока не получены. Повторите запрос позже';
@@ -2056,7 +2026,7 @@ begin
     GET_STATES_MSG:
     begin
       Log('Запрос состояний');
-      //aMain.InitState;
+      aMain.InitState;
 
       for i := 1 to Devs.Count do
       begin

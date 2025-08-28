@@ -75,7 +75,7 @@ begin
   while (not Terminated) do
     with Tline(Owner) do
       try
-        if length(Live) > LiveId then Live[LiveId]:= 0;
+        //if length(Live) > LiveId then Live[LiveId]:= 0;
 
         ser := TBlockSerial.Create;
         ser.RaiseExcept := False;
@@ -166,7 +166,8 @@ begin
           Log(Format('%s закрытие...', [PortName]));
           FreeAndNil(ser);
           Log(Format('%s закрыт', [PortName]));
-          sleep(60000);
+          sleep(30000);
+          aMain.InitState;
         end;
       end;
 
