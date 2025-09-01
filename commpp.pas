@@ -59,7 +59,6 @@ procedure TPort.Execute;
         end;
       s := Format('%s ошибка #%d -> %s',
         [PortName, ser.LastError, ser.GetErrorDesc(ser.LastError)]);
-      Log(s);
       raise Exception.Create(s);
     end;
   end;
@@ -73,8 +72,6 @@ begin
   while (not Terminated) do
     with Tline(Owner) do
     try
-      //if length(Live) > LiveId then Live[LiveId]:= 0;
-
       ser := TBlockSerial.Create;
       ser.RaiseExcept := False;
       ser.LinuxLock := False;
@@ -82,9 +79,9 @@ begin
       ser.Connect(PortName);
       ser.Config(StrToInt(Baud), StrToInt(Bits), 'N', StrToInt(Stop), False, False);
       if ser.LastError <> 0 then
-        RaiseErrorInfo
-      else
-        Log(Format('%s открыт, handle %d', [PortName, ser.Handle]));
+        RaiseErrorInfo;
+      Log(Format('%s открыт, handle %d', [PortName, ser.Handle]));
+      InitState(Owner);
 
       {process}
       while (not Terminated) do
@@ -159,14 +156,13 @@ begin
     except
       on E: Exception do
       begin
-        Log('Exception class: ' + E.ClassName + ', Message: ' + E.Message);
+        Log(E.ToString);
         if Option.Debug then
           DumpExceptionCallStack;
         Log(Format('%s закрытие...', [PortName]));
         FreeAndNil(ser);
         Log(Format('%s закрыт', [PortName]));
         sleep(30000);
-        InitState(Owner);
       end;
     end;
 

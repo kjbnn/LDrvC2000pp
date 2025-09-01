@@ -3,6 +3,11 @@ unit mCheckDrv;
 interface
 
 uses
+  {$IFDEF WINDOWS}
+  Windows,
+  {$ELSE}
+  Process, Unix,
+  {$ENDIF}
   Classes;
 
 type
@@ -13,8 +18,6 @@ type
   private
   protected
     procedure Execute; override;
-    procedure TerminateApp;
-    procedure HaltApp;
   public
     function AddId: byte;
   end;
@@ -59,31 +62,18 @@ begin
           Inc(Live[i])
         else
         begin
-          LiveCheck := Format(
-            'Компонент #%d не отвечает.', [i]);
-          exit;
+          Log(Format('Компонент #%d не отвечает.', [i]));
+          Raise Exception.Create('');
         end;
     end;
-
   finally
-    LiveCheck := LiveCheck + ' Аварийный останов модуля !!!';
-    Log(LiveCheck);
-    Synchronize(TerminateApp);
-    Sleep(10000);
-    Synchronize(HaltApp);
+    Log('Аварийное завершение модуля !!!');
+    {$IFDEF WINDOWS}
+    TerminateProcess(GetCurrentProcess, 1);
+    {$ELSE}
+    Kill(GetProcessID, SIGKILL);
+    {$ENDIF}
   end;
-end;
-
-procedure TCheckDrv.TerminateApp;
-begin
-  if not Application.Terminated then
-    Application.Terminate;
-end;
-
-procedure TCheckDrv.HaltApp;
-begin
-  if not Application.Terminated then
-    Halt(1);
 end;
 
 function TCheckDrv.AddId: byte;

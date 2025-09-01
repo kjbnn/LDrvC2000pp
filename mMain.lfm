@@ -50,7 +50,7 @@ object aMain: TaMain
     WordWrap = False
   end
   object SpinEdit1: TSpinEdit
-    Left = 312
+    Left = 8
     Height = 33
     Hint = 'Bigdevice'
     Top = 8
@@ -62,7 +62,7 @@ object aMain: TaMain
     Value = 1
   end
   object SpinEdit2: TSpinEdit
-    Left = 312
+    Left = 8
     Height = 33
     Hint = 'Smalldevice'
     Top = 40
@@ -74,8 +74,8 @@ object aMain: TaMain
     Value = 1
   end
   object MainMenu1: TMainMenu
-    Left = 36
-    Top = 12
+    Left = 152
+    Top = 24
     object N4: TMenuItem
       Caption = 'Файл'
       object N1: TMenuItem
@@ -147,14 +147,14 @@ object aMain: TaMain
   end
   object TimerVisible: TTimer
     OnTimer = TimerVisibleTimer
-    Left = 240
-    Top = 60
+    Left = 136
+    Top = 112
   end
   object FormTimer: TTimer
     Enabled = False
     Interval = 100
     OnTimer = FormTimerTimer
-    Left = 132
-    Top = 120
+    Left = 248
+    Top = 112
   end
 end

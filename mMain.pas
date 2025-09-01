@@ -10,7 +10,8 @@ uses
   laz2_DOM,
   laz2_XMLRead, FileInfo,
   cKsbmes,
-  commPP;
+  commPP,
+  syncobjs;
 
 const
   MAX_LOG_SIZE = 1e7;
@@ -123,10 +124,8 @@ type
   TAct = (ComPortList, DeviceList, ShleifList, RelayList, ReaderList);
 
   TOption = record
-    LogForm: boolean;
     FileMask: string;
     Debug: boolean;
-    Test: boolean;
     Noport: boolean;
   end;
 
@@ -270,6 +269,7 @@ var
   Event: array [0..511] of string;
   RelayState: array [0..1] of string;
   OrionState: array [0..1] of string;
+  cs_istate: TCriticalSection;
 
 implementation
 
@@ -323,7 +323,6 @@ begin
     Log('Чтение файла ' + Option.FileMask + '.xml...');
     ReadConfiguration;
     Log('Файл ' + Option.FileMask + '.xml прочитан');
-    InitState;
 
     if not Option.Noport then
     begin
@@ -361,7 +360,7 @@ begin
   Indicator.Brush.Color := clRed;
   Indicator.ShowHint := True;
 
-  if not Option.Test then
+  if not Option.Debug then
   begin
     SpinEdit1.Visible := False;
     SpinEdit2.Visible := False;
@@ -378,9 +377,7 @@ begin
 
   with Option do
   begin
-    LogForm := StrToInt(getkey('LogForm', '1')) = 1;
     Debug := StrToInt(getkey('Debug', '0')) = 1;
-    Test := StrToInt(getkey('Test', '0')) = 1;
     Noport := StrToInt(getkey('Noport', '0')) = 1;
   end;
 
@@ -1927,24 +1924,32 @@ var
   line: TLine;
   dev: TDev;
 begin
-  for i1 := 1 to Lines.Count do
-  begin
-    line := Lines.Items[i1 - 1];
-    if (pLine <> nil) and (pLine <> line) then  continue;
-    Log('Инициализация чтения состояний элементов '
-      + line.Port.PortName);
-    for i2 := 1 to line.ChildsObj.Count do
+  if (cs_istate = nil) then
+    exit;
+  cs_istate.Enter;
+
+  try
+    for i1 := 1 to Lines.Count do
     begin
-      dev := line.ChildsObj.Items[i2 - 1];
-      dev.Op := DOP_HW_INFO;
-      {$IFDEF EXTENDINFO}
+      line := Lines.Items[i1 - 1];
+      if (pLine <> nil) and (pLine <> line) then  continue;
+      Log('Инициализация чтения состояний элементов '
+        + line.Port.PortName);
+      for i2 := 1 to line.ChildsObj.Count do
+      begin
+        dev := line.ChildsObj.Items[i2 - 1];
+        dev.Op := DOP_HW_INFO;
+        {$IFDEF EXTENDINFO}
       dev.Op := DOP_MAX_RELAYS;
-      {$ENDIF}
-      {$IFDEF MASTER}
+        {$ENDIF}
+        {$IFDEF MASTER}
       dev.Op := DOP_SET_TIME;
-      {$ENDIF}
-      dev.TempIndex := $FFFF;
+        {$ENDIF}
+        dev.TempIndex := $FFFF;
+      end;
     end;
+  finally
+    cs_istate.Leave;
   end;
 end;
 
@@ -2231,24 +2236,23 @@ begin
   if (length(Live) > 1) and (ConDevs = Devs.Count) then
     Live[LiveDev] := 0;
 
-  if Option.LogForm then
-    if cs_log <> nil then
-      if cs_log.TryEnter then
-      try
-        if (sl_log.Count > 0) then
-        begin
-          Memo1.Lines.BeginUpdate;
-          if Memo1.Lines.Count > 500 then
-            Memo1.Lines.Clear;
-          Memo1.Lines.AddStrings(sl_log);
-          Memo1.Lines.EndUpdate;
-          Memo1.SelStart := Length(Memo1.Text);
-          Memo1.SelLength := 0;
-        end;
-      finally
-        sl_log.Clear;
-        cs_log.Leave;
+  if cs_log <> nil then
+    if cs_log.TryEnter then
+    try
+      if (sl_log.Count > 0) then
+      begin
+        Memo1.Lines.BeginUpdate;
+        if Memo1.Lines.Count > 500 then
+          Memo1.Lines.Clear;
+        Memo1.Lines.AddStrings(sl_log);
+        Memo1.Lines.EndUpdate;
+        Memo1.SelStart := Length(Memo1.Text);
+        Memo1.SelLength := 0;
       end;
+    finally
+      sl_log.Clear;
+      cs_log.Leave;
+    end;
 end;
 
 procedure TaMain.MenuItem10Click(Sender: TObject);
@@ -2258,17 +2262,17 @@ end;
 
 procedure TaMain.MenuItem11Click(Sender: TObject);
 begin
-  Live[LiveDev] := 200;
+  Live[LiveDev] := LiveTime[LiveDev];
 end;
 
 procedure TaMain.MenuItem12Click(Sender: TObject);
 begin
-  Live[2] := 200;
+  Live[2] := LiveTime[2];
 end;
 
 procedure TaMain.MenuItem13Click(Sender: TObject);
 begin
-  Live[3] := 200;
+  Live[3] := LiveTime[3];
 end;
 
 procedure TaMain.MenuItem1Click(Sender: TObject);
@@ -2702,5 +2706,10 @@ initialization
   RelayState[1] := 'Вкл.';
   OrionState[0] := 'Связь потеряна';
   OrionState[1] := 'Связь установлена';
+
+  cs_istate := TCriticalSection.Create;
+
+finalization
+  FreeAndNil(cs_istate);
 
 end.
