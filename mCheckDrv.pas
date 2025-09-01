@@ -21,7 +21,7 @@ type
 
 
 const
-  LiveTime: array [0..3] of word = (120,120,120,120);
+  LiveTime: array [0..3] of word = (120, 120, 120, 120);
 
 var
   Live: array of word;
@@ -36,9 +36,8 @@ procedure TCheckDrv.Execute;
 var
   i, j: word;
   LiveCheck: string;
-
 begin
-  LiveCheck:= '';
+  LiveCheck := '';
   try
     while not Terminated do
     begin
@@ -61,14 +60,13 @@ begin
         else
         begin
           LiveCheck := Format(
-            'Компонент #%d не отвечает.',
-            [i]);
+            'Компонент #%d не отвечает.', [i]);
           exit;
         end;
     end;
 
   finally
-    LiveCheck:= LiveCheck + ' Аварийный останов модуля !!!';
+    LiveCheck := LiveCheck + ' Аварийный останов модуля !!!';
     Log(LiveCheck);
     Synchronize(TerminateApp);
     Sleep(10000);

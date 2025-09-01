@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <CONFIG>
   <ProjectOptions>
-    <Version Value="11"/>
+    <Version Value="12"/>
     <PathDelim Value="\"/>
     <General>
       <Flags>
@@ -10,9 +10,9 @@
         <MainUnitHasTitleStatement Value="False"/>
         <MainUnitHasScaledStatement Value="False"/>
         <UseDesignTimePackages Value="True"/>
+        <CompatibilityMode Value="True"/>
       </Flags>
       <SessionStorage Value="InProjectDir"/>
-      <MainUnit Value="0"/>
       <Title Value="DrvC2000pp"/>
       <UseAppBundle Value="False"/>
       <ResourceType Value="res"/>
@@ -24,7 +24,7 @@
       <MajorVersionNr Value="3"/>
       <MinorVersionNr Value="1"/>
       <RevisionNr Value="5"/>
-      <BuildNr Value="142"/>
+      <BuildNr Value="156"/>
       <Language Value="0419"/>
       <StringTable CompanyName="ООО &quot;Рост-ВСП&quot;" FileDescription="Драйвер С2000-ПП" LegalCopyright="ООО &quot;Рост-ВСП&quot;" ProductName="РОСТЭК" ProductVersion="3.1"/>
     </VersionInfo>
@@ -145,7 +145,6 @@
     </PublishOptions>
     <RunParams>
       <FormatVersion Value="2"/>
-      <Modes Count="0"/>
     </RunParams>
     <RequiredPackages Count="3">
       <Item1>

@@ -4,14 +4,14 @@
     <PathDelim Value="\"/>
     <Version Value="12"/>
     <BuildModes Active="Debug"/>
-    <Units Count="34">
+    <Units Count="37">
       <Unit0>
         <Filename Value="DrvC2000pp.lpr"/>
         <IsPartOfProject Value="True"/>
-        <TopLine Value="9"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="2"/>
         <CursorPos X="31" Y="15"/>
         <UsageCount Value="220"/>
-        <Loaded Value="True"/>
       </Unit0>
       <Unit1>
         <Filename Value="mMain.pas"/>
@@ -20,13 +20,13 @@
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
         <IsVisibleTab Value="True"/>
-        <EditorIndex Value="3"/>
-        <TopLine Value="2251"/>
-        <CursorPos Y="2261"/>
+        <TopLine Value="462"/>
+        <CursorPos X="23" Y="484"/>
         <UsageCount Value="209"/>
-        <Bookmarks Count="2">
-          <Item0 X="11" Y="2266" Left="1" Top="2252" ID="3"/>
-          <Item1 Y="2295" Left="1" Top="2276" ID="1"/>
+        <Bookmarks Count="3">
+          <Item0 X="11" Y="2264" Left="1" Top="2250" ID="3"/>
+          <Item1 X="23" Y="372" Left="1" Top="371" ID="1"/>
+          <Item2 X="18" Y="479" Left="1" Top="461" ID="2"/>
         </Bookmarks>
         <Loaded Value="True"/>
         <LoadedDesigner Value="True"/>
@@ -36,8 +36,8 @@
         <IsPartOfProject Value="True"/>
         <UnitName Value="commPP"/>
         <EditorIndex Value="1"/>
-        <TopLine Value="85"/>
-        <CursorPos X="23" Y="103"/>
+        <TopLine Value="66"/>
+        <CursorPos X="25" Y="96"/>
         <ExtraEditorCount Value="1"/>
         <ExtraEditor1>
           <EditorIndex Value="-1"/>
@@ -60,8 +60,8 @@
         <Filename Value="..\LKsb\windows\cOsFeature.pas"/>
         <IsPartOfProject Value="True"/>
         <EditorIndex Value="-1"/>
-        <TopLine Value="61"/>
-        <CursorPos X="83" Y="78"/>
+        <TopLine Value="19"/>
+        <CursorPos X="43" Y="36"/>
         <UsageCount Value="220"/>
         <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit4>
@@ -122,13 +122,14 @@
         <Filename Value="mLogging.pas"/>
         <IsPartOfProject Value="True"/>
         <EditorIndex Value="-1"/>
-        <TopLine Value="4"/>
+        <TopLine Value="19"/>
+        <CursorPos X="25" Y="21"/>
         <UsageCount Value="200"/>
       </Unit11>
       <Unit12>
         <Filename Value="C:\LKsb\constants.pas"/>
         <EditorIndex Value="-1"/>
-        <UsageCount Value="157"/>
+        <UsageCount Value="156"/>
         <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit12>
       <Unit13>
@@ -136,38 +137,36 @@
         <UnitName Value="LegacyTransport"/>
         <EditorIndex Value="-1"/>
         <CursorPos X="21"/>
-        <UsageCount Value="10"/>
+        <UsageCount Value="9"/>
         <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit13>
       <Unit14>
         <Filename Value="mCheckDrv.pas"/>
         <EditorIndex Value="2"/>
         <TopLine Value="41"/>
-        <CursorPos X="24" Y="53"/>
+        <CursorPos X="15" Y="57"/>
         <UsageCount Value="102"/>
-        <Bookmarks Count="1">
-          <Item0 X="3" Y="79" Left="1" Top="65" ID="2"/>
-        </Bookmarks>
         <Loaded Value="True"/>
       </Unit14>
       <Unit15>
         <Filename Value="C:\lazarus\fpc\3.2.2\source\rtl\objpas\sysutils\sysutilh.inc"/>
         <EditorIndex Value="-1"/>
-        <CursorPos X="4" Y="37"/>
-        <UsageCount Value="50"/>
+        <TopLine Value="213"/>
+        <CursorPos X="13" Y="236"/>
+        <UsageCount Value="49"/>
       </Unit15>
       <Unit16>
         <Filename Value="C:\Users\uk\AppData\Local\lazarus\onlinepackagemanager\packages\synapse40.1\synaser.pas"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="1012"/>
         <CursorPos Y="1037"/>
-        <UsageCount Value="19"/>
+        <UsageCount Value="18"/>
       </Unit16>
       <Unit17>
         <Filename Value="C:\lazarus\fpc\3.2.2\source\rtl\objpas\classes\classesh.inc"/>
         <EditorIndex Value="-1"/>
-        <TopLine Value="1810"/>
-        <CursorPos X="36" Y="1820"/>
+        <TopLine Value="280"/>
+        <CursorPos X="3" Y="298"/>
         <UsageCount Value="24"/>
       </Unit17>
       <Unit18>
@@ -175,34 +174,34 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="903"/>
         <CursorPos Y="924"/>
-        <UsageCount Value="3"/>
+        <UsageCount Value="2"/>
       </Unit18>
       <Unit19>
         <Filename Value="C:\lazarus\fpc\3.2.2\source\rtl\win\wininc\func.inc"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="182"/>
         <CursorPos Y="205"/>
-        <UsageCount Value="8"/>
+        <UsageCount Value="7"/>
       </Unit19>
       <Unit20>
         <Filename Value="C:\lazarus\fpc\3.2.2\source\rtl\inc\objpas.inc"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="321"/>
         <CursorPos Y="335"/>
-        <UsageCount Value="6"/>
+        <UsageCount Value="5"/>
       </Unit20>
       <Unit21>
         <Filename Value="C:\lazarus\fpc\3.2.2\source\rtl\win\sysosh.inc"/>
         <EditorIndex Value="-1"/>
         <CursorPos X="19" Y="25"/>
-        <UsageCount Value="5"/>
+        <UsageCount Value="4"/>
       </Unit21>
       <Unit22>
         <Filename Value="C:\lazarus\lcl\interfaces\win32\win32callback.inc"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="2603"/>
         <CursorPos Y="2621"/>
-        <UsageCount Value="3"/>
+        <UsageCount Value="2"/>
       </Unit22>
       <Unit23>
         <Filename Value="C:\lazarus\lcl\extctrls.pp"/>
@@ -210,7 +209,7 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="174"/>
         <CursorPos X="3" Y="195"/>
-        <UsageCount Value="2"/>
+        <UsageCount Value="1"/>
       </Unit23>
       <Unit24>
         <Filename Value="C:\lazarus\lcl\customtimer.pas"/>
@@ -218,28 +217,28 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="4"/>
         <CursorPos X="3" Y="31"/>
-        <UsageCount Value="2"/>
+        <UsageCount Value="1"/>
       </Unit24>
       <Unit25>
         <Filename Value="C:\lazarus\fpc\3.2.2\source\rtl\objpas\classes\compon.inc"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="667"/>
         <CursorPos X="26" Y="702"/>
-        <UsageCount Value="2"/>
+        <UsageCount Value="1"/>
       </Unit25>
       <Unit26>
         <Filename Value="C:\lazarus\lcl\include\control.inc"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="2287"/>
         <CursorPos Y="2304"/>
-        <UsageCount Value="3"/>
+        <UsageCount Value="2"/>
       </Unit26>
       <Unit27>
         <Filename Value="C:\lazarus\lcl\include\wincontrol.inc"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="5461"/>
         <CursorPos Y="5478"/>
-        <UsageCount Value="3"/>
+        <UsageCount Value="2"/>
       </Unit27>
       <Unit28>
         <Filename Value="C:\lazarus\lcl\lclmessageglue.pas"/>
@@ -247,27 +246,27 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="97"/>
         <CursorPos Y="114"/>
-        <UsageCount Value="3"/>
+        <UsageCount Value="2"/>
       </Unit28>
       <Unit29>
         <Filename Value="C:\lazarus\lcl\include\application.inc"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="2250"/>
         <CursorPos Y="2273"/>
-        <UsageCount Value="3"/>
+        <UsageCount Value="2"/>
       </Unit29>
       <Unit30>
         <Filename Value="C:\lazarus\fpc\3.2.2\source\rtl\win\syswinh.inc"/>
         <EditorIndex Value="-1"/>
         <CursorPos X="2" Y="17"/>
-        <UsageCount Value="4"/>
+        <UsageCount Value="3"/>
       </Unit30>
       <Unit31>
         <Filename Value="C:\lazarus\fpc\3.2.2\source\rtl\objpas\sysutils\filutilh.inc"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="182"/>
         <CursorPos X="15" Y="200"/>
-        <UsageCount Value="4"/>
+        <UsageCount Value="3"/>
       </Unit31>
       <Unit32>
         <Filename Value="C:\lazarus\lcl\forms.pp"/>
@@ -275,15 +274,36 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="1957"/>
         <CursorPos X="10" Y="1973"/>
-        <UsageCount Value="6"/>
+        <UsageCount Value="5"/>
       </Unit32>
       <Unit33>
         <Filename Value="C:\lazarus\fpc\3.2.2\source\rtl\objpas\fgl.pp"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="1639"/>
         <CursorPos Y="1657"/>
-        <UsageCount Value="8"/>
+        <UsageCount Value="7"/>
       </Unit33>
+      <Unit34>
+        <Filename Value="C:\lazarus\fpc\3.2.2\source\rtl\objpas\classes\lists.inc"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="128"/>
+        <CursorPos X="15" Y="133"/>
+        <UsageCount Value="10"/>
+      </Unit34>
+      <Unit35>
+        <Filename Value="C:\lazarus\fpc\3.2.2\source\rtl\inc\systemh.inc"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="1560"/>
+        <CursorPos X="3" Y="1583"/>
+        <UsageCount Value="10"/>
+      </Unit35>
+      <Unit36>
+        <Filename Value="C:\lazarus\fpc\3.2.2\source\rtl\inc\system.inc"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="1185"/>
+        <CursorPos X="6" Y="1206"/>
+        <UsageCount Value="10"/>
+      </Unit36>
     </Units>
     <OtherDefines Count="3">
       <Define0 Value="Compiler6_Up"/>
@@ -292,124 +312,123 @@
     </OtherDefines>
     <JumpHistory Count="30" HistoryIndex="29">
       <Position1>
-        <Filename Value="DrvC2000pp.lpr"/>
-        <Caret Line="41" Column="13" TopLine="10"/>
+        <Filename Value="mCheckDrv.pas"/>
+        <Caret Line="57" TopLine="32"/>
       </Position1>
       <Position2>
-        <Filename Value="mMain.pas"/>
-        <Caret Line="437" Column="5" TopLine="419"/>
+        <Filename Value="mCheckDrv.pas"/>
+        <Caret Line="58" TopLine="32"/>
       </Position2>
       <Position3>
-        <Filename Value="mMain.pas"/>
-        <Caret Line="2267" Column="48" TopLine="2249"/>
+        <Filename Value="mCheckDrv.pas"/>
+        <Caret Line="64" TopLine="35"/>
       </Position3>
       <Position4>
-        <Filename Value="mMain.pas"/>
-        <Caret Line="437" Column="5" TopLine="419"/>
+        <Filename Value="mCheckDrv.pas"/>
+        <Caret Line="62" TopLine="35"/>
       </Position4>
       <Position5>
-        <Filename Value="mMain.pas"/>
-        <Caret Line="2282" Column="82" TopLine="2249"/>
+        <Filename Value="mCheckDrv.pas"/>
+        <Caret Line="63" TopLine="35"/>
       </Position5>
       <Position6>
-        <Filename Value="mMain.pas"/>
-        <Caret Line="2273" Column="57"/>
+        <Filename Value="mCheckDrv.pas"/>
+        <Caret Line="62" TopLine="35"/>
       </Position6>
       <Position7>
-        <Filename Value="commpp.pas"/>
-        <Caret Line="169" Column="16" TopLine="151"/>
+        <Filename Value="mCheckDrv.pas"/>
+        <Caret Line="66" TopLine="38"/>
       </Position7>
       <Position8>
         <Filename Value="mCheckDrv.pas"/>
-        <Caret Line="21" Column="58" TopLine="13"/>
+        <Caret Line="69" TopLine="41"/>
       </Position8>
       <Position9>
-        <Filename Value="mMain.pas"/>
-        <Caret Line="2273" Column="57" TopLine="25"/>
+        <Filename Value="mCheckDrv.pas"/>
+        <Caret Line="70" TopLine="42"/>
       </Position9>
       <Position10>
         <Filename Value="mCheckDrv.pas"/>
-        <Caret Line="24" Column="13" TopLine="7"/>
+        <Caret Line="71" TopLine="43"/>
       </Position10>
       <Position11>
-        <Filename Value="mCheckDrv.pas"/>
-        <Caret Line="59" Column="20" TopLine="43"/>
+        <Filename Value="mMain.pas"/>
+        <Caret Line="2234" Column="13" TopLine="2214"/>
       </Position11>
       <Position12>
-        <Filename Value="mCheckDrv.pas"/>
-        <Caret Line="24" Column="11"/>
+        <Filename Value="mMain.pas"/>
+        <Caret Line="385" Column="10" TopLine="356"/>
       </Position12>
       <Position13>
-        <Filename Value="mCheckDrv.pas"/>
-        <Caret Line="59" Column="22" TopLine="43"/>
+        <Filename Value="mMain.pas"/>
+        <Caret Line="2018" Column="45" TopLine="2012"/>
       </Position13>
       <Position14>
-        <Filename Value="mMain.pas"/>
-        <Caret Line="2275" Column="24" TopLine="2262"/>
+        <Filename Value="commpp.pas"/>
+        <Caret Line="166" Column="13" TopLine="144"/>
       </Position14>
       <Position15>
-        <Filename Value="mMain.pas"/>
-        <Caret Line="131" TopLine="114"/>
+        <Filename Value="commpp.pas"/>
+        <Caret Line="79" Column="45" TopLine="61"/>
       </Position15>
       <Position16>
         <Filename Value="mMain.pas"/>
-        <Caret Line="436" TopLine="419"/>
       </Position16>
       <Position17>
         <Filename Value="mMain.pas"/>
-        <Caret Line="2269" Column="37" TopLine="2252"/>
+        <Caret Line="268" Column="8" TopLine="239"/>
       </Position17>
       <Position18>
         <Filename Value="mMain.pas"/>
-        <Caret Line="252" Column="14" TopLine="236"/>
+        <Caret Line="332" Column="26" TopLine="304"/>
       </Position18>
       <Position19>
         <Filename Value="mMain.pas"/>
-        <Caret Line="2241" Column="27" TopLine="2235"/>
+        <Caret Line="333" Column="21" TopLine="305"/>
       </Position19>
       <Position20>
         <Filename Value="mMain.pas"/>
-        <Caret Line="2270" Column="38" TopLine="2251"/>
+        <Caret Line="380" Column="23" TopLine="366"/>
       </Position20>
       <Position21>
         <Filename Value="mMain.pas"/>
-        <Caret Line="2268" Column="40" TopLine="2251"/>
+        <Caret Line="382" Column="18" TopLine="366"/>
       </Position21>
       <Position22>
         <Filename Value="mMain.pas"/>
-        <Caret Line="2268" Column="40" TopLine="2251"/>
+        <Caret Line="374" Column="23" TopLine="366"/>
       </Position22>
       <Position23>
-        <Filename Value="commpp.pas"/>
-        <Caret Line="169" Column="16" TopLine="148"/>
+        <Filename Value="mMain.pas"/>
+        <Caret Line="483" Column="11" TopLine="464"/>
       </Position23>
       <Position24>
-        <Filename Value="mCheckDrv.pas"/>
-        <Caret Line="61" Column="29" TopLine="43"/>
+        <Filename Value="mMain.pas"/>
+        <Caret Line="137" Column="5" TopLine="119"/>
       </Position24>
       <Position25>
-        <Filename Value="mCheckDrv.pas"/>
-        <Caret Line="24" Column="48" TopLine="34"/>
+        <Filename Value="mMain.pas"/>
+        <Caret Line="374" Column="23" TopLine="356"/>
       </Position25>
       <Position26>
-        <Filename Value="mCheckDrv.pas"/>
-        <Caret Line="59" Column="14" TopLine="34"/>
+        <Filename Value="mMain.pas"/>
+        <Caret Line="485" Column="24" TopLine="465"/>
       </Position26>
       <Position27>
         <Filename Value="mCheckDrv.pas"/>
-        <Caret Line="53" Column="24" TopLine="41"/>
+        <Caret Line="57" Column="15" TopLine="41"/>
       </Position27>
       <Position28>
-        <Filename Value="commpp.pas"/>
-        <Caret Line="78" Column="17" TopLine="62"/>
+        <Filename Value="mMain.pas"/>
+        <Caret Line="487" Column="16" TopLine="465"/>
       </Position28>
       <Position29>
-        <Filename Value="commpp.pas"/>
-        <Caret Line="94" Column="19" TopLine="67"/>
+        <Filename Value="mMain.pas"/>
+        <Caret Line="274" TopLine="250"/>
       </Position29>
       <Position30>
-        <Filename Value="commpp.pas"/>
-        <Caret Line="78" TopLine="67"/>
+        <Filename Value="mMain.pas"/>
+        <Caret Line="372" Column="23" TopLine="354"/>
       </Position30>
     </JumpHistory>
     <RunParams>

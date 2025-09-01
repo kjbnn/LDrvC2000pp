@@ -1,6 +1,6 @@
 unit commPP;
 
-{$mode objfpc}{$H+}
+//{$mode objfpc}{$H+}
 
 interface
 
@@ -17,6 +17,7 @@ type
   protected
     ser: TBlockSerial;
     procedure Execute; override;
+    procedure InitState;
   public
     ProcessProc: TProcess;
     PortName, Baud, Bits, Stop: string;
@@ -167,11 +168,16 @@ begin
           FreeAndNil(ser);
           Log(Format('%s закрыт', [PortName]));
           sleep(30000);
-          aMain.InitState;
+          Synchronize(InitState);
         end;
       end;
 
   Log(Format('%s завершение потока порта', [PortName]));
+end;
+
+procedure TPort.InitState;
+begin
+  aMain.InitState(Owner);
 end;
 
 

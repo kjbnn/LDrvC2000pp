@@ -159,14 +159,13 @@ type
     procedure Read;
     function NextDev: TDev;
     function Process(IsWrite: boolean): boolean;
-  private
   public
     CurDev: TDev;
     constructor Create;
     destructor Destroy; override;
   end;
 
-  TDev = class(TOrionObj)
+  TDev = class(TOrionObj) //pp
     FNoAnswer: byte;
     Op: TDevOp;
     TempIndex: word;
@@ -252,7 +251,7 @@ type
     function ConDevs: word;
     procedure SetIndicator;
   public
-    procedure InitState;
+    procedure InitState(pLine: pointer = nil);
   end;
 
 
@@ -271,8 +270,6 @@ var
   Event: array [0..511] of string;
   RelayState: array [0..1] of string;
   OrionState: array [0..1] of string;
-
-
 
 implementation
 
@@ -372,23 +369,25 @@ begin
 
 end;
 
-procedure TaMain.InitState;
+procedure TaMain.InitState(pLine: pointer = nil);
 var
   i1, i2: word;
   line: TLine;
   dev: TDev;
 begin
-  Log('Вычитывание состояний элементов');
   for i1 := 1 to Lines.Count do
   begin
     line := Lines.Items[i1 - 1];
+    if (pLine <> nil) and (pLine <> line) then  continue;
+    Log('Инициализация чтения состояний элементов '
+      + line.Port.PortName);
     for i2 := 1 to line.ChildsObj.Count do
     begin
       dev := line.ChildsObj.Items[i2 - 1];
-      dev.Op:= DOP_HW_INFO;
+      dev.Op := DOP_HW_INFO;
     end;
   end;
-  Log('Вычитывание состояний элементов выполнено');
+
 end;
 
 procedure TaMain.ReadParam;
@@ -754,7 +753,7 @@ begin
     if r_c = 0 then
       exit;
 
-  childs:= ChildsObj.Count;
+  childs := ChildsObj.Count;
   for i := (TempIndex + 1) mod $10000 to {ChildsObj.Count} childs - 1 do
     if (TOrionObj(ChildsObj.Items[i]).Kind = ObjKind) then
     begin
@@ -2025,9 +2024,7 @@ begin
 
     GET_STATES_MSG:
     begin
-      Log('Запрос состояний');
-      aMain.InitState;
-
+      aMain.InitState();
       for i := 1 to Devs.Count do
       begin
         Dev := Devs.Items[i - 1];
@@ -2239,22 +2236,23 @@ begin
     Live[LiveDev] := 0;
 
   if Option.LogForm then
-    if cs_log.TryEnter then
-    try
-      if (sl_log.Count > 0) then
-      begin
-        Memo1.Lines.BeginUpdate;
-        if Memo1.Lines.Count > 500 then
-          Memo1.Lines.Clear;
-        Memo1.Lines.AddStrings(sl_log);
-        Memo1.Lines.EndUpdate;
-        Memo1.SelStart := Length(Memo1.Text);
-        Memo1.SelLength := 0;
+    if cs_log <> nil then
+      if cs_log.TryEnter then
+      try
+        if (sl_log.Count > 0) then
+        begin
+          Memo1.Lines.BeginUpdate;
+          if Memo1.Lines.Count > 500 then
+            Memo1.Lines.Clear;
+          Memo1.Lines.AddStrings(sl_log);
+          Memo1.Lines.EndUpdate;
+          Memo1.SelStart := Length(Memo1.Text);
+          Memo1.SelLength := 0;
+        end;
+      finally
+        sl_log.Clear;
+        cs_log.Leave;
       end;
-    finally
-      sl_log.Clear;
-      cs_log.Leave;
-    end;
 end;
 
 procedure TaMain.MenuItem10Click(Sender: TObject);
