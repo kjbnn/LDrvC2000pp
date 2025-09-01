@@ -1,7 +1,5 @@
 unit commPP;
 
-//{$mode objfpc}{$H+}
-
 interface
 
 uses
@@ -17,13 +15,12 @@ type
   protected
     ser: TBlockSerial;
     procedure Execute; override;
-    procedure InitState;
   public
     ProcessProc: TProcess;
     PortName, Baud, Bits, Stop: string;
     Owner: pointer;
     LiveId: byte;
-    procedure DumpExceptionCallStack(E: Exception);
+    procedure DumpExceptionCallStack;
   end;
 
 function GetCRC16(Buffer: TBuf; Number: byte): word;
@@ -60,8 +57,8 @@ procedure TPort.Execute;
           CurDev.FNoAnswer := PP_DISCONNECTED;
           CurDev.Connected := False;
         end;
-      s := Format('%s ошибка #%d -> %s', [PortName,
-        ser.LastError, ser.GetErrorDesc(ser.LastError)]);
+      s := Format('%s ошибка #%d -> %s',
+        [PortName, ser.LastError, ser.GetErrorDesc(ser.LastError)]);
       Log(s);
       raise Exception.Create(s);
     end;
@@ -75,111 +72,106 @@ var
 begin
   while (not Terminated) do
     with Tline(Owner) do
-      try
-        //if length(Live) > LiveId then Live[LiveId]:= 0;
+    try
+      //if length(Live) > LiveId then Live[LiveId]:= 0;
 
-        ser := TBlockSerial.Create;
-        ser.RaiseExcept := False;
-        ser.LinuxLock := False;
-        Log(Format('%s открытие...', [PortName]));
-        ser.Connect(PortName);
-        ser.Config(StrToInt(Baud), StrToInt(Bits), 'N', StrToInt(Stop), False, False);
-        if ser.LastError <> 0 then
-          RaiseErrorInfo
-        else
-          Log(Format('%s открыт, handle %d', [PortName, ser.Handle]));
+      ser := TBlockSerial.Create;
+      ser.RaiseExcept := False;
+      ser.LinuxLock := False;
+      Log(Format('%s открытие...', [PortName]));
+      ser.Connect(PortName);
+      ser.Config(StrToInt(Baud), StrToInt(Bits), 'N', StrToInt(Stop), False, False);
+      if ser.LastError <> 0 then
+        RaiseErrorInfo
+      else
+        Log(Format('%s открыт, handle %d', [PortName, ser.Handle]));
 
-        {process}
-        while (not Terminated) do
+      {process}
+      while (not Terminated) do
+      begin
+        sleep(20);
+        if length(Live) > LiveId then Live[LiveId] := 0;
+
+        if not ProcessProc(True) then
         begin
-          sleep(20);
-          if length(Live) > LiveId then Live[LiveId]:= 0;
-
-          if not ProcessProc(True) then
-          begin
-            s := Format('%s. Ошибка ProcessProc(True), ', [PortName]);
-            if CurDev <> nil then
-              s := s + Format('CurDev.Op: %d, CurDev.ObjNum: %d',
-                [Ord(CurDev.Op), CurDev.CmdObj])
-            else
-              s := s + 'CurDev is nil';
-            Log(s);
-            sleep(3000);
-            raise Exception.Create(s);
-          end;
-
-          {отправка}
-          if TLine(Owner).CurDev <> nil then
-            with TLine(Owner).CurDev do
-              if Option.Debug then
-                Log(Format('%s W> %s', [PortName, ArrayToStr(w, wCount)]));
-          ser.SendBuffer(@CurDev.w, CurDev.wCount);
-          if ser.LastError <> 0 then
-            RaiseErrorInfo;
-
-          {прием}
-          FillChar(CurDev.r, 255, 0);
-          CurDev.rCount := 0;
-          TotalWaiting := 0;
-          waiting := 0;
-          s := 'waiting:';
-          repeat
-            waiting := ser.WaitingData;
-            if (CurDev.rCount > 0) and (waiting = 0) then
-              break;
-            s := s + Format(' %d', [waiting]);
-            ser.RecvBuffer(@CurDev.r[CurDev.rCount], waiting);
-            CurDev.rCount := CurDev.rCount + waiting;
-            Inc(TotalWaiting);
-            sleep(5);
-          until ((CurDev.rCount > 0) and (waiting = 0)) or (TotalWaiting >= 100);
-
-          if TLine(Owner).CurDev <> nil then
-            with TLine(Owner).CurDev do
-              if Option.Debug then
-                Log(Format('%s R> %s %s', [PortName, ArrayToStr(r, rCount), s]));
-
-          if ser.LastError <> 0 then
-            RaiseErrorInfo;
-
-          if (CurDev.rCount < 5) or (CurDev.w[0] <> CurDev.r[0]) or
-            (CurDev.w[1] <> (CurDev.r[1] and $7F)) then
-            CurDev.Connected := False
+          s := Format('%s. Ошибка ProcessProc(True), ', [PortName]);
+          if CurDev <> nil then
+            s := s + Format('CurDev.Op: %d, CurDev.ObjNum: %d',
+              [Ord(CurDev.Op), CurDev.CmdObj])
           else
-          begin
-            crc := CRC16(CurDev.r, CurDev.rCount - 2);
-            if (CurDev.r[CurDev.rCount - 2] = hi(crc)) and
-              (CurDev.r[CurDev.rCount - 1] = lo(crc)) then
-            begin
-              CurDev.Connected := True;
-              ProcessProc(False);
-            end
-            else
-              CurDev.Connected := False;
-          end;
+            s := s + 'CurDev is nil';
+          Log(s);
+          sleep(3000);
+          raise Exception.Create(s);
         end;
 
-      except
-        on E: Exception do
+        {отправка}
+        if TLine(Owner).CurDev <> nil then
+          with TLine(Owner).CurDev do
+            if Option.Debug then
+              Log(Format('%s W> %s', [PortName, ArrayToStr(w, wCount)]));
+        ser.SendBuffer(@CurDev.w, CurDev.wCount);
+        if ser.LastError <> 0 then
+          RaiseErrorInfo;
+
+        {прием}
+        FillChar(CurDev.r, 255, 0);
+        CurDev.rCount := 0;
+        TotalWaiting := 0;
+        waiting := 0;
+        s := 'waiting:';
+        repeat
+          waiting := ser.WaitingData;
+          if (CurDev.rCount > 0) and (waiting = 0) then
+            break;
+          s := s + Format(' %d', [waiting]);
+          ser.RecvBuffer(@CurDev.r[CurDev.rCount], waiting);
+          CurDev.rCount := CurDev.rCount + waiting;
+          Inc(TotalWaiting);
+          sleep(5);
+        until ((CurDev.rCount > 0) and (waiting = 0)) or (TotalWaiting >= 100);
+
+        if TLine(Owner).CurDev <> nil then
+          with TLine(Owner).CurDev do
+            if Option.Debug then
+              Log(Format('%s R> %s %s', [PortName, ArrayToStr(r, rCount), s]));
+
+        if ser.LastError <> 0 then
+          RaiseErrorInfo;
+
+        if (CurDev.rCount < 5) or (CurDev.w[0] <> CurDev.r[0]) or
+          (CurDev.w[1] <> (CurDev.r[1] and $7F)) then
+          CurDev.Connected := False
+        else
         begin
-          if Option.Debug then
-            DumpExceptionCallStack(E);
-          Log(Format('%s закрытие...', [PortName]));
-          FreeAndNil(ser);
-          Log(Format('%s закрыт', [PortName]));
-          sleep(30000);
-          Synchronize(InitState);
+          crc := CRC16(CurDev.r, CurDev.rCount - 2);
+          if (CurDev.r[CurDev.rCount - 2] = hi(crc)) and
+            (CurDev.r[CurDev.rCount - 1] = lo(crc)) then
+          begin
+            CurDev.Connected := True;
+            ProcessProc(False);
+          end
+          else
+            CurDev.Connected := False;
         end;
       end;
 
+    except
+      on E: Exception do
+      begin
+        Log('Exception class: ' + E.ClassName + ', Message: ' + E.Message);
+        if Option.Debug then
+          DumpExceptionCallStack;
+        Log(Format('%s закрытие...', [PortName]));
+        FreeAndNil(ser);
+        Log(Format('%s закрыт', [PortName]));
+        sleep(30000);
+        InitState(Owner);
+      end;
+    end;
+
   Log(Format('%s завершение потока порта', [PortName]));
 end;
-
-procedure TPort.InitState;
-begin
-  aMain.InitState(Owner);
-end;
-
 
 //**Original Code from Sky devil**
 function GetCRC16(Buffer: TBuf; Number: byte): word;
@@ -279,29 +271,17 @@ begin
 end;
 
 
-procedure TPort.DumpExceptionCallStack(E: Exception);
+procedure TPort.DumpExceptionCallStack;
 var
-  I: integer;
+  i: integer;
   Frames: PPointer;
   s: string;
-  //f: TextFile;
 begin
-  {
-  AssignFile(f, '.\stack.log');
-  Rewrite(f);
-  DumpExceptionBackTrace(f);
-  CloseFile(f);
-  }
-  s := 'Trace exception:' + LineEnding;
-  if E <> nil then
-  begin
-    s := s + 'Exception class: ' + E.ClassName + 'Message: ' + E.Message + LineEnding;
-  end;
-  s := s + BackTraceStrFunc(ExceptAddr);
+  s:= 'Trace:' + LineEnding + BackTraceStrFunc(ExceptAddr);
   Log(s);
   Frames := ExceptFrames;
-  for I := 0 to ExceptFrameCount - 1 do
-    Log(BackTraceStrFunc(Frames[I]));
+  for i := 0 to ExceptFrameCount - 1 do
+    Log(BackTraceStrFunc(Frames[i]));
 end;
 
 end.
