@@ -251,7 +251,6 @@ type
     function ConDevs: word;
     procedure SetIndicator;
   public
-    procedure InitState(pLine: pointer = nil);
   end;
 
 
@@ -261,6 +260,7 @@ function FindDevWithPultid(DevId: word; KindObj: TObjectType; ObjId: word): TDev
 procedure Consider(mes: KSBMES; str: string);
 procedure Send(mes: KSBMES); overload;
 procedure Send(mes: KSBMES; str: pchar); overload;
+procedure InitState(pLine: pointer = nil);
 
 var
   aMain: TaMain;
@@ -323,6 +323,7 @@ begin
     Log('Чтение файла ' + Option.FileMask + '.xml...');
     ReadConfiguration;
     Log('Файл ' + Option.FileMask + '.xml прочитан');
+    InitState;
 
     if not Option.Noport then
     begin
@@ -365,27 +366,6 @@ begin
     SpinEdit1.Visible := False;
     SpinEdit2.Visible := False;
     MenuItem2.Visible := False;
-  end;
-
-end;
-
-procedure TaMain.InitState(pLine: pointer = nil);
-var
-  i1, i2: word;
-  line: TLine;
-  dev: TDev;
-begin
-  for i1 := 1 to Lines.Count do
-  begin
-    line := Lines.Items[i1 - 1];
-    if (pLine <> nil) and (pLine <> line) then  continue;
-    Log('Инициализация чтения состояний элементов '
-      + line.Port.PortName);
-    for i2 := 1 to line.ChildsObj.Count do
-    begin
-      dev := line.ChildsObj.Items[i2 - 1];
-      dev.Op := DOP_HW_INFO;
-    end;
   end;
 
 end;
@@ -502,17 +482,6 @@ begin
         ParentObj := pParent;
         TOrionObj(ParentObj).ChildsObj.Add(pObj);
         Devs.Add(pObj);
-
-        TempIndex := $FFFF;
-        //set start PP operation
-        //Op := DOP_OUTKEYS_STATE;
-        Op := DOP_HW_INFO;
-        {$IFDEF EXTENDINFO}
-        Op := DOP_MAX_RELAYS;
-        {$ENDIF}
-        {$IFDEF MASTER}
-        Op := DOP_SET_TIME;
-        {$ENDIF}
       end;
     end;
 
@@ -1952,6 +1921,33 @@ begin
   Result := CurDev;
 end;
 
+procedure InitState(pLine: pointer = nil);
+var
+  i1, i2: word;
+  line: TLine;
+  dev: TDev;
+begin
+  for i1 := 1 to Lines.Count do
+  begin
+    line := Lines.Items[i1 - 1];
+    if (pLine <> nil) and (pLine <> line) then  continue;
+    Log('Инициализация чтения состояний элементов '
+      + line.Port.PortName);
+    for i2 := 1 to line.ChildsObj.Count do
+    begin
+      dev := line.ChildsObj.Items[i2 - 1];
+      dev.Op := DOP_HW_INFO;
+      {$IFDEF EXTENDINFO}
+      dev.Op := DOP_MAX_RELAYS;
+      {$ENDIF}
+      {$IFDEF MASTER}
+      dev.Op := DOP_SET_TIME;
+      {$ENDIF}
+      dev.TempIndex := $FFFF;
+    end;
+  end;
+end;
+
 (* --------------- *)
 (*      KSBMES     *)
 (* --------------- *)
@@ -2024,7 +2020,7 @@ begin
 
     GET_STATES_MSG:
     begin
-      aMain.InitState();
+      InitState;
       for i := 1 to Devs.Count do
       begin
         Dev := Devs.Items[i - 1];
