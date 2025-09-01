@@ -136,7 +136,7 @@ object aMain: TaMain
         OnClick = MenuItem12Click
       end
       object MenuItem13: TMenuItem
-        Caption = 'Порт2 исключение'
+        Caption = 'Форма зависла CPU overload'
         OnClick = MenuItem13Click
       end
     end

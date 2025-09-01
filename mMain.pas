@@ -2272,7 +2272,7 @@ end;
 
 procedure TaMain.MenuItem13Click(Sender: TObject);
 begin
-  Live[3] := LiveTime[3];
+  while true do;
 end;
 
 procedure TaMain.MenuItem1Click(Sender: TObject);
