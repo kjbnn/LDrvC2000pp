@@ -60,6 +60,7 @@ object aMain: TaMain
     ShowHint = True
     TabOrder = 2
     Value = 1
+    Visible = False
   end
   object SpinEdit2: TSpinEdit
     Left = 8
@@ -72,6 +73,7 @@ object aMain: TaMain
     ShowHint = True
     TabOrder = 3
     Value = 1
+    Visible = False
   end
   object MainMenu1: TMainMenu
     Left = 152
@@ -92,6 +94,7 @@ object aMain: TaMain
     end
     object MenuItem2: TMenuItem
       Caption = 'Управление'
+      Visible = False
       object MenuItem3: TMenuItem
         Caption = 'Взять шлейф'
         OnClick = MenuItem3Click

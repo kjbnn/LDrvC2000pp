@@ -19,9 +19,10 @@
         <ComponentName Value="aMain"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
+        <IsVisibleTab Value="True"/>
         <EditorIndex Value="1"/>
-        <TopLine Value="2358"/>
-        <CursorPos Y="2379"/>
+        <TopLine Value="343"/>
+        <CursorPos X="29" Y="359"/>
         <UsageCount Value="209"/>
         <Bookmarks Count="3">
           <Item0 Y="372" Left="1" Top="371" ID="1"/>
@@ -35,10 +36,9 @@
         <Filename Value="commpp.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="commPP"/>
-        <IsVisibleTab Value="True"/>
-        <EditorIndex Value="3"/>
-        <TopLine Value="116"/>
-        <CursorPos X="11" Y="137"/>
+        <EditorIndex Value="2"/>
+        <TopLine Value="101"/>
+        <CursorPos X="12" Y="117"/>
         <ExtraEditorCount Value="1"/>
         <ExtraEditor1>
           <EditorIndex Value="-1"/>
@@ -46,6 +46,9 @@
           <CursorPos X="46" Y="120"/>
         </ExtraEditor1>
         <UsageCount Value="220"/>
+        <Bookmarks Count="1">
+          <Item0 X="9" Y="122" Left="1" Top="96" ID="4"/>
+        </Bookmarks>
         <Loaded Value="True"/>
       </Unit2>
       <Unit3>
@@ -122,7 +125,7 @@
       <Unit11>
         <Filename Value="mLogging.pas"/>
         <IsPartOfProject Value="True"/>
-        <EditorIndex Value="4"/>
+        <EditorIndex Value="3"/>
         <CursorPos Y="25"/>
         <UsageCount Value="200"/>
         <Loaded Value="True"/>
@@ -143,7 +146,7 @@
       </Unit13>
       <Unit14>
         <Filename Value="mCheckDrv.pas"/>
-        <EditorIndex Value="5"/>
+        <EditorIndex Value="4"/>
         <CursorPos Y="28"/>
         <UsageCount Value="102"/>
         <Loaded Value="True"/>
@@ -305,11 +308,10 @@
       <Unit37>
         <Filename Value="C:\lazarus\lcl\customtimer.pas"/>
         <UnitName Value="CustomTimer"/>
-        <EditorIndex Value="2"/>
+        <EditorIndex Value="-1"/>
         <TopLine Value="132"/>
         <CursorPos Y="153"/>
         <UsageCount Value="10"/>
-        <Loaded Value="True"/>
       </Unit37>
     </Units>
     <OtherDefines Count="3">
@@ -319,124 +321,124 @@
     </OtherDefines>
     <JumpHistory Count="30" HistoryIndex="29">
       <Position1>
-        <Filename Value="mCheckDrv.pas"/>
-        <Caret Line="25" Column="39" TopLine="6"/>
+        <Filename Value="commpp.pas"/>
+        <Caret Line="167" TopLine="153"/>
       </Position1>
       <Position2>
-        <Filename Value="mCheckDrv.pas"/>
-        <Caret Line="65" TopLine="45"/>
+        <Filename Value="commpp.pas"/>
+        <Caret Line="168" TopLine="153"/>
       </Position2>
       <Position3>
-        <Filename Value="mCheckDrv.pas"/>
-        <Caret Line="70" TopLine="45"/>
+        <Filename Value="commpp.pas"/>
+        <Caret Line="169" TopLine="153"/>
       </Position3>
       <Position4>
-        <Filename Value="mCheckDrv.pas"/>
-        <Caret Line="71" TopLine="45"/>
+        <Filename Value="commpp.pas"/>
+        <Caret Line="170" TopLine="153"/>
       </Position4>
       <Position5>
-        <Filename Value="mCheckDrv.pas"/>
-        <Caret Line="88" TopLine="53"/>
+        <Filename Value="commpp.pas"/>
+        <Caret Line="171" TopLine="153"/>
       </Position5>
       <Position6>
-        <Filename Value="mCheckDrv.pas"/>
-        <Caret Line="81" TopLine="53"/>
+        <Filename Value="commpp.pas"/>
+        <Caret Line="95" TopLine="79"/>
       </Position6>
       <Position7>
-        <Filename Value="mCheckDrv.pas"/>
-        <Caret Line="82" TopLine="53"/>
+        <Filename Value="commpp.pas"/>
+        <Caret Line="158" Column="28" TopLine="124"/>
       </Position7>
       <Position8>
-        <Filename Value="mCheckDrv.pas"/>
-        <Caret Line="83" TopLine="53"/>
+        <Filename Value="commpp.pas"/>
+        <Caret Line="20" Column="5"/>
       </Position8>
       <Position9>
-        <Filename Value="mCheckDrv.pas"/>
-        <Caret Line="50" Column="7" TopLine="39"/>
+        <Filename Value="commpp.pas"/>
+        <Caret Line="64" Column="10" TopLine="43"/>
       </Position9>
       <Position10>
-        <Filename Value="mCheckDrv.pas"/>
-        <Caret Line="81" TopLine="56"/>
+        <Filename Value="commpp.pas"/>
+        <Caret Line="65" Column="13" TopLine="43"/>
       </Position10>
       <Position11>
-        <Filename Value="mCheckDrv.pas"/>
-        <Caret Line="69" Column="5" TopLine="54"/>
+        <Filename Value="commpp.pas"/>
+        <Caret Line="87" Column="7" TopLine="67"/>
       </Position11>
       <Position12>
-        <Filename Value="mCheckDrv.pas"/>
-        <Caret Line="70" Column="7" TopLine="51"/>
+        <Filename Value="commpp.pas"/>
+        <Caret Line="95" Column="44" TopLine="67"/>
       </Position12>
       <Position13>
-        <Filename Value="mCheckDrv.pas"/>
-        <Caret Line="64" Column="19" TopLine="43"/>
+        <Filename Value="commpp.pas"/>
+        <Caret Line="159" Column="45" TopLine="137"/>
       </Position13>
       <Position14>
-        <Filename Value="mCheckDrv.pas"/>
-        <Caret Line="76" TopLine="43"/>
+        <Filename Value="commpp.pas"/>
+        <Caret Line="158" Column="13" TopLine="137"/>
       </Position14>
       <Position15>
-        <Filename Value="mMain.pas"/>
-        <Caret Line="2379" TopLine="2358"/>
+        <Filename Value="commpp.pas"/>
+        <Caret Line="95" Column="7" TopLine="74"/>
       </Position15>
       <Position16>
-        <Filename Value="C:\lazarus\lcl\customtimer.pas"/>
-        <Caret Line="181" TopLine="160"/>
+        <Filename Value="commpp.pas"/>
+        <Caret Line="87" Column="7" TopLine="74"/>
       </Position16>
       <Position17>
-        <Filename Value="mCheckDrv.pas"/>
-        <Caret Line="77" TopLine="49"/>
+        <Filename Value="commpp.pas"/>
+        <Caret Line="95" Column="7" TopLine="74"/>
       </Position17>
       <Position18>
-        <Filename Value="mCheckDrv.pas"/>
-        <Caret Line="72" Column="14" TopLine="49"/>
+        <Filename Value="commpp.pas"/>
+        <Caret Line="158" Column="13" TopLine="137"/>
       </Position18>
       <Position19>
-        <Filename Value="mCheckDrv.pas"/>
-        <Caret Line="12" Column="3"/>
+        <Filename Value="commpp.pas"/>
+        <Caret Line="95" Column="7" TopLine="74"/>
       </Position19>
       <Position20>
-        <Filename Value="mCheckDrv.pas"/>
-        <Caret Line="92" TopLine="58"/>
+        <Filename Value="commpp.pas"/>
+        <Caret Line="87" Column="7" TopLine="74"/>
       </Position20>
       <Position21>
-        <Filename Value="mCheckDrv.pas"/>
-        <Caret Line="83" TopLine="49"/>
+        <Filename Value="commpp.pas"/>
+        <Caret Line="52" Column="30" TopLine="42"/>
       </Position21>
       <Position22>
-        <Filename Value="mCheckDrv.pas"/>
-        <Caret Line="73" Column="11" TopLine="45"/>
+        <Filename Value="commpp.pas"/>
+        <Caret Line="91" Column="7" TopLine="71"/>
       </Position22>
       <Position23>
-        <Filename Value="mCheckDrv.pas"/>
-        <Caret Line="79" TopLine="45"/>
+        <Filename Value="commpp.pas"/>
+        <Caret Line="122" Column="9" TopLine="101"/>
       </Position23>
       <Position24>
         <Filename Value="commpp.pas"/>
-        <Caret Line="82" Column="9" TopLine="72"/>
+        <Caret Line="146" Column="9" TopLine="125"/>
       </Position24>
       <Position25>
         <Filename Value="commpp.pas"/>
-        <Caret Line="112" Column="11" TopLine="78"/>
+        <Caret Line="122" Column="9" TopLine="101"/>
       </Position25>
       <Position26>
         <Filename Value="commpp.pas"/>
-        <Caret Line="137" Column="11" TopLine="116"/>
+        <Caret Line="146" Column="9" TopLine="125"/>
       </Position26>
       <Position27>
         <Filename Value="commpp.pas"/>
-        <Caret Line="82" Column="9" TopLine="61"/>
+        <Caret Line="122" Column="9" TopLine="101"/>
       </Position27>
       <Position28>
         <Filename Value="commpp.pas"/>
-        <Caret Line="112" Column="11" TopLine="91"/>
+        <Caret Line="146" Column="9" TopLine="125"/>
       </Position28>
       <Position29>
         <Filename Value="commpp.pas"/>
-        <Caret Line="137" Column="11" TopLine="116"/>
+        <Caret Line="122" Column="9" TopLine="101"/>
       </Position29>
       <Position30>
         <Filename Value="commpp.pas"/>
-        <Caret Line="112" Column="11" TopLine="91"/>
+        <Caret Line="146" Column="9" TopLine="125"/>
       </Position30>
     </JumpHistory>
     <RunParams>

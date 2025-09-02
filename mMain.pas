@@ -125,7 +125,7 @@ type
 
   TOption = record
     FileMask: string;
-    Debug: boolean;
+    Debug: byte; {1-exp, 2-port, 4-menu}
     Noport: boolean;
   end;
 
@@ -360,11 +360,11 @@ begin
   Indicator.Brush.Color := clRed;
   Indicator.ShowHint := True;
 
-  if not Option.Debug then
+  if (Option.Debug and 4) > 0 then
   begin
-    SpinEdit1.Visible := False;
-    SpinEdit2.Visible := False;
-    MenuItem2.Visible := False;
+    SpinEdit1.Visible := True;
+    SpinEdit2.Visible := True;
+    MenuItem2.Visible := True;
   end;
 
 end;
@@ -377,7 +377,7 @@ begin
 
   with Option do
   begin
-    Debug := StrToInt(getkey('Debug', '0')) = 1;
+    Debug := StrToInt(getkey('Debug', '0'));
     Noport := StrToInt(getkey('Noport', '0')) = 1;
   end;
 
@@ -800,7 +800,7 @@ begin
   if not IsWrite then
     ch := 'R';
 
-  if Option.Debug then
+  if (Option.Debug and 2) > 0 then
     if CurDev <> nil then
       log(Format('%s%s %s (%d)', [s, ch, GetEnumName(TypeInfo(TDevOp), Ord(CurDev.Op)),
         Ord(CurDev.Op)]));
@@ -2272,7 +2272,7 @@ end;
 
 procedure TaMain.MenuItem13Click(Sender: TObject);
 begin
-  while true do;
+  while True do ;
 end;
 
 procedure TaMain.MenuItem1Click(Sender: TObject);

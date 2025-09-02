@@ -5,6 +5,9 @@ interface
 uses
   Classes, synaser, Graphics, SysUtils;
 
+const
+  MaxTransmitAttempt = 3;
+
 type
   TProcess = function(IsWrite: boolean): boolean of object;
 
@@ -14,6 +17,7 @@ type
   TPort = class(TThread)
   protected
     ser: TBlockSerial;
+    TransmitAttempt: byte;
     procedure Execute; override;
   public
     ProcessProc: TProcess;
@@ -45,7 +49,7 @@ end;
 
 procedure TPort.Execute;
 
-  procedure RaiseErrorInfo;
+  procedure TryRaiseErrorInfo;
   var
     s: string;
   begin
@@ -57,9 +61,14 @@ procedure TPort.Execute;
           CurDev.FNoAnswer := PP_DISCONNECTED;
           CurDev.Connected := False;
         end;
-      s := Format('%s ошибка #%d -> %s',
-        [PortName, ser.LastError, ser.GetErrorDesc(ser.LastError)]);
-      raise Exception.Create(s);
+      if TransmitAttempt > 0 then
+        Dec(TransmitAttempt)
+      else
+      begin
+        s := Format('%s ошибка #%d -> %s',
+          [PortName, ser.LastError, ser.GetErrorDesc(ser.LastError)]);
+        raise Exception.Create(s);
+      end;
     end;
   end;
 
@@ -75,20 +84,22 @@ begin
       ser := TBlockSerial.Create;
       ser.RaiseExcept := False;
       ser.LinuxLock := False;
+      TransmitAttempt := 0;
       Log(Format('%s открытие...', [PortName]));
       ser.Connect(PortName);
       ser.Config(StrToInt(Baud), StrToInt(Bits), 'N', StrToInt(Stop), False, False);
-      if ser.LastError <> 0 then
-        RaiseErrorInfo;
+      TryRaiseErrorInfo;
+
       Log(Format('%s открыт, handle %d', [PortName, ser.Handle]));
       InitState(Owner);
+      TransmitAttempt := MaxTransmitAttempt;
 
-      {process}
       while (not Terminated) do
       begin
         sleep(20);
         if length(Live) > LiveId then Live[LiveId] := 0;
 
+        {prepare process}
         if not ProcessProc(True) then
         begin
           s := Format('%s. Ошибка ProcessProc(True), ', [PortName]);
@@ -105,11 +116,10 @@ begin
         {отправка}
         if TLine(Owner).CurDev <> nil then
           with TLine(Owner).CurDev do
-            if Option.Debug then
+            if (Option.Debug and 2) > 0 then
               Log(Format('%s W> %s', [PortName, ArrayToStr(w, wCount)]));
         ser.SendBuffer(@CurDev.w, CurDev.wCount);
-        if ser.LastError <> 0 then
-          RaiseErrorInfo;
+        TryRaiseErrorInfo;
 
         {прием}
         FillChar(CurDev.r, 255, 0);
@@ -130,12 +140,10 @@ begin
 
         if TLine(Owner).CurDev <> nil then
           with TLine(Owner).CurDev do
-            if Option.Debug then
+            if (Option.Debug and 2) > 0 then
               Log(Format('%s R> %s %s', [PortName, ArrayToStr(r, rCount), s]));
 
-        if ser.LastError <> 0 then
-          RaiseErrorInfo;
-
+        TryRaiseErrorInfo;
         if (CurDev.rCount < 5) or (CurDev.w[0] <> CurDev.r[0]) or
           (CurDev.w[1] <> (CurDev.r[1] and $7F)) then
           CurDev.Connected := False
@@ -147,6 +155,7 @@ begin
           begin
             CurDev.Connected := True;
             ProcessProc(False);
+            TransmitAttempt := MaxTransmitAttempt;
           end
           else
             CurDev.Connected := False;
@@ -157,7 +166,7 @@ begin
       on E: Exception do
       begin
         Log(E.ToString);
-        if Option.Debug then
+        if (Option.Debug and 1) > 0 then
           DumpExceptionCallStack;
         Log(Format('%s закрытие...', [PortName]));
         FreeAndNil(ser);
@@ -273,7 +282,7 @@ var
   Frames: PPointer;
   s: string;
 begin
-  s:= 'Trace:' + LineEnding + BackTraceStrFunc(ExceptAddr);
+  s := 'Trace:' + LineEnding + BackTraceStrFunc(ExceptAddr);
   Log(s);
   Frames := ExceptFrames;
   for i := 0 to ExceptFrameCount - 1 do
