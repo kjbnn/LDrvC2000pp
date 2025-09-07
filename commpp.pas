@@ -5,9 +5,6 @@ interface
 uses
   Classes, synaser, Graphics, SysUtils;
 
-const
-  MaxTransmitAttempt = 10;
-
 type
   TProcess = procedure(IsWrite: boolean) of object;
 
@@ -89,10 +86,9 @@ begin
 
         if (Option.Debug and 2) > 0 then
           with CurPp do
-          begin
             Log(Format('%s W> %s', [PortName, ArrayToStr(w, wCount)]));
-            ser.SendBuffer(@w, wCount);
-          end;
+
+        ser.SendBuffer(@CurPp.w, CurPp.wCount);
         if ser.LastError <> 0 then
           raise Exception.Create(PortErrorInfo);
 
@@ -120,10 +116,8 @@ begin
             Log(Format('%s R> %s %s', [PortName, ArrayToStr(r, rCount), s]));
 
         {обработка приема}
-        if (CurPp.rCount < 5) or (CurPp.w[0] <> CurPp.r[0]) or
-          (CurPp.w[1] <> (CurPp.r[1] and $7F)) then
-          CurPp.Connected := False
-        else
+        if (CurPp.rCount >= 5) and (CurPp.w[0] = CurPp.r[0]) and
+          (CurPp.w[1] = (CurPp.r[1] and $7F)) then
         begin
           crc := CRC16(CurPp.r, CurPp.rCount - 2);
           if (CurPp.r[CurPp.rCount - 2] = hi(crc)) and

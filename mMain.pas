@@ -682,7 +682,6 @@ begin
   else if (FNoAnswer < PP_DISCONNECTED) then
   begin
     Inc(FNoAnswer);
-
     if (FNoAnswer = PP_DISCONNECTED) then
     begin
       Init(mes);
@@ -787,19 +786,16 @@ var
   Address: word;
   Sended: boolean;
 begin
-  if CurPp <> nil then
-    s := Format('%s PP#%d ', [TPort(Port).PortName, CurPp.Number])
+  Assert(CurPp <> nil, 'CurPp = nil !');
+
+  s := Format('%s PP#%d ', [TPort(Port).PortName, CurPp.Number]);
+  if IsWrite then
+    ch := 'W'
   else
-    s := Format('%s PP(unknown) ', [TPort(Port).PortName]);
-
-  ch := 'W';
-  if not IsWrite then
     ch := 'R';
-
   if (Option.Debug and 2) > 0 then
-    if CurPp <> nil then
-      log(Format('%s%s %s (%d)', [s, ch, GetEnumName(TypeInfo(TDevOp), Ord(CurPp.Op)),
-        Ord(CurPp.Op)]));
+    log(Format('%s%s %s (%d)', [s, ch, GetEnumName(TypeInfo(TDevOp), Ord(CurPp.Op)),
+      Ord(CurPp.Op)]));
 
 
   { Write }
