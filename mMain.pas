@@ -443,7 +443,7 @@ begin
       begin
         ParentObj := pParent;
         Port := TPort.Create(True);
-        //Port.FreeOnTerminate := True;
+        Port.FreeOnTerminate := True;
         Port.LiveId := CheckDrv.AddId;
         with Port as TPort do
         begin

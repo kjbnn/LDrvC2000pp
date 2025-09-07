@@ -109,7 +109,7 @@ begin
           CurPp.rCount := CurPp.rCount + waiting;
           Inc(TotalWaiting);
           sleep(5);
-        until ((CurPp.rCount > 0) and (waiting = 0)) or (TotalWaiting >= 100);
+        until ((CurPp.rCount > 0) and (waiting = 0)) or (TotalWaiting >= 50);
 
         if (Option.Debug and 2) > 0 then
           with CurPp do
@@ -128,7 +128,9 @@ begin
           end
           else
             CurPp.Connected := False;
-        end;
+        end
+        else
+          CurPp.Connected := False;
       end;
 
   except

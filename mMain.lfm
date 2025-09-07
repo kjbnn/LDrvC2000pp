@@ -6,7 +6,6 @@ object aMain: TaMain
   ClientHeight = 277
   ClientWidth = 371
   Menu = MainMenu1
-  LCLVersion = '4.2.0.0'
   Visible = True
   OnClose = FormClose
   OnConstrainedResize = FormConstrainedResize
