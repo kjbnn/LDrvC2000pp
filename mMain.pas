@@ -143,7 +143,7 @@ type
     function FindWithIdChild(bKind: TObjectType; Id: word): word;
   end;
 
-  TDev = class;
+  TPp = class;
 
   TCmdRec = record
     Op: TDevOp;
@@ -155,16 +155,16 @@ type
   TLine = class(TOrionObj)
   private
     Port: TPort;
-    procedure Read;
-    function NextDev: TDev;
-    function Process(IsWrite: boolean): boolean;
+    procedure Process(IsWrite: boolean);
+    procedure Read; //call from Process
   public
-    CurDev: TDev;
+    CurPp: TPp;
+    function NextPp: TPp;
     constructor Create;
     destructor Destroy; override;
   end;
 
-  TDev = class(TOrionObj) //pp
+  TPp = class(TOrionObj)
     FNoAnswer: byte;
     Op: TDevOp;
     TempIndex: word;
@@ -172,7 +172,7 @@ type
     CmdOp: TDevOp;
     CmdObj: word;
     CmdTry: byte;
-    z_c, r_c, p_c, u_c: word;
+    z_c, r_c, p_c, u_c: word; //кол-во Zone, Part, User
     StateRequest: word;
     rCount, wCount: word;
     Cmds: TThreadList;
@@ -254,8 +254,7 @@ type
 
 
 function GetVersion(FileName: string): string;
-function FindDev(Number: word): TDev;
-function FindDevWithPultid(DevId: word; KindObj: TObjectType; ObjId: word): TDev;
+function FindPpWithPultid(PpId: word; KindObj: TObjectType; ObjId: word): TPp;
 procedure Consider(mes: KSBMES; str: string);
 procedure Send(mes: KSBMES); overload;
 procedure Send(mes: KSBMES; str: pchar); overload;
@@ -265,7 +264,7 @@ var
   aMain: TaMain;
   Option: TOption;
   Lines: TList;
-  Devs: TList;
+  Pps: TList;
   Event: array [0..511] of string;
   RelayState: array [0..1] of string;
   OrionState: array [0..1] of string;
@@ -444,7 +443,7 @@ begin
       begin
         ParentObj := pParent;
         Port := TPort.Create(True);
-        Port.FreeOnTerminate := True;
+        //Port.FreeOnTerminate := True;
         Port.LiveId := CheckDrv.AddId;
         with Port as TPort do
         begin
@@ -469,8 +468,8 @@ begin
         TDOMElement(XmlDocNode).GetAttribute('Id')]);
       Log(s);
 
-      pObj := TDev.Create;
-      with TDev(pObj) do
+      pObj := TPp.Create;
+      with TPp(pObj) do
       begin
         Kind := DEVPP;
         Number := TDOMElement(XmlDocNode).GetAttribute('Number').ToInteger;
@@ -478,7 +477,7 @@ begin
         Bigdevice := TDOMElement(XmlDocNode).GetAttribute('Id').ToInteger;
         ParentObj := pParent;
         TOrionObj(ParentObj).ChildsObj.Add(pObj);
-        Devs.Add(pObj);
+        Pps.Add(pObj);
       end;
     end;
 
@@ -500,7 +499,7 @@ begin
         Smalldevice := TDOMElement(XmlDocNode).GetAttribute('Id').ToInteger;
         ParentObj := pParent;
         TOrionObj(ParentObj).ChildsObj.Add(pObj);
-        Inc(TDev(ParentObj).z_c);
+        Inc(TPp(ParentObj).z_c);
       end;
     end;
 
@@ -520,7 +519,7 @@ begin
         Smalldevice := TDOMElement(XmlDocNode).GetAttribute('Id').ToInteger;
         ParentObj := pParent;
         TOrionObj(ParentObj).ChildsObj.Add(pObj);
-        Inc(TDev(ParentObj).r_c);
+        Inc(TPp(ParentObj).r_c);
       end;
     end;
 
@@ -540,7 +539,7 @@ begin
         Smalldevice := TDOMElement(XmlDocNode).GetAttribute('Id').ToInteger;
         ParentObj := pParent;
         TOrionObj(ParentObj).ChildsObj.Add(pObj);
-        Inc(TDev(ParentObj).p_c);
+        Inc(TPp(ParentObj).p_c);
       end;
     end;
 
@@ -560,7 +559,7 @@ begin
         Smalldevice := TDOMElement(XmlDocNode).GetAttribute('Id').ToInteger;
         ParentObj := pParent;
         TOrionObj(ParentObj).ChildsObj.Add(pObj);
-        Inc(TDev(ParentObj).u_c);
+        Inc(TPp(ParentObj).u_c);
       end;
     end;
 
@@ -629,8 +628,8 @@ begin
 end;
 
 
-{ TDev }
-constructor TDev.Create;
+{ TPp }
+constructor TPp.Create;
 begin
   inherited;
   FNoAnswer := PP_DISCONNECTED;
@@ -644,20 +643,20 @@ begin
   Cmds := TThreadList.Create;
 end;
 
-destructor TDev.Destroy;
+destructor TPp.Destroy;
 begin
   Cmds.Free;
   inherited;
 end;
 
-function TDev.GetConnect: boolean;
+function TPp.GetConnect: boolean;
 begin
   Result := False;
   if FNoAnswer < PP_DISCONNECTED then
     Result := True;
 end;
 
-procedure TDev.SetConnect(Value: boolean);
+procedure TPp.SetConnect(Value: boolean);
 var
   mes: KSBMES;
   s: string;
@@ -702,7 +701,7 @@ begin
 
 end;
 
-function TDev.NextObj(ObjKind: TObjectType): word;
+function TPp.NextObj(ObjKind: TObjectType): word;
 var
   i: word; //???
   childs: word;
@@ -728,7 +727,7 @@ begin
     end;
 end;
 
-procedure TDev.AddCrc;
+procedure TPp.AddCrc;
 var
   crc: word;
 begin
@@ -738,7 +737,7 @@ begin
   Inc(wCount, 2);
 end;
 
-procedure TDev.AddCmd(Opn: TDevOp; ObjNum: word);
+procedure TPp.AddCmd(Opn: TDevOp; ObjNum: word);
 var
   internalList: TList;
   pCmdRec: ^TCmdRec;
@@ -751,7 +750,7 @@ begin
   Cmds.UnlockList;
 end;
 
-procedure TDev.GetCmd(var Op: TDevOp; var ObjNum: word);
+procedure TPp.GetCmd(var Op: TDevOp; var ObjNum: word);
 var
   internalList: TList;
   pCmdRec: ^TCmdRec;
@@ -780,7 +779,7 @@ begin
 end;
 
 
-function TLine.Process(IsWrite: boolean): boolean;
+procedure TLine.Process(IsWrite: boolean);
 var
   cObj: TOrionObj;
   s: string;
@@ -788,11 +787,8 @@ var
   Address: word;
   Sended: boolean;
 begin
-  Result := False;
-
-
-  if CurDev <> nil then
-    s := Format('%s PP#%d ', [TPort(Port).PortName, CurDev.Number])
+  if CurPp <> nil then
+    s := Format('%s PP#%d ', [TPort(Port).PortName, CurPp.Number])
   else
     s := Format('%s PP(unknown) ', [TPort(Port).PortName]);
 
@@ -801,23 +797,15 @@ begin
     ch := 'R';
 
   if (Option.Debug and 2) > 0 then
-    if CurDev <> nil then
-      log(Format('%s%s %s (%d)', [s, ch, GetEnumName(TypeInfo(TDevOp), Ord(CurDev.Op)),
-        Ord(CurDev.Op)]));
+    if CurPp <> nil then
+      log(Format('%s%s %s (%d)', [s, ch, GetEnumName(TypeInfo(TDevOp), Ord(CurPp.Op)),
+        Ord(CurPp.Op)]));
 
 
   { Write }
   if IsWrite then
   begin
-    CurDev := NextDev;
-    if CurDev = nil then
-    begin
-      Log(Format('Отсутсвуют в конфигурации С2000-ПП для %s',
-        [TPort(self.Port).PortName]));
-      exit;
-    end;
-
-    with CurDev do
+    with CurPp do
     begin
 
       if Op = DOP_OUTKEYS_STATE then
@@ -849,13 +837,13 @@ begin
 
   { Read }
   else
-    with CurDev do
+    with CurPp do
     begin
 
-      if (CurDev.Number <> r[0]) then
+      if (CurPp.Number <> r[0]) then
         Log(s + Format(
           'Ошибка приема PP#%d в запросе, PP#%d в ответе',
-          [CurDev.Number, r[0]]));
+          [CurPp.Number, r[0]]));
 
       if (r[1] = (w[1] + $80)) then
       begin
@@ -868,10 +856,9 @@ begin
               'Адрес данных в запросе не доступен данному ведомому'
               + Format(
               ', ошибка в файле %s.xml для С2000-ПП #%d [%d]',
-              [Option.FileMask, CurDev.Bigdevice, CurDev.Number]);
+              [Option.FileMask, CurPp.Bigdevice, CurPp.Number]);
             //Close;
           end;
-
           3:
           begin
             s := s +
@@ -897,22 +884,17 @@ begin
                   '. Неизвестное для ПП прочитанное событие #%d',
                   [256 * w[4] + w[5]]);
             end;
-            //Close;
           end;
-
           6:
             s := s +
               'Ведомый занят обработкой команды. Повторите запрос позже или сбросьте ведомый по питанию';
-
           15: s := s +
               'Запрошенные данные пока не получены. Повторите запрос позже';
-
           else
             s := s + 'Причина неизвестна';
         end;
 
         Log(s + Format('(Ошибка #%d)', [r[2]]));
-
 
         case Op of
           DOP_CMD_ZONE_DISARM,
@@ -934,7 +916,7 @@ begin
 
 
   { Write or Read }
-  with CurDev do
+  with CurPp do
     case Op of
 
       DOP_SET_TIME:
@@ -1152,7 +1134,7 @@ begin
         begin
           Read;
           Inc(TempIndex);
-          if TempIndex >= CurDev.ChildsObj.Count then
+          if TempIndex >= CurPp.ChildsObj.Count then
             Op := DOP_EVENT;
         end;
 
@@ -1526,8 +1508,6 @@ begin
         end;
 
     end; //case Op
-
-  Result := True;
 end;
 
 procedure TLine.Read;
@@ -1539,7 +1519,7 @@ var
   Child: TOrionObj;
   SynNorma, SynConnect: boolean;
 begin
-  with CurDev, aMain do
+  with CurPp, aMain do
   begin
     s := Format('%s PP#%d ', [(Port as TPort).PortName, Number]);
 
@@ -1880,7 +1860,7 @@ begin
         if r[6] in [250, 251] then
           StateRequest := 500;
 
-      end;
+      end; //DOP_EVENT
 
     end;// Op
 
@@ -1888,41 +1868,37 @@ begin
 
 end;
 
-function TLine.NextDev: TDev;
+function TLine.NextPp: TPp;
 var
   Index: word;
   Value: integer;
 begin
   Result := nil;
   Value := ChildsObj.Count;
-  case Value of
-
-    0: ; // Ситуация: Нет
-
-    1: // Ситуация: Один
-      CurDev := ChildsObj.Items[0];
-
+  case Value of // Ситуации:
+    0: ; // Нет
+    1:   // Один
+      CurPp := ChildsObj.Items[0];
     else
-      if CurDev = nil then // Ситуация: Не было
-        CurDev := ChildsObj.First
-      else if CurDev = ChildsObj.Last then // Ситуация: Последний
-        CurDev := ChildsObj.First
+      if CurPp = nil then // Не было
+        CurPp := ChildsObj.First
+      else if CurPp = ChildsObj.Last then // Последний
+        CurPp := ChildsObj.First
       else
       begin
-        Index := ChildsObj.IndexOf(CurDev);
-        CurDev := ChildsObj.Items[Index + 1];
+        Index := ChildsObj.IndexOf(CurPp);
+        CurPp := ChildsObj.Items[Index + 1];
       end;
+  end;
 
-  end;// case
-
-  Result := CurDev;
+  Result := CurPp;
 end;
 
 procedure InitState(pLine: pointer = nil);
 var
   i1, i2: word;
   line: TLine;
-  dev: TDev;
+  pp: TPp;
 begin
   if (cs_istate = nil) then
     exit;
@@ -1933,19 +1909,19 @@ begin
     begin
       line := Lines.Items[i1 - 1];
       if (pLine <> nil) and (pLine <> line) then  continue;
-      Log('Инициализация чтения состояний элементов '
-        + line.Port.PortName);
+      Log('Старт чтения состояний элементов ' +
+        line.Port.PortName);
       for i2 := 1 to line.ChildsObj.Count do
       begin
-        dev := line.ChildsObj.Items[i2 - 1];
-        dev.Op := DOP_HW_INFO;
+        pp := line.ChildsObj.Items[i2 - 1];
+        pp.Op := DOP_HW_INFO;
         {$IFDEF EXTENDINFO}
-      dev.Op := DOP_MAX_RELAYS;
+      pp.Op := DOP_MAX_RELAYS;
         {$ENDIF}
         {$IFDEF MASTER}
-      dev.Op := DOP_SET_TIME;
+      pp.Op := DOP_SET_TIME;
         {$ENDIF}
-        dev.TempIndex := $FFFF;
+        pp.TempIndex := $FFFF;
       end;
     end;
   finally
@@ -1989,7 +1965,7 @@ var
   s: string;
   i: word;
   arr: array of byte;
-  Dev: TDev;
+  pp: TPp;
   Param: word;
 begin
   if (mes.Proga <> KsbAppType) and (mes.NetDevice = ModuleNetDevice) then
@@ -2026,15 +2002,15 @@ begin
     GET_STATES_MSG:
     begin
       InitState;
-      for i := 1 to Devs.Count do
+      for i := 1 to Pps.Count do
       begin
-        Dev := Devs.Items[i - 1];
+        pp := Pps.Items[i - 1];
         Init(mes);
         mes.SysDevice := SYSTEM_OPS;
         mes.TypeDevice := TYPEDEVICE_ORION;
         mes.NetDevice := ModuleNetDevice;
-        mes.BigDevice := Dev.Bigdevice;
-        if Dev.Connected then
+        mes.BigDevice := pp.Bigdevice;
+        if pp.Connected then
           mes.Level := ORION_ENABLE_MSG
         else
           mes.Level := ORION_DISABLE_MSG;
@@ -2042,9 +2018,9 @@ begin
         Send(mes);
         Log(
           Format('PP#%d Состояние >> %s',
-          [Dev.Number, OrionState[Ord(Dev.Connected)]])
+          [pp.Number, OrionState[Ord(pp.Connected)]])
           );
-        Dev.NextOp := DOP_OUTKEYS_STATE;
+        pp.NextOp := DOP_OUTKEYS_STATE;
       end;
     end;
 
@@ -2053,17 +2029,17 @@ begin
       s := Format('Снять шлейф Big=%d Small=%d',
         [mes.BigDevice, mes.SmallDevice]);
 
-      Dev := FindDevWithPultid(mes.BigDevice, ZONE, mes.SmallDevice);
-      if Dev <> nil then
+      pp := FindPpWithPultid(mes.BigDevice, ZONE, mes.SmallDevice);
+      if pp <> nil then
       begin
-        Param := Dev.FindWithIdChild(ZONE, mes.SmallDevice);
+        Param := pp.FindWithIdChild(ZONE, mes.SmallDevice);
         if Param <> $FFFF then
         begin
-          Dev.AddCmd(DOP_CMD_ZONE_DISARM,
-            TOrionObj(Dev.ChildsObj.Items[Param]).Number);
+          pp.AddCmd(DOP_CMD_ZONE_DISARM,
+            TOrionObj(pp.ChildsObj.Items[Param]).Number);
           s := s + Format(
             ' -> найдено оборудование: PP#%d шлейф #%d',
-            [Dev.Number, TOrionObj(Dev.ChildsObj.Items[Param]).Number]);
+            [pp.Number, TOrionObj(pp.ChildsObj.Items[Param]).Number]);
         end;
       end
       else
@@ -2074,17 +2050,17 @@ begin
     begin
       s := Format('Взять шлейф Big=%d Small=%d',
         [mes.BigDevice, mes.SmallDevice]);
-      Dev := FindDevWithPultid(mes.BigDevice, ZONE, mes.SmallDevice);
-      if Dev <> nil then
+      pp := FindPpWithPultid(mes.BigDevice, ZONE, mes.SmallDevice);
+      if pp <> nil then
       begin
-        Param := Dev.FindWithIdChild(ZONE, mes.SmallDevice);
+        Param := pp.FindWithIdChild(ZONE, mes.SmallDevice);
         if Param <> $FFFF then
         begin
-          Dev.AddCmd(DOP_CMD_ZONE_ARM,
-            TOrionObj(Dev.ChildsObj.Items[Param]).Number);
+          pp.AddCmd(DOP_CMD_ZONE_ARM,
+            TOrionObj(pp.ChildsObj.Items[Param]).Number);
           s := s + Format(
             ' -> найдено оборудование: PP#%d шлейф #%d',
-            [Dev.Number, TOrionObj(Dev.ChildsObj.Items[Param]).Number]);
+            [pp.Number, TOrionObj(pp.ChildsObj.Items[Param]).Number]);
         end;
       end
       else
@@ -2095,16 +2071,16 @@ begin
     begin
       s := Format('Снять раздел Big=%d Small=%d',
         [mes.BigDevice, mes.SmallDevice]);
-      Dev := FindDevWithPultid(mes.BigDevice, PART, mes.SmallDevice);
-      if Dev <> nil then
+      pp := FindPpWithPultid(mes.BigDevice, PART, mes.SmallDevice);
+      if pp <> nil then
       begin
-        Param := Dev.FindWithIdChild(PART, mes.SmallDevice);
+        Param := pp.FindWithIdChild(PART, mes.SmallDevice);
         if Param <> $FFFF then
         begin
-          Dev.AddCmd(DOP_CMD_PART_DISARM,
-            TOrionObj(Dev.ChildsObj.Items[Param]).Number);
+          pp.AddCmd(DOP_CMD_PART_DISARM,
+            TOrionObj(pp.ChildsObj.Items[Param]).Number);
           s := s + Format(' -> найден элемент: PP#%d раздел #%d',
-            [Dev.Number, TOrionObj(Dev.ChildsObj.Items[Param]).Number]);
+            [pp.Number, TOrionObj(pp.ChildsObj.Items[Param]).Number]);
         end;
       end
       else
@@ -2115,16 +2091,16 @@ begin
     begin
       s := Format('Взять раздел Big=%d Small=%d',
         [mes.BigDevice, mes.SmallDevice]);
-      Dev := FindDevWithPultid(mes.BigDevice, PART, mes.SmallDevice);
-      if Dev <> nil then
+      pp := FindPpWithPultid(mes.BigDevice, PART, mes.SmallDevice);
+      if pp <> nil then
       begin
-        Param := Dev.FindWithIdChild(PART, mes.SmallDevice);
+        Param := pp.FindWithIdChild(PART, mes.SmallDevice);
         if Param <> $FFFF then
         begin
-          Dev.AddCmd(DOP_CMD_PART_ARM,
-            TOrionObj(Dev.ChildsObj.Items[Param]).Number);
+          pp.AddCmd(DOP_CMD_PART_ARM,
+            TOrionObj(pp.ChildsObj.Items[Param]).Number);
           s := s + Format(' -> найден элемент: PP#%d раздел #%d',
-            [Dev.Number, TOrionObj(Dev.ChildsObj.Items[Param]).Number]);
+            [pp.Number, TOrionObj(pp.ChildsObj.Items[Param]).Number]);
         end;
       end
       else
@@ -2135,17 +2111,17 @@ begin
     begin
       s := Format('Выключить реле Big=%d Small=%d',
         [mes.BigDevice, mes.SmallDevice]);
-      Dev := FindDevWithPultid(mes.BigDevice, OUTKEY, mes.SmallDevice);
-      if Dev <> nil then
+      pp := FindPpWithPultid(mes.BigDevice, OUTKEY, mes.SmallDevice);
+      if pp <> nil then
       begin
-        Param := Dev.FindWithIdChild(OUTKEY, mes.SmallDevice);
+        Param := pp.FindWithIdChild(OUTKEY, mes.SmallDevice);
         if Param <> $FFFF then
         begin
-          Dev.AddCmd(DOP_CMD_RELAY_OFF,
-            TOrionObj(Dev.ChildsObj.Items[Param]).Number);
+          pp.AddCmd(DOP_CMD_RELAY_OFF,
+            TOrionObj(pp.ChildsObj.Items[Param]).Number);
           s := s + Format(
             ' -> найдено оборудование: PP#%d реле #%d',
-            [Dev.Number, TOrionObj(Dev.ChildsObj.Items[Param]).Number]);
+            [pp.Number, TOrionObj(pp.ChildsObj.Items[Param]).Number]);
         end;
       end
       else
@@ -2156,17 +2132,17 @@ begin
     begin
       s := Format('Включить реле Big=%d Small=%d',
         [mes.BigDevice, mes.SmallDevice]);
-      Dev := FindDevWithPultid(mes.BigDevice, OUTKEY, mes.SmallDevice);
-      if Dev <> nil then
+      pp := FindPpWithPultid(mes.BigDevice, OUTKEY, mes.SmallDevice);
+      if pp <> nil then
       begin
-        Param := Dev.FindWithIdChild(OUTKEY, mes.SmallDevice);
+        Param := pp.FindWithIdChild(OUTKEY, mes.SmallDevice);
         if Param <> $FFFF then
         begin
-          Dev.AddCmd(DOP_CMD_RELAY_ON,
-            TOrionObj(Dev.ChildsObj.Items[Param]).Number);
+          pp.AddCmd(DOP_CMD_RELAY_ON,
+            TOrionObj(pp.ChildsObj.Items[Param]).Number);
           s := s + Format(
             ' -> найдено оборудование: PP#%d реле #%d',
-            [Dev.Number, TOrionObj(Dev.ChildsObj.Items[Param]).Number]);
+            [pp.Number, TOrionObj(pp.ChildsObj.Items[Param]).Number]);
         end;
       end
       else
@@ -2194,13 +2170,13 @@ var
   i, total: word;
 begin
   total := 0;
-  for i := 1 to Devs.Count do
-    if TDev(Devs.Items[i - 1]).GetConnect then
+  for i := 1 to Pps.Count do
+    if TPp(Pps.Items[i - 1]).GetConnect then
       Inc(total);
 
   TControl(Sender).Hint :=
     Format('На связи #%d из #%d приборов С2000-ПП',
-    [total, Devs.Count]);
+    [total, Pps.Count]);
 end;
 
 function TaMain.ConDevs: word;
@@ -2208,8 +2184,8 @@ var
   i: word;
 begin
   Result := 0;
-  for i := 1 to Devs.Count do
-    if TDev(Devs.Items[i - 1]).Connected then
+  for i := 1 to Pps.Count do
+    if TPp(Pps.Items[i - 1]).Connected then
       Inc(Result);
 end;
 
@@ -2221,19 +2197,23 @@ begin
   with Indicator.Brush do
     if total = 0 then
       Color := clRed
-    else if total < Devs.Count then
+    else if total < Pps.Count then
       Color := clYellow
     else
       Color := clLime;
 end;
 
 procedure TaMain.FormTimerTimer(Sender: TObject);
+const
+  MaxFormLog = 2000;
+var
+  i: longword;
 begin
   SetIndicator;
+
   if length(Live) > 0 then
     Live[LiveId] := 0;
-
-  if (length(Live) > 1) and (ConDevs = Devs.Count) then
+  if (length(Live) > 1) and (ConDevs = Pps.Count) then
     Live[LiveDev] := 0;
 
   if cs_log <> nil then
@@ -2242,9 +2222,12 @@ begin
       if (sl_log.Count > 0) then
       begin
         Memo1.Lines.BeginUpdate;
-        if Memo1.Lines.Count > 500 then
-          Memo1.Lines.Clear;
         Memo1.Lines.AddStrings(sl_log);
+
+        if Memo1.Lines.Count > MaxFormLog then
+          for i := 1 to MaxFormLog do
+            Memo1.Lines.Delete(0);
+
         Memo1.Lines.EndUpdate;
         Memo1.SelStart := Length(Memo1.Text);
         Memo1.SelLength := 0;
@@ -2394,36 +2377,19 @@ begin
   Version.Free;
 end;
 
-function FindDev(Number: word): TDev;
+function FindPpWithPultid(PpId: word; KindObj: TObjectType; ObjId: word): TPp;
 var
   i: word;
-  Dev: TDev;
+  pp: TPp;
 begin
   Result := nil;
-  for i := 1 to Devs.Count do
+  for i := 1 to Pps.Count do
   begin
-    Dev := Devs.Items[i - 1];
-    if Dev.Number = Number then
-    begin
-      Result := Dev;
-      break;
-    end;
-  end;
-end;
-
-function FindDevWithPultid(DevId: word; KindObj: TObjectType; ObjId: word): TDev;
-var
-  i: word;
-  Dev: TDev;
-begin
-  Result := nil;
-  for i := 1 to Devs.Count do
-  begin
-    Dev := Devs.Items[i - 1];
-    if Dev.Pultid = DevId then
-      if Dev.FindWithIdChild(KindObj, ObjId) <> $FFFF then
+    pp := Pps.Items[i - 1];
+    if pp.Pultid = PpId then
+      if pp.FindWithIdChild(KindObj, ObjId) <> $FFFF then
       begin
-        Result := Dev;
+        Result := pp;
         Break;
       end
       else
@@ -2477,7 +2443,7 @@ initialization
   Pointer_AppKsbConsider := @_AppKsbConsider;
 
   Lines := TList.Create;
-  Devs := TList.Create;
+  Pps := TList.Create;
   Event[1] := 'Восстановление сети 220В';
   Event[2] := 'Авария сети 220В';
   Event[3] := 'Тревога проникновения';

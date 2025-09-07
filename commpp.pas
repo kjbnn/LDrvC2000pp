@@ -6,10 +6,10 @@ uses
   Classes, synaser, Graphics, SysUtils;
 
 const
-  MaxTransmitAttempt = 3;
+  MaxTransmitAttempt = 10;
 
 type
-  TProcess = function(IsWrite: boolean): boolean of object;
+  TProcess = procedure(IsWrite: boolean) of object;
 
   TBuf = array [0..255] of byte;
 
@@ -17,7 +17,6 @@ type
   TPort = class(TThread)
   protected
     ser: TBlockSerial;
-    TransmitAttempt: byte;
     procedure Execute; override;
   public
     ProcessProc: TProcess;
@@ -49,27 +48,10 @@ end;
 
 procedure TPort.Execute;
 
-  procedure TryRaiseErrorInfo;
-  var
-    s: string;
+  function PortErrorInfo: string;
   begin
-    if ser.LastError <> 0 then
-    begin
-      with Tline(Owner) do
-        if CurDev <> nil then
-        begin
-          CurDev.FNoAnswer := PP_DISCONNECTED;
-          CurDev.Connected := False;
-        end;
-      if TransmitAttempt > 0 then
-        Dec(TransmitAttempt)
-      else
-      begin
-        s := Format('%s ошибка #%d -> %s',
-          [PortName, ser.LastError, ser.GetErrorDesc(ser.LastError)]);
-        raise Exception.Create(s);
-      end;
-    end;
+    Result := Format('%s ошибка #%d -> %s',
+      [PortName, ser.LastError, ser.GetErrorDesc(ser.LastError)]);
   end;
 
 var
@@ -78,104 +60,95 @@ var
   crc: word;
   s: string;
 begin
-  while (not Terminated) do
-    with Tline(Owner) do
-    try
-      ser := TBlockSerial.Create;
-      ser.RaiseExcept := False;
-      ser.LinuxLock := False;
-      TransmitAttempt := 0;
-      Log(Format('%s открытие...', [PortName]));
-      ser.Connect(PortName);
-      ser.Config(StrToInt(Baud), StrToInt(Bits), 'N', StrToInt(Stop), False, False);
-      TryRaiseErrorInfo;
+  ser := TBlockSerial.Create;
+  ser.RaiseExcept := False;
+  ser.LinuxLock := False;
+  Log(Format('%s открытие...', [PortName]));
 
-      Log(Format('%s открыт, handle %d', [PortName, ser.Handle]));
-      InitState(Owner);
-      TransmitAttempt := MaxTransmitAttempt;
+  try
+    ser.Connect(PortName);
+    ser.Config(StrToInt(Baud), StrToInt(Bits), 'N', StrToInt(Stop), False, False);
+    if ser.LastError <> 0 then
+      raise Exception.Create(PortErrorInfo);
+    Log(Format('%s открыт, handle %d', [PortName, ser.Handle]));
+    InitState(Owner);
 
-      while (not Terminated) do
+    while (not Terminated) do
+      with Tline(Owner) do
       begin
         sleep(20);
         if length(Live) > LiveId then Live[LiveId] := 0;
 
-        {prepare process}
-        if not ProcessProc(True) then
-        begin
-          s := Format('%s. Ошибка ProcessProc(True), ', [PortName]);
-          if CurDev <> nil then
-            s := s + Format('CurDev.Op: %d, CurDev.ObjNum: %d',
-              [Ord(CurDev.Op), CurDev.CmdObj])
-          else
-            s := s + 'CurDev is nil';
-          Log(s);
-          sleep(3000);
-          raise Exception.Create(s);
-        end;
-
         {отправка}
-        if TLine(Owner).CurDev <> nil then
-          with TLine(Owner).CurDev do
-            if (Option.Debug and 2) > 0 then
-              Log(Format('%s W> %s', [PortName, ArrayToStr(w, wCount)]));
-        ser.SendBuffer(@CurDev.w, CurDev.wCount);
-        TryRaiseErrorInfo;
+        CurPp := NextPp;
+        if CurPp = nil then
+          raise Exception.Create(
+            Format('%s не содержит конфигурацию С2000-ПП',
+            [PortName]));
+        ProcessProc(True);
+
+        if (Option.Debug and 2) > 0 then
+          with CurPp do
+          begin
+            Log(Format('%s W> %s', [PortName, ArrayToStr(w, wCount)]));
+            ser.SendBuffer(@w, wCount);
+          end;
+        if ser.LastError <> 0 then
+          raise Exception.Create(PortErrorInfo);
 
         {прием}
-        FillChar(CurDev.r, 255, 0);
-        CurDev.rCount := 0;
+        FillChar(CurPp.r, 255, 0);
+        CurPp.rCount := 0;
         TotalWaiting := 0;
         waiting := 0;
         s := 'waiting:';
         repeat
           waiting := ser.WaitingData;
-          if (CurDev.rCount > 0) and (waiting = 0) then
+          if (CurPp.rCount > 0) and (waiting = 0) then
             break;
           s := s + Format(' %d', [waiting]);
-          ser.RecvBuffer(@CurDev.r[CurDev.rCount], waiting);
-          CurDev.rCount := CurDev.rCount + waiting;
+          ser.RecvBuffer(@CurPp.r[CurPp.rCount], waiting);
+          if ser.LastError <> 0 then
+            Log(PortErrorInfo);
+          CurPp.rCount := CurPp.rCount + waiting;
           Inc(TotalWaiting);
           sleep(5);
-        until ((CurDev.rCount > 0) and (waiting = 0)) or (TotalWaiting >= 100);
+        until ((CurPp.rCount > 0) and (waiting = 0)) or (TotalWaiting >= 100);
 
-        if TLine(Owner).CurDev <> nil then
-          with TLine(Owner).CurDev do
-            if (Option.Debug and 2) > 0 then
-              Log(Format('%s R> %s %s', [PortName, ArrayToStr(r, rCount), s]));
+        if (Option.Debug and 2) > 0 then
+          with CurPp do
+            Log(Format('%s R> %s %s', [PortName, ArrayToStr(r, rCount), s]));
 
-        TryRaiseErrorInfo;
-        if (CurDev.rCount < 5) or (CurDev.w[0] <> CurDev.r[0]) or
-          (CurDev.w[1] <> (CurDev.r[1] and $7F)) then
-          CurDev.Connected := False
+        {обработка приема}
+        if (CurPp.rCount < 5) or (CurPp.w[0] <> CurPp.r[0]) or
+          (CurPp.w[1] <> (CurPp.r[1] and $7F)) then
+          CurPp.Connected := False
         else
         begin
-          crc := CRC16(CurDev.r, CurDev.rCount - 2);
-          if (CurDev.r[CurDev.rCount - 2] = hi(crc)) and
-            (CurDev.r[CurDev.rCount - 1] = lo(crc)) then
+          crc := CRC16(CurPp.r, CurPp.rCount - 2);
+          if (CurPp.r[CurPp.rCount - 2] = hi(crc)) and
+            (CurPp.r[CurPp.rCount - 1] = lo(crc)) then
           begin
-            CurDev.Connected := True;
+            CurPp.Connected := True;
             ProcessProc(False);
-            TransmitAttempt := MaxTransmitAttempt;
           end
           else
-            CurDev.Connected := False;
+            CurPp.Connected := False;
         end;
       end;
 
-    except
-      on E: Exception do
-      begin
-        Log(E.ToString);
-        if (Option.Debug and 1) > 0 then
-          DumpExceptionCallStack;
-        Log(Format('%s закрытие...', [PortName]));
-        FreeAndNil(ser);
-        Log(Format('%s закрыт', [PortName]));
-        sleep(30000);
-      end;
+  except
+    on E: Exception do
+    begin
+      Log(E.ToString);
+      if (Option.Debug and 1) > 0 then
+        DumpExceptionCallStack;
+      Log(Format('%s закрытие...', [PortName]));
+      FreeAndNil(ser);
     end;
+  end;
 
-  Log(Format('%s завершение потока порта', [PortName]));
+  Log(Format('%s закрыт', [PortName]));
 end;
 
 //**Original Code from Sky devil**

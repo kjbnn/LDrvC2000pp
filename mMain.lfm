@@ -1,47 +1,47 @@
 object aMain: TaMain
   Left = 417
-  Height = 416
+  Height = 277
   Top = 152
-  Width = 556
-  ClientHeight = 416
-  ClientWidth = 556
-  DesignTimePPI = 144
+  Width = 371
+  ClientHeight = 277
+  ClientWidth = 371
   Menu = MainMenu1
+  LCLVersion = '4.2.0.0'
   Visible = True
   OnClose = FormClose
   OnConstrainedResize = FormConstrainedResize
   OnCreate = FormCreate
   object Indicator: TShape
-    Left = 312
-    Height = 84
-    Top = 372
-    Width = 74
+    Left = 208
+    Height = 56
+    Top = 248
+    Width = 49
     ParentShowHint = False
     OnMouseMove = IndicatorMouseMove
   end
   object StatusBar1: TStatusBar
     Left = 0
-    Height = 36
-    Top = 380
-    Width = 556
+    Height = 28
+    Top = 249
+    Width = 371
     Panels = <    
       item
-        Width = 240
+        Width = 160
       end    
       item
-        Width = 32
+        Width = 21
       end    
       item
-        Width = 75
+        Width = 50
       end>
     ParentFont = False
     SimplePanel = False
   end
   object Memo1: TMemo
     Left = 0
-    Height = 380
+    Height = 249
     Top = 0
-    Width = 556
+    Width = 371
     Align = alClient
     ParentFont = False
     ReadOnly = True
@@ -50,11 +50,11 @@ object aMain: TaMain
     WordWrap = False
   end
   object SpinEdit1: TSpinEdit
-    Left = 8
-    Height = 33
+    Left = 5
+    Height = 23
     Hint = 'Bigdevice'
-    Top = 8
-    Width = 96
+    Top = 5
+    Width = 64
     ParentFont = False
     ParentShowHint = False
     ShowHint = True
@@ -63,11 +63,11 @@ object aMain: TaMain
     Visible = False
   end
   object SpinEdit2: TSpinEdit
-    Left = 8
-    Height = 33
+    Left = 5
+    Height = 23
     Hint = 'Smalldevice'
-    Top = 40
-    Width = 96
+    Top = 27
+    Width = 64
     ParentFont = False
     ParentShowHint = False
     ShowHint = True
@@ -76,8 +76,8 @@ object aMain: TaMain
     Visible = False
   end
   object MainMenu1: TMainMenu
-    Left = 152
-    Top = 24
+    Left = 101
+    Top = 16
     object N4: TMenuItem
       Caption = 'Файл'
       object N1: TMenuItem
@@ -150,14 +150,14 @@ object aMain: TaMain
   end
   object TimerVisible: TTimer
     OnTimer = TimerVisibleTimer
-    Left = 136
-    Top = 112
+    Left = 91
+    Top = 75
   end
   object FormTimer: TTimer
     Enabled = False
     Interval = 100
     OnTimer = FormTimerTimer
-    Left = 248
-    Top = 112
+    Left = 165
+    Top = 75
   end
 end
