@@ -347,8 +347,8 @@ begin
   Indicator.BorderSpacing.Left := StatusBar1.Panels[0].Width + 4;
   Indicator.BorderSpacing.Top := ((StatusBar1.Height - IndicatorSize) div 2);
   {$ifdef MSWINDOWS}
-  Indicator.BorderSpacing.Left := Indicator.BorderSpacing.Left + 2;
-  Indicator.BorderSpacing.Top := Indicator.BorderSpacing.Top - 2;
+  Indicator.BorderSpacing.Left := Indicator.BorderSpacing.Left + 1;
+  Indicator.BorderSpacing.Top := Indicator.BorderSpacing.Top + 1;
 
   {$endif}
   Indicator.Shape := stCircle;
@@ -393,7 +393,6 @@ begin
   setkey('POS_TOP', top);
   setkey('POS_WIDTH', Width);
   setkey('POS_HEIGHT', Height);
-  //inherited;
 end;
 
 procedure TaMain.FormConstrainedResize(Sender: TObject;
@@ -544,7 +543,7 @@ begin
 
     if XmlDocNode.NodeName = 'User' then
     begin
-      s := Format('    %s Number=%s Id=%s', [XmlDocNode.NodeName,
+      s := Format('%s Number=%s Id=%s', [XmlDocNode.NodeName,
         TDOMElement(XmlDocNode).GetAttribute('Number'),
         TDOMElement(XmlDocNode).GetAttribute('Id')]);
       Log(s);
@@ -2200,9 +2199,7 @@ end;
 
 procedure TaMain.FormTimerTimer(Sender: TObject);
 const
-  MaxFormLog = 2000;
-var
-  i: longword;
+  MaxFormLog = 5000;
 begin
   SetIndicator;
 
@@ -2220,8 +2217,7 @@ begin
         Memo1.Lines.AddStrings(sl_log);
 
         if Memo1.Lines.Count > MaxFormLog then
-          for i := 1 to MaxFormLog do
-            Memo1.Lines.Delete(0);
+          Memo1.Lines.Clear;
 
         Memo1.Lines.EndUpdate;
         Memo1.SelStart := Length(Memo1.Text);

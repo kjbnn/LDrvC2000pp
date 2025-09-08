@@ -6,10 +6,10 @@ object aMain: TaMain
   ClientHeight = 277
   ClientWidth = 371
   Menu = MainMenu1
-  Visible = True
   OnClose = FormClose
   OnConstrainedResize = FormConstrainedResize
   OnCreate = FormCreate
+  Visible = True
   object Indicator: TShape
     Left = 208
     Height = 56
@@ -21,7 +21,7 @@ object aMain: TaMain
   object StatusBar1: TStatusBar
     Left = 0
     Height = 23
-    Top = 254
+    Top = 234
     Width = 371
     Panels = <    
       item
@@ -38,7 +38,7 @@ object aMain: TaMain
   end
   object Memo1: TMemo
     Left = 0
-    Height = 254
+    Height = 234
     Top = 0
     Width = 371
     Align = alClient
@@ -49,7 +49,7 @@ object aMain: TaMain
     WordWrap = False
   end
   object SpinEdit1: TSpinEdit
-    Left = 5
+    Left = 208
     Height = 23
     Hint = 'Bigdevice'
     Top = 5
@@ -62,7 +62,7 @@ object aMain: TaMain
     Visible = False
   end
   object SpinEdit2: TSpinEdit
-    Left = 5
+    Left = 208
     Height = 23
     Hint = 'Smalldevice'
     Top = 27
@@ -75,8 +75,8 @@ object aMain: TaMain
     Visible = False
   end
   object MainMenu1: TMainMenu
-    Left = 101
-    Top = 16
+    left = 24
+    top = 8
     object N4: TMenuItem
       Caption = 'Файл'
       object N1: TMenuItem
@@ -138,7 +138,7 @@ object aMain: TaMain
         OnClick = MenuItem12Click
       end
       object MenuItem13: TMenuItem
-        Caption = 'Форма зависла CPU overload'
+        Caption = 'Порт2 исключение'
         OnClick = MenuItem13Click
       end
     end
@@ -149,14 +149,14 @@ object aMain: TaMain
   end
   object TimerVisible: TTimer
     OnTimer = TimerVisibleTimer
-    Left = 91
-    Top = 75
+    left = 160
+    top = 40
   end
   object FormTimer: TTimer
     Enabled = False
-    Interval = 100
+    Interval = 300
     OnTimer = FormTimerTimer
-    Left = 165
-    Top = 75
+    left = 88
+    top = 80
   end
 end
