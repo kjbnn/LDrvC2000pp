@@ -20,8 +20,8 @@ object aMain: TaMain
   end
   object StatusBar1: TStatusBar
     Left = 0
-    Height = 28
-    Top = 249
+    Height = 23
+    Top = 254
     Width = 371
     Panels = <    
       item
@@ -38,7 +38,7 @@ object aMain: TaMain
   end
   object Memo1: TMemo
     Left = 0
-    Height = 249
+    Height = 254
     Top = 0
     Width = 371
     Align = alClient

@@ -337,9 +337,9 @@ begin
   except
     On E: Exception do
     begin
-      Log(Format('Завершение работы с ошибкой: %s',
-        [E.Message]));
-      Close;
+      Log(Format('Ошибка: %s',[E.Message]));
+      Log('Завершение работы');
+      Application.Terminate;
     end;
   end;
 
@@ -389,12 +389,11 @@ end;
 procedure TaMain.FormClose(Sender: TObject; var CloseAction: TCloseAction);
 begin
   Log('Останов модуля');
-  CloseAction := caFree;
   setkey('POS_LEFT', left);
   setkey('POS_TOP', top);
   setkey('POS_WIDTH', Width);
   setkey('POS_HEIGHT', Height);
-  inherited;
+  //inherited;
 end;
 
 procedure TaMain.FormConstrainedResize(Sender: TObject;
