@@ -125,7 +125,7 @@ type
 
   TOption = record
     FileMask: string;
-    Debug: byte; {1-exp, 2-port, 4-menu}
+    Debug: byte; {1-exp, 2-port, 4-menu, 8-noformlog}
     Noport: boolean;
   end;
 
@@ -888,7 +888,7 @@ begin
             s := s + 'Причина неизвестна';
         end;
 
-        Log(s + Format('(Ошибка #%d)', [r[2]]));
+        Log(s + Format(' (Ошибка #%d)', [r[2]]));
 
         case Op of
           DOP_CMD_ZONE_DISARM,
@@ -2211,6 +2211,7 @@ begin
   if cs_log <> nil then
     if cs_log.TryEnter then
     try
+      if (Option.Debug and 8) = 0 then
       if (sl_log.Count > 0) then
       begin
         Memo1.Lines.BeginUpdate;
