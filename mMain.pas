@@ -174,7 +174,7 @@ type
     CmdTry: byte;
     z_c, r_c, p_c, u_c: word; //кол-во Zone, Part, User
     StateRequest: word;
-    rCount, wCount: word;
+    rCount, wCount: byte;
     Cmds: TThreadList;
     function GetConnect: boolean;
     procedure SetConnect(Value: boolean);
@@ -388,6 +388,7 @@ end;
 
 procedure TaMain.FormClose(Sender: TObject; var CloseAction: TCloseAction);
 begin
+  CloseAction := caFree;
   Log('Останов модуля');
   setkey('POS_LEFT', left);
   setkey('POS_TOP', top);
@@ -670,8 +671,15 @@ begin
       mes.BigDevice := Bigdevice;
       mes.Code := ORION_ENABLE_MSG;
       Send(mes);
-      s := Format('%s PP#%d %s', [(TLine(ParentObj).Port as TPort).PortName,
-        Number, OrionState[1]]);
+      if ParentObj=nil then
+        s:=  Format('%s PP#%d %s', ['Внимание!!! ParentObj=nil',
+          Number, OrionState[1]])
+      else if TLine(ParentObj).Port=nil then
+        s:=  Format('%s PP#%d %s', ['Внимание!!! TLine(ParentObj).Port=nil',
+          Number, OrionState[1]])
+      else
+        s := Format('%s PP#%d %s', [(TLine(ParentObj).Port as TPort).PortName,
+          Number, OrionState[1]]);
       Log(s);
     end;
     FNoAnswer := 0;
@@ -689,8 +697,16 @@ begin
       mes.BigDevice := Bigdevice;
       mes.Code := ORION_DISABLE_MSG;
       Send(mes);
-      s := Format('%s PP#%d %s', [(TLine(ParentObj).Port as TPort).PortName,
-        Number, OrionState[0]]);
+
+      if ParentObj=nil then
+        s:=  Format('%s PP#%d %s', ['Внимание!!! ParentObj=nil',
+          Number, OrionState[0]])
+      else if TLine(ParentObj).Port=nil then
+        s:=  Format('%s PP#%d %s', ['Внимание!!! TLine(ParentObj).Port=nil',
+          Number, OrionState[0]])
+      else
+        s := Format('%s PP#%d %s', [(TLine(ParentObj).Port as TPort).PortName,
+          Number, OrionState[0]]);
       Log(s);
     end;
 
@@ -1548,74 +1564,77 @@ begin
         begin
           Log(s + Format('Зона %d не найдена в файле %s.xml !!!',
             [256 * r[3] + r[4], Option.FileMask]));
-          exit; {???}
+          exit;
+        end;
+        if Child = nil then
+        begin
+          Log(s + Format('Зона %d, Childindex %d никуда не ссылается!',
+            [256 * r[3] + r[4], Childindex]));
+          exit;
         end;
 
         s := s + Format('Зона #%d Состояние >>', [256 * r[3] + r[4]]);
-
-        {защита: в пакете после неготов, потеря связи приходит взято, норма и т п.}
         SynNorma := True;
         SynConnect := True;
+
+        Init(mes);
+        mes.NetDevice := ModuleNetDevice;
+        mes.BigDevice := Child.Bigdevice;
+        mes.SmallDevice := Child.Smalldevice;
+        mes.TypeDevice := TYPEDEVICE_ZONE;
+        mes.Code := STATEZONE_MSG;
+        if (Child.ZnType = 3) then
+          if (Child.Smalldevice = 0) then
+          begin
+            mes.TypeDevice := TYPEDEVICE_PULT;
+            mes.Code := STATEPULT_MSG;
+          end
+          else
+          begin
+            mes.TypeDevice := TYPEDEVICE_DEVICE;
+            mes.Code := STATEDEVICE_MSG;
+          end;
+
         for i := 1 to r[5] do
         begin
           s := s + Format(' %s (%d)', [Event[r[5 + i]], r[5 + i]]);
-          if Child <> nil then
-          begin
-            Init(mes);
-            mes.NetDevice := ModuleNetDevice;
-            mes.BigDevice := Child.Bigdevice;
-            mes.SmallDevice := Child.Smalldevice;
-            mes.Level := r[5 + i];
-            mes.TypeDevice := TYPEDEVICE_ZONE;
-            mes.Code := STATEZONE_MSG;
+          mes.Level := r[5 + i];
+          Send(mes);
 
-            if (Child.ZnType = 3) then
-              if (Child.Smalldevice = 0) then
-              begin
-                mes.TypeDevice := TYPEDEVICE_PULT;
-                mes.Code := STATEPULT_MSG;
-              end
-              else
-              begin
-                mes.TypeDevice := TYPEDEVICE_DEVICE;
-                mes.Code := STATEDEVICE_MSG;
+          {защита от ситуации, когда в пакете после неготов, потеря связи
+          приходит взято, норма и т п.}
+          case mes.Code of
+            STATEZONE_MSG:
+            begin
+              case mes.Level of
+                2, 41, 45, 82, 90, 165, 189,
+                190, 192, 194, 196, 198,
+                202, 205, 211, 212, 214,
+                215, 222, 224, 225:
+                  SynNorma := False;
               end;
-
-            Send(mes);
-
-            case mes.Code of
-              STATEZONE_MSG:
-              begin
-                case mes.Level of
-                  2, 41, 45, 82, 90, 165, 189,
-                  190, 192, 194, 196, 198,
-                  202, 205, 211, 212, 214,
-                  215, 222, 224, 225:
-                    SynNorma := False;
-                end;
-                case mes.Level of
-                  187, 250:
-                    SynConnect := False;
-                end;
+              case mes.Level of
+                187, 250:
+                  SynConnect := False;
               end;
-              STATEDEVICE_MSG,
-              STATEPULT_MSG:
-                case mes.Level of
-                  2, 189, 190, 198,
-                  202, 215, 222, 250:
-                    SynNorma := False;
-                end;
-              {
-              STATEOUTKEY_MSG:
-                case mes.Level of
-                  121, 122, 126, 189,
-                  190, 215, 222, 250:
-                    SyntNorma:= False;
-                end;
-              STATEPARTGROUP_MSG:;
-              }
-            end; //case
-          end;
+            end;
+            STATEDEVICE_MSG,
+            STATEPULT_MSG:
+              case mes.Level of
+                2, 189, 190, 198,
+                202, 215, 222, 250:
+                  SynNorma := False;
+              end;
+            {
+            STATEOUTKEY_MSG:
+              case mes.Level of
+                121, 122, 126, 189,
+                190, 215, 222, 250:
+                  SyntNorma:= False;
+              end;
+            STATEPARTGROUP_MSG:;
+            }
+          end; //case
         end;
         Log(s);
 
@@ -1934,19 +1953,30 @@ var
 begin
   mes.Proga := KsbAppType;
   mes.NumDevice := mes.SmallDevice;
-  WriteNet(mes, str);
 
-  s := Format('SEND: %s Code=%d Sys=%d Type=%d Net=%d Big=%d Small=%d ' +
-    'Mode=%d Part=%d Lev=%d Us=%d Num=%d Card=%d Mon=%d Cam=%d Prog=%d NumDev=%d',
-    [DateTimeToStr(mes.SendTime), mes.Code, mes.SysDevice, mes.TypeDevice,
-    mes.NetDevice, mes.BigDevice, mes.SmallDevice, mes.Mode, mes.Partion,
-    mes.Level, mes.User, mes.Num, mes.NumCard, mes.Monitor, mes.Camera,
-    mes.Proga, mes.NumDevice]);
-  if (mes.Size > max_str_len) then
-    s := s + 'Внимание!!! Длина строки более 1000'
-  else if (mes.Size > 0) then
-    s := s + Format(' str(%d)=%s', [mes.Size, Bin2Simbol(str, mes.Size)]);
-  Log(s);
+  try
+    WriteNet(mes, str);
+    s := Format('SEND: %s Code=%d Sys=%d Type=%d Net=%d Big=%d Small=%d ' +
+      'Mode=%d Part=%d Lev=%d Us=%d Num=%d Card=%d Mon=%d Cam=%d Prog=%d NumDev=%d',
+      [DateTimeToStr(mes.SendTime), mes.Code, mes.SysDevice, mes.TypeDevice,
+      mes.NetDevice, mes.BigDevice, mes.SmallDevice, mes.Mode, mes.Partion,
+      mes.Level, mes.User, mes.Num, mes.NumCard, mes.Monitor, mes.Camera,
+      mes.Proga, mes.NumDevice]);
+    if (mes.Size > max_str_len) then
+      s := s + Format('Внимание!!! Длина строки превышает %d',
+        [max_str_len])
+    else if (mes.Size > 0) then
+      s := s + Format(' str(%d)=%s', [mes.Size, Bin2Simbol(str, mes.Size)]);
+    Log(s);
+
+  except
+    on E: Exception do
+    begin
+      Log(E.ToString);
+      if (Option.Debug and 1) > 0 then
+        DumpExceptionCallStack;
+    end;
+  end;
 end;
 
 procedure Send(mes: KSBMES);
@@ -2237,12 +2267,12 @@ end;
 
 procedure TaMain.MenuItem11Click(Sender: TObject);
 begin
-  Live[LiveDev] := LiveTime[LiveDev];
+  Live[LiveDev] := LiveLimit[LiveDev];
 end;
 
 procedure TaMain.MenuItem12Click(Sender: TObject);
 begin
-  Live[2] := LiveTime[2];
+  Live[2] := LiveLimit[2];
 end;
 
 procedure TaMain.MenuItem13Click(Sender: TObject);
@@ -2413,20 +2443,19 @@ procedure _AppKsbConsider(strmes: string);
 var
   mes: KSBMES;
   tail: string;
-  step: byte;
 begin
   init(mes);
   tail := '';
-  step := 0;
   try
     Unpack(strmes, mes, tail);
-    step := 1;
     Consider(mes, tail);
   except
-    if step = 0 then
-      Log('Ошибка распаковки KSBMES сообщения !')
-    else
-      Log('Ошибка обработки KSBMES сообщения !');
+    on E: Exception do
+    begin
+      Log(E.ToString);
+      if (Option.Debug and 1) > 0 then
+        DumpExceptionCallStack;
+    end;
   end;
 end;
 

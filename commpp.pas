@@ -20,7 +20,6 @@ type
     PortName, Baud, Bits, Stop: string;
     Owner: pointer;
     LiveId: byte;
-    procedure DumpExceptionCallStack;
   end;
 
 function GetCRC16(Buffer: TBuf; Number: byte): word;
@@ -60,6 +59,7 @@ begin
   ser := TBlockSerial.Create;
   ser.RaiseExcept := False;
   ser.LinuxLock := False;
+  ser.DeadlockTimeout:=5000;
   Log(Format('%s открытие...', [PortName]));
 
   try
@@ -245,17 +245,5 @@ begin
 end;
 
 
-procedure TPort.DumpExceptionCallStack;
-var
-  i: integer;
-  Frames: PPointer;
-  s: string;
-begin
-  s := 'Trace:' + LineEnding + BackTraceStrFunc(ExceptAddr);
-  Log(s);
-  Frames := ExceptFrames;
-  for i := 0 to ExceptFrameCount - 1 do
-    Log(BackTraceStrFunc(Frames[i]));
-end;
 
 end.

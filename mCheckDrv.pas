@@ -22,9 +22,10 @@ type
     function AddId: byte;
   end;
 
+procedure DumpExceptionCallStack;
 
 const
-  LiveTime: array [0..3] of word = (120, 120, 120, 120);
+  LiveLimit: array [0..3] of word = (60, 60, 60, 60);
 
 var
   Live: array of word;
@@ -58,7 +59,7 @@ begin
         end;
 
       for i := low(Live) to high(Live) do
-        if Live[i] < LiveTime[i] then
+        if Live[i] < LiveLimit[i] then
           Inc(Live[i])
         else
         begin
@@ -82,5 +83,17 @@ begin
   Result := length(Live) - 1;
 end;
 
+procedure DumpExceptionCallStack;
+var
+  i: integer;
+  Frames: PPointer;
+  s: string;
+begin
+  s := 'Trace:' + LineEnding + BackTraceStrFunc(ExceptAddr);
+  Log(s);
+  Frames := ExceptFrames;
+  for i := 0 to ExceptFrameCount - 1 do
+    Log(BackTraceStrFunc(Frames[i]));
+end;
 
 end.

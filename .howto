@@ -2,4 +2,4 @@
 Log -> ‘айл + sl_log.Add -> FormTimer -> memo1 + sl_log.Delete
 
 —амодиагностика
-Live: array, каждый живой поток и компонент занул€ет свою €чейку
+Live: array.  аждый живой занул€ет свою €чейку (main, pps, line1, line2, ...)

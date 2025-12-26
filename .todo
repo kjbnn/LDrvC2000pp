@@ -1,3 +1,28 @@
+1) +
+Долбит
+2025.09.10 16:49:51:044  Com6 PP#4 Ведомый занят обработкой команды. Повторите запрос позже или сбросьте ведомый по питанию(Ошибка #6)
+2025.09.10 17:35:00:807  Com6 PP#4 Ведомый занят обработкой команды. Повторите запрос позже или сбросьте ведомый по питанию(Ошибка #6)
+Игнорируется
+
+2) +
+SetConnect in EAccessViolation: Access violation
+s := Format('%s PP#%d %s', [(TLine(ParentObj).Port as TPort).PortName, Number, OrionState[0]]);
+Добавлена проверка TLine(ParentObj).Port=nil
+
+3) +
+line 92 of commpp.pas
+Exception: Com6 ошибка #9999 -> Receive framing error
+DeadlockTimeout = 5000
+
+4) +
+2025.09.27 01:34:44:118  ERangeError: Range check error line 106 of commpp.pas
+rCount to byte
+
+5) +
+2025.09.29 01:35:16:982  EInvalidPointer: Invalid pointer operation
+line 1949 of mMain.pas
+
+
 1) Сделать тестовые дампы без, встроенной, отдельной символьной информацией 
 2) Попробовать wingdb на этих 3-х dmp
 4 dmp дебаг
