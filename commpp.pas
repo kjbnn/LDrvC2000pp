@@ -90,7 +90,7 @@ begin
 
         ser.SendBuffer(@CurPp.w, CurPp.wCount);
         if ser.LastError <> 0 then
-          raise Exception.Create(PortErrorInfo);
+          Log(PortErrorInfo);
 
         {прием}
         FillChar(CurPp.r, 255, 0);
