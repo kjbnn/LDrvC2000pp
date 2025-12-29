@@ -125,7 +125,7 @@ type
 
   TOption = record
     FileMask: string;
-    Debug: byte; {1-exp, 2-port, 4-menu, 8-noformlog}
+    Debug: byte; {1-noformlog, 2-portlog, 4-menu}
     Noport: boolean;
   end;
 
@@ -1973,8 +1973,7 @@ begin
     on E: Exception do
     begin
       Log(E.ToString);
-      if (Option.Debug and 1) > 0 then
-        DumpExceptionCallStack;
+      DumpExceptionCallStack;
     end;
   end;
 end;
@@ -2241,7 +2240,7 @@ begin
   if cs_log <> nil then
     if cs_log.TryEnter then
     try
-      if (Option.Debug and 8) = 0 then
+      if (Option.Debug and 1) = 0 then
       if (sl_log.Count > 0) then
       begin
         Memo1.Lines.BeginUpdate;
@@ -2453,8 +2452,7 @@ begin
     on E: Exception do
     begin
       Log(E.ToString);
-      if (Option.Debug and 1) > 0 then
-        DumpExceptionCallStack;
+      DumpExceptionCallStack;
     end;
   end;
 end;

@@ -2,4 +2,7 @@
 Log -> Файл + sl_log.Add -> FormTimer -> memo1 + sl_log.Delete
 
 Самодиагностика
-Live: array. Каждый живой зануляет свою ячейку (main, pps, line1, line2, ...)
+Live: array.  (main, pps, line1, line2, ...)
+Каждый живой зануляет свой элемент массива
+
+ser.RaiseExcept := False не вызывает Exception порта

@@ -50,6 +50,9 @@ procedure TPort.Execute;
       [PortName, ser.LastError, ser.GetErrorDesc(ser.LastError)]);
   end;
 
+const
+  MaxTotalWaiting = 50;
+
 var
   waiting: integer;
   TotalWaiting: word;
@@ -59,7 +62,7 @@ begin
   ser := TBlockSerial.Create;
   ser.RaiseExcept := False;
   ser.LinuxLock := False;
-  ser.DeadlockTimeout:=5000;
+  ser.DeadlockTimeout := 5000;
   Log(Format('%s открытие...', [PortName]));
 
   try
@@ -106,10 +109,19 @@ begin
           ser.RecvBuffer(@CurPp.r[CurPp.rCount], waiting);
           if ser.LastError <> 0 then
             Log(PortErrorInfo);
-          CurPp.rCount := CurPp.rCount + waiting;
+          if (CurPp.rCount + waiting) > $FF then
+          begin
+            Log(Format('Внимание! %s принял длинный PP ответ (TotalWaiting=%d, rCount=%d, %s)',
+              [PortName, TotalWaiting, CurPp.rCount, s]));
+            with CurPp do
+              Log(Format('Вывод первых 255 байт ...  %s', [ArrayToStr(r, $FF)]));
+            TotalWaiting := MaxTotalWaiting;
+          end
+          else
+            CurPp.rCount := CurPp.rCount + waiting;
           Inc(TotalWaiting);
           sleep(5);
-        until ((CurPp.rCount > 0) and (waiting = 0)) or (TotalWaiting >= 50);
+        until ((CurPp.rCount > 0) and (waiting = 0)) or (TotalWaiting >= MaxTotalWaiting);
 
         if (Option.Debug and 2) > 0 then
           with CurPp do
@@ -137,8 +149,7 @@ begin
     on E: Exception do
     begin
       Log(E.ToString);
-      if (Option.Debug and 1) > 0 then
-        DumpExceptionCallStack;
+      DumpExceptionCallStack;
       Log(Format('%s закрытие...', [PortName]));
       FreeAndNil(ser);
     end;
